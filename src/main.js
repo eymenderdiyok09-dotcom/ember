@@ -43,20 +43,69 @@ function drawLogo() {
   }));
 }
 
-function spawnEmbers() {
-  const colors = ["#ff5a1f", "#ff8a24", "#ffcc40", "#ff6a2a"];
-  const root = $("embers");
-  for (let i = 0; i < 26; i++) {
-    const ember = document.createElement("span");
-    ember.className = "ember";
-    const s = ember.style;
-    s.left = `${Math.random() * 100}%`;
-    s.setProperty("--size", `${2 + Math.round(Math.random() * 3)}px`);
-    s.setProperty("--color", colors[i % colors.length]);
-    s.setProperty("--duration", `${9 + Math.random() * 10}s`);
-    s.setProperty("--delay", `${-Math.random() * 18}s`);
-    s.setProperty("--drift", `${(Math.random() - 0.5) * 140}px`);
-    root.append(ember);
+/** Blocky landscape behind everything, drawn small and blurred by CSS (same as the website). */
+function drawLandscape() {
+  const canvas = $("landscape");
+  const W = 384, H = 216;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  let seed = 7;
+  const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const noise = (n) => {
+    const pts = Array.from({ length: n + 2 }, rand);
+    return (x) => {
+      const i = Math.floor(x), f = x - i, t = (1 - Math.cos(f * Math.PI)) / 2;
+      return pts[i % pts.length] * (1 - t) + pts[(i + 1) % pts.length] * t;
+    };
+  };
+  const haze = [196, 222, 240];
+  const mix = (c, k) => `rgb(${c.map((v, i) => Math.round(v + (haze[i] - v) * k)).join(",")})`;
+
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.6);
+  sky.addColorStop(0, "#5b9be3");
+  sky.addColorStop(1, "#c4def2");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  for (let i = 0; i < 11; i++) {
+    const x = rand() * W, y = 6 + rand() * 62, w = 24 + rand() * 60, h = 4 + rand() * 6;
+    ctx.fillStyle = `rgba(255,255,255,${0.75 + rand() * 0.2})`;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillRect(x + w * 0.2, y - h * 0.6, w * 0.5, h);
+  }
+
+  const layers = 7;
+  for (let L = 0; L < layers; L++) {
+    const t = L / (layers - 1);
+    const far = 1 - t;
+    const bs = 1 + Math.round(t * 6);
+    const base = H * 0.5 + t * t * H * 0.42;
+    const amp = 3 + t * 16;
+    const n = noise(12);
+    const freq = 0.012 + far * 0.02;
+    const water = L === 4 ? [W * 0.3, W * 0.62] : null;
+    for (let x = 0; x < W; x += bs) {
+      let y = Math.round((base - n(x * freq) * amp) / bs) * bs;
+      const inWater = water && x > water[0] && x < water[1];
+      if (inWater) y = Math.round(base / bs) * bs + bs;
+      ctx.fillStyle = inWater ? mix([70, 120, 220], far * 0.6) : mix([96, 160, 70], far * 0.7);
+      ctx.fillRect(x, y, bs, H - y);
+      if (inWater) continue;
+      ctx.fillStyle = mix([118, 184, 82], far * 0.7);
+      ctx.fillRect(x, y, bs, bs);
+      if (rand() < 0.25) {
+        ctx.fillStyle = mix([78, 136, 58], far * 0.7);
+        ctx.fillRect(x, y + bs * (1 + Math.floor(rand() * 4)), bs, bs);
+      }
+      if (rand() < 0.05 + t * 0.03 && x % (bs * 6) < bs) {
+        ctx.fillStyle = mix([102, 74, 44], far * 0.7);
+        ctx.fillRect(x + bs, y - bs * 3, bs, bs * 3);
+        ctx.fillStyle = mix([58, 112, 46], far * 0.7);
+        ctx.fillRect(x - bs, y - bs * 6, bs * 5, bs * 3);
+        ctx.fillRect(x, y - bs * 7, bs * 3, bs);
+      }
+    }
   }
 }
 
@@ -595,7 +644,7 @@ async function initBedrock() {
 }
 
 drawLogo();
-spawnEmbers();
+drawLandscape();
 initJava().catch((e) => toast(String(e), { error: true }));
 initBedrock().catch((e) => toast(String(e), { error: true }));
 

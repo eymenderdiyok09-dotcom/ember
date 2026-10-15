@@ -8,11 +8,7 @@
   <script src="main.js" defer></script>
 </head>
 <body>
-  <div class="backdrop" aria-hidden="true">
-    <div class="backdrop-grid"></div>
-    <div class="backdrop-glow"></div>
-    <div class="embers" id="embers"></div>
-  </div>
+  <canvas class="backdrop" id="landscape" aria-hidden="true"></canvas>
 
   <header class="titlebar" data-tauri-drag-region>
     <div class="edition-switch" id="edition-switch" role="tablist" hidden>
@@ -23,8 +19,10 @@
 
   <main class="stage">
     <div class="brand">
-      <svg class="logo" id="logo" viewBox="0 0 12 14" aria-hidden="true"></svg>
-      <h1>Ember</h1>
+      <div class="brand-row">
+        <svg class="logo" id="logo" viewBox="0 0 12 14" aria-hidden="true"></svg>
+        <h1>Ember</h1>
+      </div>
       <p class="tagline">Minecraft, lit fast.</p>
     </div>
 

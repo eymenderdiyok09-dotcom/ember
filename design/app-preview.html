@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ember app redesign preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+<style>
+  :root {
+    --text: #0f1419; --muted: #687280; --line: #e6e9ee; --field: #f3f5f8;
+    --accent: #f2611d; --accent-hover: #df5512; --accent-soft: #fff0e7;
+    --shadow: 0 1px 2px rgba(15,20,25,.05), 0 14px 40px rgba(15,20,25,.12);
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #dfe5ec; font: 15px/1.5 var(--font); color: var(--text); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; align-items: center; padding: 28px 16px 60px; }
+  .states { display: flex; gap: 6px; padding: 5px; border-radius: 14px; background: #fff; box-shadow: var(--shadow); margin-bottom: 22px; }
+  .states button { border: 0; background: none; font: 600 14px var(--font); padding: 8px 16px; border-radius: 10px; cursor: pointer; color: var(--muted); }
+  .states button.on { background: var(--accent); color: #fff; }
+  .note { color: var(--muted); font-size: 13px; margin: 0 0 18px; text-align: center; }
+
+  /* The app window (1040×780, same as the real app) */
+  .window { position: relative; width: 1040px; height: 780px; max-width: 100%; border-radius: 14px; overflow: hidden; box-shadow: 0 30px 80px rgba(15,20,25,.3), 0 0 0 1px rgba(0,0,0,.12); isolation: isolate; }
+  .bg { position: absolute; left: -40px; top: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(9px) saturate(1.1); z-index: -2; }
+  .window::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.35) 100%); }
+  .titlebar { height: 52px; display: flex; align-items: center; padding: 0 20px; gap: 8px; }
+  .titlebar i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.15); }
+  .titlebar i:nth-child(2) { background: #febc2e; } .titlebar i:nth-child(3) { background: #28c840; }
+  .edition { margin-left: auto; margin-right: auto; transform: translateX(-30px); display: flex; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.55); backdrop-filter: blur(12px); }
+  .edition span { padding: 5px 14px; border-radius: 9px; font-weight: 600; font-size: 13px; color: #3c4450; }
+  .edition span.on { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+  .stage { display: flex; flex-direction: column; align-items: center; padding-top: 14px; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand svg { width: 52px; height: 60px; filter: drop-shadow(0 4px 14px rgba(255,120,30,.35)); }
+  .brand h1 { margin: 0; color: #fff; font-size: 64px; font-weight: 800; letter-spacing: -.055em; line-height: 1; text-shadow: 0 4px 24px rgba(20,40,70,.3), 0 1px 2px rgba(20,40,70,.2); }
+  .tagline { margin: 8px 0 0; color: #fff; font-weight: 600; font-size: 18px; letter-spacing: -.02em; text-shadow: 0 2px 12px rgba(20,40,70,.35); }
+
+  .card { width: 440px; margin-top: 26px; padding: 22px; border-radius: 24px; background: rgba(255,255,255,.94); backdrop-filter: blur(20px); box-shadow: var(--shadow); display: grid; gap: 18px; }
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .label { font-weight: 700; font-size: 14px; letter-spacing: -.01em; }
+  .value { font-weight: 700; font-size: 14px; color: var(--accent); }
+  .seg { display: flex; padding: 3px; border-radius: 10px; background: var(--field); }
+  .seg span { padding: 3px 11px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .seg span.on { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .input { display: flex; align-items: center; gap: 12px; height: 50px; padding: 0 14px; border-radius: 14px; background: var(--field); border: 1.5px solid transparent; font-size: 16px; font-weight: 500; }
+  .input.focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(242,97,29,.12); }
+  .avatar { width: 28px; height: 28px; border-radius: 6px; image-rendering: pixelated; }
+  .badge { padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  .chev { margin-left: auto; width: 18px; height: 18px; color: var(--muted); }
+  .slider { position: relative; height: 22px; display: flex; align-items: center; }
+  .slider .track { height: 6px; width: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent) 0 var(--p), #e3e7ec var(--p)); }
+  .slider .thumb { position: absolute; left: calc(var(--p) - 11px); width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25), 0 0 0 .5px rgba(0,0,0,.08); }
+  .hint { display: block; margin-top: 6px; color: var(--muted); font-size: 12.5px; }
+  .toggle { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 16px; background: var(--field); }
+  .bolt { width: 38px; height: 38px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+  .bolt svg { width: 18px; height: 18px; }
+  .t-title { font-weight: 700; display: block; }
+  .t-sub { color: var(--muted); font-size: 12.5px; }
+  .switch { margin-left: auto; width: 46px; height: 28px; border-radius: 14px; background: var(--accent); position: relative; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+
+  .play { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 14px; height: 64px; border-radius: 18px; background: var(--accent); color: #fff; box-shadow: 0 8px 22px rgba(242,97,29,.35); }
+  .play svg { width: 22px; height: 22px; }
+  .play b { display: block; font-size: 20px; letter-spacing: -.02em; line-height: 1.1; }
+  .play small { display: block; font-size: 12.5px; opacity: .85; font-weight: 500; }
+  .play .fill { position: absolute; inset: 0 auto 0 0; width: 42%; background: rgba(255,255,255,.2); }
+  .play > :not(.fill) { position: relative; }
+  .cancel { text-align: center; margin-top: -8px; color: var(--muted); font-weight: 600; font-size: 13px; }
+
+  .menu { position: absolute; left: 50%; top: 333px; transform: translateX(-50%); width: 396px; padding: 10px; border-radius: 18px; background: #fff; box-shadow: 0 2px 6px rgba(15,20,25,.06), 0 24px 60px rgba(15,20,25,.22); z-index: 5; }
+  .search { height: 40px; border-radius: 11px; background: var(--field); display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin: 10px 0 6px; overflow: hidden; }
+  .tabs span { padding: 5px 10px; border-radius: 9px; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .tabs span.on { background: var(--accent-soft); color: var(--accent); }
+  .item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 11px; font-weight: 600; font-size: 14px; }
+  .item small { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .item.on { background: var(--field); }
+  .item.on::after { content: "✓"; color: var(--accent); font-weight: 800; }
+
+  .footer { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); padding: 5px 12px; border-radius: 999px; background: rgba(255,255,255,.6); backdrop-filter: blur(10px); color: #3c4450; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="states" role="tablist">
+    <button class="on" data-state="ready">Ready</button>
+    <button data-state="menu">Version menu</button>
+    <button data-state="installing">Installing</button>
+  </div>
+  <p class="note">Preview only — the real app isn't changed yet. Same window size as Ember (1040 × 780).</p>
+
+  <div class="window" id="win">
+    <canvas class="bg" id="landscape"></canvas>
+    <div class="titlebar"><i></i><i></i><i></i>
+      <div class="edition"><span class="on">Java Edition</span><span>Bedrock Edition</span></div>
+    </div>
+
+    <div class="stage">
+      <div class="brand"><svg id="logo" viewBox="0 0 12 14"></svg><h1>Ember</h1></div>
+      <p class="tagline">Minecraft, lit fast.</p>
+
+      <div class="card">
+        <div>
+          <div class="head"><span class="label">Player</span><span class="seg"><span class="on">Offline</span><span>Microsoft</span></span></div>
+          <div class="input" id="name-field"><canvas class="avatar" id="avatar" width="8" height="8"></canvas>Eymen</div>
+        </div>
+        <div>
+          <div class="head"><span class="label">Version</span></div>
+          <div class="input" id="version-field">Fabric 1.21.1 <span class="badge">Fabric</span>
+            <svg class="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg></div>
+        </div>
+        <div>
+          <div class="head"><span class="label">Memory</span><span class="value">4 GB</span></div>
+          <div class="slider" style="--p: 28%"><div class="track"></div><div class="thumb"></div></div>
+          <span class="hint">Your Mac has 16 GB. 4 GB is plenty for most modpacks.</span>
+        </div>
+        <div class="toggle">
+          <span class="bolt"><svg viewBox="0 0 16 16"><path fill="currentColor" d="M9.2 1.5 3.5 9h4l-1 5.5L12.5 7h-4z"/></svg></span>
+          <span><span class="t-title">FPS Boost</span><span class="t-sub">Sodium, Lithium &amp; more + tuned Java</span></span>
+          <span class="switch"></span>
+        </div>
+        <div class="play" id="play">
+          <span class="fill" id="fill" hidden></span>
+          <svg viewBox="0 0 16 16"><path fill="currentColor" d="M4 2.5v11l9-5.5z"/></svg>
+          <span><b id="play-label">Play</b><small id="play-sub">Fabric 1.21.1 · FPS Boost on</small></span>
+        </div>
+        <div class="cancel" id="cancel" hidden>Cancel</div>
+      </div>
+    </div>
+
+    <div class="menu" id="menu" hidden>
+      <div class="search">Search all versions</div>
+      <div class="tabs"><span>Installed</span><span>Releases</span><span>Snapshots</span><span class="on">Fabric</span><span>Forge</span><span>NeoForge</span><span>Old</span></div>
+      <div class="item on"><span>Fabric 1.21.1</span></div>
+      <div class="item"><span>Fabric 1.21</span><small>not installed</small></div>
+      <div class="item"><span>Fabric 1.20.6</span><small>not installed</small></div>
+      <div class="item"><span>Fabric 1.20.4</span><small>not installed</small></div>
+      <div class="item"><span>Fabric 1.20.1</span><small>installed</small></div>
+    </div>
+
+    <div class="footer">~/Library/Application Support/minecraft</div>
+  </div>
+
+<script>
+// Pixel flame logo (same art as the app icon).
+const FLAME = ["......#.....", ".....##.....", "....###..#..", "....####.##.", "...#####.##.", "..##oo####..", "..#ooo#####.", ".##oyyo####.", ".#ooyyyoo###", ".#oyyyyyoo##", ".#oyyWWyyo##", "..#oyWWyyo#.", "..##oyyyo##.", "....######.."];
+const C = { "#": "#e8481c", o: "#ff8a24", y: "#ffcc40", W: "#fff4c8" };
+const logo = document.getElementById("logo");
+FLAME.forEach((row, y) => [...row].forEach((c, x) => {
+  if (!C[c]) return;
+  const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  for (const [k, v] of Object.entries({ x, y, width: 1.02, height: 1.02, fill: C[c] })) r.setAttribute(k, v);
+  logo.append(r);
+}));
+
+// Simple pixel head for the avatar.
+const head = ["hhhhhhhh", "hhhhhhhh", "hsssssss", "ssssssss", "swwsswws", "sbwsswbs", "sssnnsss", "ssmmmmss"];
+const HC = { h: "#3b2a1d", s: "#c8916b", w: "#ffffff", b: "#4a3fa3", n: "#9a6448", m: "#7a4a35" };
+const a = document.getElementById("avatar").getContext("2d");
+head.forEach((row, y) => [...row].forEach((c, x) => { a.fillStyle = HC[c]; a.fillRect(x, y, 1, 1); }));
+
+// Same blocky landscape as the website.
+(function (canvas) {
+  const W = 384, H = 216; canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  let seed = 7;
+  const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const noise = (n) => { const p = Array.from({ length: n + 2 }, rand); return (x) => { const i = Math.floor(x), f = x - i, t = (1 - Math.cos(f * Math.PI)) / 2; return p[i % p.length] * (1 - t) + p[(i + 1) % p.length] * t; }; };
+  const haze = [196, 222, 240];
+  const mix = (c, k) => `rgb(${c.map((v, i) => Math.round(v + (haze[i] - v) * k)).join(",")})`;
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.6); sky.addColorStop(0, "#5b9be3"); sky.addColorStop(1, "#c4def2");
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 11; i++) { const x = rand() * W, y = 6 + rand() * 62, w = 24 + rand() * 60, h = 4 + rand() * 6; ctx.fillStyle = `rgba(255,255,255,${0.75 + rand() * 0.2})`; ctx.fillRect(x, y, w, h); ctx.fillRect(x + w * 0.2, y - h * 0.6, w * 0.5, h); }
+  for (let L = 0; L < 7; L++) {
+    const t = L / 6, far = 1 - t, bs = 1 + Math.round(t * 6), base = H * 0.5 + t * t * H * 0.42, amp = 3 + t * 16, n = noise(12), freq = 0.012 + far * 0.02;
+    const water = L === 4 ? [W * 0.3, W * 0.62] : null;
+    for (let x = 0; x < W; x += bs) {
+      let y = Math.round((base - n(x * freq) * amp) / bs) * bs;
+      const wet = water && x > water[0] && x < water[1];
+      if (wet) y = Math.round(base / bs) * bs + bs;
+      ctx.fillStyle = wet ? mix([70, 120, 220], far * 0.6) : mix([96, 160, 70], far * 0.7); ctx.fillRect(x, y, bs, H - y);
+      if (!wet) {
+        ctx.fillStyle = mix([118, 184, 82], far * 0.7); ctx.fillRect(x, y, bs, bs);
+        if (rand() < 0.25) { ctx.fillStyle = mix([78, 136, 58], far * 0.7); ctx.fillRect(x, y + bs * (1 + Math.floor(rand() * 4)), bs, bs); }
+        if (rand() < 0.05 + t * 0.03 && x % (bs * 6) < bs) { ctx.fillStyle = mix([102, 74, 44], far * 0.7); ctx.fillRect(x + bs, y - bs * 3, bs, bs * 3); ctx.fillStyle = mix([58, 112, 46], far * 0.7); ctx.fillRect(x - bs, y - bs * 6, bs * 5, bs * 3); ctx.fillRect(x, y - bs * 7, bs * 3, bs); }
+      }
+    }
+  }
+})(document.getElementById("landscape"));
+
+// Switch between the states being previewed.
+const $ = (id) => document.getElementById(id);
+for (const b of document.querySelectorAll(".states button")) b.onclick = () => {
+  document.querySelectorAll(".states button").forEach((x) => x.classList.toggle("on", x === b));
+  const s = b.dataset.state;
+  $("menu").hidden = s !== "menu";
+  $("version-field").classList.toggle("focus", s === "menu");
+  $("fill").hidden = $("cancel").hidden = s !== "installing";
+  $("play-label").textContent = s === "installing" ? "Installing… 42%" : "Play";
+  $("play-sub").textContent = s === "installing" ? "Downloading assets · 1,204 / 2,870 files" : "Fabric 1.21.1 · FPS Boost on";
+};
+</script>
+</body>
+</html>

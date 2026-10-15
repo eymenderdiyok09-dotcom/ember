@@ -130,7 +130,7 @@ svg { flex: none; }
 .feature p { margin: 0; color: var(--muted); font-size: 17px; }
 
 /* Demo */
-.demo { margin: 0; border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-lg); background: #0c0a0d; }
+.demo { margin: 0; border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-lg); background: #c4def2; }
 .demo iframe { display: block; width: 100%; height: 760px; border: 0; }
 .demo-caption { margin: 22px 0 0; color: var(--muted); font-size: 16px; text-align: center; }
 

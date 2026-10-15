@@ -38,6 +38,10 @@ const CANCELLED: &str = "Cancelled";
 /// Performance mods FPS Boost installs (Modrinth slugs). Sodium is required;
 /// the rest are added when available for the game version.
 const FPS_MODS: &[&str] = &["sodium", "lithium", "ferrite-core", "entityculling", "immediatelyfast"];
+/// Shader loader added on top of FPS Boost when shaders are on.
+const SHADER_LOADER: &str = "iris";
+/// Default shader pack (Modrinth project), light enough for most computers.
+const SHADER_PACK: &str = "complementary-reimagined";
 /// Folders an FPS Boost instance shares with the main game folder.
 const SHARED_FOLDERS: &[&str] = &["saves", "resourcepacks", "shaderpacks", "screenshots"];
 
@@ -119,6 +123,7 @@ pub struct Progress {
     pub bytes_total: u64,
 }
 
+#[derive(Clone)]
 struct Download {
     url: String,
     path: PathBuf,
@@ -213,9 +218,9 @@ pub async fn java_available_versions() -> Result<AvailableVersions, String> {
 /// game version for the latest loader. With `fps_boost`, vanilla versions run
 /// on Fabric with performance mods in a separate game folder.
 #[tauri::command]
-pub async fn java_prepare(app: AppHandle, target: String, fps_boost: bool) -> Result<Prepared, String> {
+pub async fn java_prepare(app: AppHandle, target: String, fps_boost: bool, shaders: Option<bool>) -> Result<Prepared, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        prepare(&target, fps_boost, &|p| {
+        prepare(&target, fps_boost, shaders.unwrap_or(false), &|p| {
             let _ = app.emit("java-progress", p);
         })
     })
@@ -235,7 +240,7 @@ fn report_stage(report: Report, stage: &'static str) {
     report(Progress { stage, files_done: 0, files_total: 0, bytes_done: 0, bytes_total: 0 });
 }
 
-pub(crate) fn prepare(target: &str, fps_boost: bool, report: Report) -> Result<Prepared, String> {
+pub(crate) fn prepare(target: &str, fps_boost: bool, shaders: bool, report: Report) -> Result<Prepared, String> {
     CANCEL.store(false, Ordering::Relaxed);
     let mc = minecraft_dir().ok_or("could not resolve .minecraft directory")?;
     let agent = agent();
@@ -252,7 +257,7 @@ pub(crate) fn prepare(target: &str, fps_boost: bool, report: Report) -> Result<P
     let mut prepared = Prepared { version: id.clone(), instance: None, fps_mods: Vec::new(), notice: None };
     let is_vanilla = matches!(target, Target::Vanilla(_)) && read_version_json(&mc, &id)?.get("inheritsFrom").is_none();
     if fps_boost && is_vanilla {
-        match fps_boost_instance(&agent, &mc, &id, report) {
+        match fps_boost_instance(&agent, &mc, &id, shaders, report) {
             Ok(Some(boosted)) => prepared = boosted,
             Ok(None) => {
                 prepared.notice = Some(format!(
@@ -262,6 +267,8 @@ pub(crate) fn prepare(target: &str, fps_boost: bool, report: Report) -> Result<P
             Err(e) if e == CANCELLED => return Err(e),
             Err(e) => prepared.notice = Some(format!("FPS Boost mods couldn't be set up ({e}); playing without them.")),
         }
+    } else if shaders {
+        prepared.notice = Some("Shaders work with FPS Boost on a plain Minecraft version, so they're off for this one.".into());
     }
     Ok(prepared)
 }
@@ -832,8 +839,11 @@ fn modrinth_version(agent: &ureq::Agent, project: &str, game: &str) -> Result<Op
 }
 
 /// FPS mods (plus their required dependencies) as downloads into `mods`.
-fn resolve_fps_mods(agent: &ureq::Agent, game: &str, mods: &Path) -> Result<Option<Vec<(String, Download)>>, String> {
+fn resolve_fps_mods(agent: &ureq::Agent, game: &str, mods: &Path, shaders: bool) -> Result<Option<Vec<(String, Download)>>, String> {
     let mut queue: Vec<String> = FPS_MODS.iter().map(|m| m.to_string()).collect();
+    if shaders {
+        queue.insert(0, SHADER_LOADER.to_owned());
+    }
     let mut seen = HashSet::new();
     let mut found = Vec::new();
     while let Some(project) = queue.pop() {
@@ -864,6 +874,7 @@ fn resolve_fps_mods(agent: &ureq::Agent, game: &str, mods: &Path) -> Result<Opti
             "ferrite-core" => "FerriteCore",
             "entityculling" => "EntityCulling",
             "immediatelyfast" => "ImmediatelyFast",
+            "iris" => "Iris",
             "P7dR8mSH" | "fabric-api" => "Fabric API",
             _ => filename.trim_end_matches(".jar"),
         }
@@ -881,7 +892,7 @@ fn resolve_fps_mods(agent: &ureq::Agent, game: &str, mods: &Path) -> Result<Opti
 
 /// Sets up `ember/instances/fps-boost-<game>`: Fabric + performance mods, sharing
 /// worlds and packs with the main folder. `None` if Sodium doesn't support `game`.
-fn fps_boost_instance(agent: &ureq::Agent, mc: &Path, game: &str, report: Report) -> Result<Option<Prepared>, String> {
+fn fps_boost_instance(agent: &ureq::Agent, mc: &Path, game: &str, shaders: bool, report: Report) -> Result<Option<Prepared>, String> {
     let instance = format!("fps-boost-{game}");
     let dir = instance_dir(mc, &instance)?;
     let record_path = dir.join("ember-instance.json");
@@ -893,7 +904,7 @@ fn fps_boost_instance(agent: &ureq::Agent, mc: &Path, game: &str, report: Report
     report_stage(report, "Setting up FPS Boost");
     let mods_dir = dir.join("mods");
     let resolved = install_fabric_profile(agent, mc, game)
-        .and_then(|fabric| Ok((fabric, resolve_fps_mods(agent, game, &mods_dir)?)));
+        .and_then(|fabric| Ok((fabric, resolve_fps_mods(agent, game, &mods_dir, shaders)?)));
     let (fabric_id, mods) = match resolved {
         Ok((_, None)) => return Ok(None),
         Ok((fabric_id, Some(mods))) => (fabric_id, mods),
@@ -919,8 +930,33 @@ fn fps_boost_instance(agent: &ureq::Agent, mc: &Path, game: &str, report: Report
         .iter()
         .filter_map(|(_, d)| d.path.file_name()?.to_str().map(str::to_owned))
         .collect();
-    let pending: Vec<Download> = mods.into_iter().map(|(_, d)| d).filter(needs_download).collect();
+    let mut pending: Vec<Download> = mods.into_iter().map(|(_, d)| d).filter(needs_download).collect();
+    let has_iris = names.iter().any(|n| n == "Iris");
+    let mut notice = None;
+    let pack = if has_iris {
+        match shader_pack(agent, mc) {
+            Ok(pack) => Some(pack),
+            Err(e) if e == CANCELLED => return Err(e),
+            Err(e) => {
+                notice = Some(format!("The shader pack couldn't be downloaded ({e})."));
+                None
+            }
+        }
+    } else {
+        if shaders {
+            notice = Some(format!("Shaders (Iris) aren't available for {game} yet."));
+        }
+        None
+    };
+    if let Some((_, download)) = &pack {
+        if needs_download(download) {
+            pending.push(download.clone());
+        }
+    }
     run_downloads(agent, pending, "Downloading FPS Boost mods", report)?;
+    if let Some((file, _)) = &pack {
+        enable_shader_pack(&dir, file)?;
+    }
 
     // Remove mod versions Ember installed before that are no longer current.
     for old in previous.mods.iter().filter(|m| !files.contains(m)) {
@@ -932,7 +968,56 @@ fn fps_boost_instance(agent: &ureq::Agent, mc: &Path, game: &str, report: Report
     write_json(&record_path, &serde_json::to_value(&record).map_err(|e| e.to_string())?)?;
     link_shared_folders(mc, &dir)?;
 
-    Ok(Some(Prepared { version: fabric_id, instance: Some(instance), fps_mods: names, notice: None }))
+    Ok(Some(Prepared { version: fabric_id, instance: Some(instance), fps_mods: names, notice }))
+}
+
+/// The newest release of the default shader pack, as a download into the
+/// shared `shaderpacks` folder.
+fn shader_pack(agent: &ureq::Agent, mc: &Path) -> Result<(String, Download), String> {
+    check_cancel()?;
+    let url = format!("{MODRINTH_API}/project/{SHADER_PACK}/version?loaders={}", encode(r#"["iris"]"#));
+    let versions = get_json(agent, &url)?;
+    let versions = versions.as_array().cloned().unwrap_or_default();
+    let version = versions.iter().find(|v| v["version_type"] == "release").or(versions.first()).ok_or("no shader pack release")?;
+    let files = version["files"].as_array().cloned().unwrap_or_default();
+    let file = files.iter().find(|f| f["primary"] == true).or(files.first()).ok_or("shader pack has no files")?;
+    let (Some(url), Some(filename)) = (str_at(file, "url"), str_at(file, "filename")) else {
+        return Err("shader pack file is incomplete".into());
+    };
+    if filename.contains(['/', '\\']) || !filename.ends_with(".zip") {
+        return Err("unexpected shader pack file".into());
+    }
+    Ok((filename.to_owned(), Download {
+        url: url.to_owned(),
+        path: mc.join("shaderpacks").join(filename),
+        sha1: str_at(&file["hashes"], "sha1").map(str::to_owned),
+        size: file["size"].as_u64(),
+        executable: false,
+    }))
+}
+
+/// Turns shaders on in Iris's settings. A pack the player picked themselves
+/// (and still has) is kept; otherwise Ember's default pack is selected.
+fn enable_shader_pack(instance: &Path, pack: &str) -> Result<(), String> {
+    let config = instance.join("config");
+    fs::create_dir_all(&config).map_err(|e| e.to_string())?;
+    let path = config.join("iris.properties");
+    let existing = fs::read_to_string(&path).unwrap_or_default();
+    let chosen = existing
+        .lines()
+        .find_map(|l| l.strip_prefix("shaderPack="))
+        .map(str::trim)
+        .filter(|p| !p.is_empty() && instance.join("shaderpacks").join(p).exists())
+        .unwrap_or(pack)
+        .to_owned();
+    let mut lines: Vec<String> = existing
+        .lines()
+        .filter(|l| !l.starts_with("enableShaders=") && !l.starts_with("shaderPack="))
+        .map(str::to_owned)
+        .collect();
+    lines.push("enableShaders=true".into());
+    lines.push(format!("shaderPack={chosen}"));
+    fs::write(&path, lines.join("\n") + "\n").map_err(|e| e.to_string())
 }
 
 /// Points an instance's world/pack folders at the main game folder, and seeds
@@ -976,6 +1061,23 @@ fn link_shared_folders(mc: &Path, dir: &Path) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn enables_shaders_and_keeps_players_pack() {
+        let dir = std::env::temp_dir().join(format!("ember-iris-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        super::enable_shader_pack(&dir, "Default.zip").unwrap();
+        let text = fs::read_to_string(dir.join("config/iris.properties")).unwrap();
+        assert!(text.contains("enableShaders=true") && text.contains("shaderPack=Default.zip"));
+
+        // The player switched to a pack they still have: keep it, turn shaders back on.
+        fs::create_dir_all(dir.join("shaderpacks/Mine.zip")).unwrap();
+        fs::write(dir.join("config/iris.properties"), "enableShaders=false\nshaderPack=Mine.zip\nmaxShadowRenderDistance=4\n").unwrap();
+        super::enable_shader_pack(&dir, "Default.zip").unwrap();
+        let text = fs::read_to_string(dir.join("config/iris.properties")).unwrap();
+        assert!(text.contains("enableShaders=true") && text.contains("shaderPack=Mine.zip") && text.contains("maxShadowRenderDistance=4"));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
     use super::*;
 
     #[test]
@@ -1007,7 +1109,7 @@ mod tests {
     #[test]
     #[ignore]
     fn cancel_stops_download() {
-        let worker = std::thread::spawn(|| prepare("1.17.1", false, &|_| {}));
+        let worker = std::thread::spawn(|| prepare("1.17.1", false, false, &|_| {}));
         std::thread::sleep(Duration::from_secs(1));
         java_cancel_prepare();
         let started = Instant::now();

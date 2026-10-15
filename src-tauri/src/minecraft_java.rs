@@ -796,7 +796,8 @@ mod smoke {
     fn install_version() {
         let target = std::env::var("MC_SMOKE_VERSION").expect("set MC_SMOKE_VERSION");
         let fps = std::env::var("MC_SMOKE_FPS").is_ok();
-        let prepared = crate::minecraft_java_install::prepare(&target, fps, &|p| {
+        let shaders = std::env::var("MC_SMOKE_SHADERS").is_ok();
+        let prepared = crate::minecraft_java_install::prepare(&target, fps, shaders, &|p| {
             if p.files_done == p.files_total || p.files_done % 500 == 0 {
                 println!("{} {}/{} files, {}/{} MB", p.stage, p.files_done, p.files_total, p.bytes_done >> 20, p.bytes_total >> 20);
             }

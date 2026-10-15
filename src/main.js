@@ -28,9 +28,8 @@ const FLAME = [
 ];
 const FLAME_COLORS = { "#": "#e8481c", o: "#ff8a24", y: "#ffcc40", W: "#fff4c8" };
 
-function drawLogo() {
+function drawLogo(svg = $("logo")) {
   const ns = "http://www.w3.org/2000/svg";
-  const svg = $("logo");
   FLAME.forEach((row, y) => [...row].forEach((c, x) => {
     if (!FLAME_COLORS[c]) return;
     const rect = document.createElementNS(ns, "rect");
@@ -405,9 +404,25 @@ const selectedMemory = () => Number($("memory").value);
 
 // ---------- FPS Boost ----------
 function initFpsBoost() {
-  const toggle = $("fps-boost");
-  toggle.checked = load("fpsBoost") !== "false";
-  toggle.addEventListener("change", () => save("fpsBoost", toggle.checked));
+  const fps = $("fps-boost");
+  const shaders = $("shaders");
+  fps.checked = load("fpsBoost") !== "false";
+  shaders.checked = fps.checked && load("shaders") === "true";
+  // Shaders run on top of FPS Boost (Iris needs Sodium), so they go together.
+  fps.addEventListener("change", () => {
+    save("fpsBoost", fps.checked);
+    if (!fps.checked && shaders.checked) {
+      shaders.checked = false;
+      save("shaders", false);
+    }
+  });
+  shaders.addEventListener("change", () => {
+    save("shaders", shaders.checked);
+    if (shaders.checked && !fps.checked) {
+      fps.checked = true;
+      save("fpsBoost", true);
+    }
+  });
 }
 
 // ---------- accounts ----------
@@ -593,6 +608,63 @@ async function initAccount() {
   renderAccount();
 }
 
+// ---------- Rekindle (updates) ----------
+const formatSize = (bytes) => `${(bytes / 1048576).toFixed(1)} MB`;
+
+async function checkForUpdate() {
+  let update;
+  try {
+    update = await invoke("rekindle_check");
+  } catch {
+    return; // Offline or GitHub unreachable: try again next launch.
+  }
+  if (!update) return;
+  $("rekindle-version").textContent = update.version;
+  $("rekindle-sub").textContent = `You have ${update.current}. The update is ${formatSize(update.size)} and Ember restarts by itself.`;
+  const notes = $("rekindle-notes");
+  notes.replaceChildren(...update.notes.split("\n").map((l) => l.replace(/^[-•*]\s*/, "").trim()).filter(Boolean).map((line) => {
+    const li = document.createElement("li");
+    li.textContent = line;
+    return li;
+  }));
+  $("rekindle-modal").hidden = false;
+  $("rekindle-update").focus({ preventScroll: true });
+}
+
+async function installUpdate() {
+  if (state.busy) return toast("Wait for the current download to finish first.", { error: true });
+  $("rekindle-update").disabled = true;
+  $("rekindle-later").hidden = true;
+  $("rekindle-error").hidden = true;
+  $("rekindle-progress").hidden = false;
+  $("rekindle-update").textContent = "Downloading…";
+  try {
+    await invoke("rekindle_install");
+    $("rekindle-update").textContent = "Restarting…";
+  } catch (e) {
+    $("rekindle-error").textContent = String(e);
+    $("rekindle-error").hidden = false;
+    $("rekindle-update").disabled = false;
+    $("rekindle-update").textContent = "Try again";
+    $("rekindle-later").hidden = false;
+    $("rekindle-progress").hidden = true;
+  }
+}
+
+function initRekindle() {
+  drawLogo($("rekindle-logo"));
+  $("rekindle-update").addEventListener("click", installUpdate);
+  $("rekindle-later").addEventListener("click", () => { $("rekindle-modal").hidden = true; });
+  listen("rekindle-progress", ({ payload }) => {
+    const done = payload.total ? payload.done / payload.total : 0;
+    $("rekindle-bar").style.width = `${Math.round(done * 100)}%`;
+    $("rekindle-update").textContent = `Downloading… ${Math.floor(done * 100)}%`;
+    if (done >= 1) $("rekindle-update").textContent = "Installing…";
+  });
+  // Let the window settle before checking.
+  setTimeout(checkForUpdate, 2500);
+}
+
 // ---------- play ----------
 const formatMB = (bytes) => `${Math.round(bytes / 1048576).toLocaleString()} MB`;
 
@@ -657,7 +729,7 @@ async function playJava() {
   updatePlayButton({ label: "Preparing…", sub: entry.name });
   let runKey = entry.key;
   try {
-    const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost });
+    const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost, shaders: fpsBoost && $("shaders").checked });
     if (!entry.installed) {
       await refreshInstalled();
       runKey = entry.key.includes(":") ? prepared.version : entry.key;
@@ -678,6 +750,7 @@ async function playJava() {
     state.running.add(runKey);
     runningPids.set(info.pid, runKey);
     if (prepared.notice) toast(prepared.notice);
+    else if (prepared.fps_mods.includes("Iris")) toast("Shaders on — change the pack in Options → Video Settings → Shader Packs");
     else if (prepared.fps_mods.length) toast(`FPS Boost on: ${prepared.fps_mods.filter((m) => m !== "Fabric API").join(", ")}`);
     else toast(`Starting ${state.selected.name} — the game window will open in a moment.`);
   } catch (e) {
@@ -763,6 +836,7 @@ drawLogo();
 drawLandscape();
 initJava().catch((e) => toast(String(e), { error: true }));
 initBedrock().catch((e) => toast(String(e), { error: true }));
+initRekindle();
 
 /** Stand-in backend so the UI can be previewed in a regular browser. */
 function previewBackend() {
@@ -796,6 +870,19 @@ function previewBackend() {
     }, 700)),
     ely_logout: () => null,
     ely_refresh_skin: () => null,
+    // Demo: ?update shows the Rekindle pop-up.
+    rekindle_check: () => (new URLSearchParams(location.search).has("update")
+      ? { version: "0.5.1", current: "0.5.0", size: 4.7 * 1048576, notes: "- Faster version downloads\n- New shader pack picker\n- Bug fixes" }
+      : null),
+    rekindle_install: () => new Promise((resolve) => {
+      let done = 0;
+      const total = 4.7 * 1048576;
+      const t = setInterval(() => {
+        done = Math.min(total, done + total / 25);
+        listeners["rekindle-progress"]?.({ payload: { done, total } });
+        if (done >= total) { clearInterval(t); resolve(); }
+      }, 80);
+    }),
     ely_open_register: () => window.open("https://account.ely.by/register", "_blank"),
     java_cancel_prepare: () => null,
     java_prepare: ({ target }) => new Promise((resolve) => {

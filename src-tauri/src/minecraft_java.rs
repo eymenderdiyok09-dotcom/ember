@@ -426,6 +426,11 @@ fn launch(options: &LaunchOptions, on_exit: impl FnOnce(u32) + Send + 'static) -
     if options.ely {
         let injector = crate::ely_auth::authlib_injector(&mc)?;
         jvm_args.insert(0, format!("-javaagent:{}=ely.by", injector.display()));
+    } else if !options.online {
+        // Offline with a custom skin: serve it from Ember's local skin server.
+        if let Some(agent) = crate::skins::offline_skin_agent(&mc, &who.name, &who.uuid) {
+            jvm_args.insert(0, agent);
+        }
     }
     jvm_args.extend(flags.iter().map(|f| f.to_string()));
     let mut game_args = Vec::new();
@@ -822,7 +827,17 @@ mod smoke {
             fps_boost: std::env::var("MC_SMOKE_FPS").is_ok(),
             instance: std::env::var("MC_SMOKE_INSTANCE").ok(),
         };
+        // MC_SMOKE_SKIN=<png>: give "Tester" an offline skin first.
+        if let Ok(path) = std::env::var("MC_SMOKE_SKIN") {
+            use base64::Engine;
+            let png = base64::engine::general_purpose::STANDARD.encode(std::fs::read(path).unwrap());
+            crate::skins::skin_set_offline("Tester".into(), png, false).expect("saving skin failed");
+        }
         let info = super::launch(&options, |_| {}).expect("launch failed");
         println!("pid={} java={} log={}", info.pid, info.java, info.log);
+        // MC_SMOKE_WAIT=<seconds>: keep Ember's skin server alive while the game runs.
+        if let Some(secs) = std::env::var("MC_SMOKE_WAIT").ok().and_then(|s| s.parse().ok()) {
+            std::thread::sleep(std::time::Duration::from_secs(secs));
+        }
     }
 }

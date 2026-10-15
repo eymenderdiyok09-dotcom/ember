@@ -37,7 +37,7 @@
           </div>
         </div>
         <div class="input-wrap" id="offline-row">
-          <canvas id="avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas>
+          <button class="avatar-button" data-skin title="Change skin" aria-label="Change skin"><canvas id="avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas><span class="avatar-edit" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M8.6 1.4 10.6 3.4 4 10H2V8z" /></svg></span></button>
           <input id="username" placeholder="Choose a username" maxlength="16" spellcheck="false" autocomplete="off" />
         </div>
         <button class="mc-button" id="ms-signin" hidden>
@@ -49,7 +49,7 @@
           <span>Sign in with Ely.by</span>
         </button>
         <div class="input-wrap account-row" id="ely-row" hidden>
-          <canvas id="ely-avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas>
+          <button class="avatar-button" data-skin title="Change skin" aria-label="Change skin"><canvas id="ely-avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas><span class="avatar-edit" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M8.6 1.4 10.6 3.4 4 10H2V8z" /></svg></span></button>
           <span class="account-text">
             <span class="account-name" id="ely-name"></span>
             <span class="account-sub">Ely.by account · online play</span>
@@ -57,7 +57,7 @@
           <button class="small-button" id="ely-signout">Sign out</button>
         </div>
         <div class="input-wrap account-row" id="ms-row" hidden>
-          <canvas id="ms-avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas>
+          <button class="avatar-button" data-skin title="Change skin" aria-label="Change skin"><canvas id="ms-avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas><span class="avatar-edit" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M8.6 1.4 10.6 3.4 4 10H2V8z" /></svg></span></button>
           <span class="account-text">
             <span class="account-name" id="ms-name"></span>
             <span class="account-sub">Microsoft account · online play</span>
@@ -202,6 +202,33 @@
       <p class="modal-error" id="rekindle-error" role="alert" hidden></p>
       <button class="primary-button" id="rekindle-update">Update now</button>
       <button class="link-button" id="rekindle-later">Later</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="skin-modal" hidden>
+    <div class="modal skin-modal" role="dialog" aria-modal="true" aria-labelledby="skin-title">
+      <h2 id="skin-title">Skin</h2>
+      <div class="skin-stage">
+        <canvas id="skin-front" width="16" height="32" aria-label="Skin, front"></canvas>
+        <canvas id="skin-back" width="16" height="32" aria-label="Skin, back"></canvas>
+        <p class="skin-empty" id="skin-empty" hidden>Default skin</p>
+      </div>
+      <div class="skin-offline" id="skin-offline">
+        <div class="mini-switch skin-model" id="skin-model" role="radiogroup" aria-label="Arm style">
+          <button role="radio" data-slim="false">Classic arms</button>
+          <button role="radio" data-slim="true">Slim arms</button>
+        </div>
+        <input type="file" id="skin-file" accept="image/png" hidden />
+        <button class="primary-button" id="skin-choose">Choose skin file…</button>
+        <p class="modal-text skin-note">A 64×64 PNG. Offline skins show in your game only — other players see the default skin.</p>
+        <button class="link-button" id="skin-reset" hidden>Use the default skin</button>
+      </div>
+      <div class="skin-online" id="skin-online" hidden>
+        <p class="modal-text" id="skin-online-text"></p>
+        <button class="primary-button" id="skin-ely-open">Change on Ely.by</button>
+      </div>
+      <p class="modal-error" id="skin-error" role="alert" hidden></p>
+      <button class="mc-button is-stone" id="skin-close">Done</button>
     </div>
   </div>
 

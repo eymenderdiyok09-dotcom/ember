@@ -821,7 +821,8 @@ fn encode(value: &str) -> String {
         .collect()
 }
 
-/// Newest Fabric build of a Modrinth project for `game` (releases preferred).
+/// Newest Fabric build of a Modrinth project for `game` (releases preferred,
+/// except Iris: its betas are the builds that match the newest Sodium).
 fn modrinth_version(agent: &ureq::Agent, project: &str, game: &str) -> Result<Option<Value>, String> {
     let url = format!(
         "{MODRINTH_API}/project/{}/version?loaders={}&game_versions={}",
@@ -831,6 +832,9 @@ fn modrinth_version(agent: &ureq::Agent, project: &str, game: &str) -> Result<Op
     );
     let versions = get_json(agent, &url)?;
     let versions = versions.as_array().cloned().unwrap_or_default();
+    if project == SHADER_LOADER {
+        return Ok(versions.first().cloned());
+    }
     Ok(versions
         .iter()
         .find(|v| v["version_type"] == "release")
@@ -845,10 +849,13 @@ fn resolve_fps_mods(agent: &ureq::Agent, game: &str, mods: &Path, shaders: bool)
         queue.insert(0, SHADER_LOADER.to_owned());
     }
     let mut seen = HashSet::new();
+    // Dependencies name projects by id ("AANobbMI") while FPS_MODS uses slugs
+    // ("sodium"), so also dedupe on the id each version reports.
+    let mut seen_ids = HashSet::new();
     let mut found = Vec::new();
     while let Some(project) = queue.pop() {
         check_cancel()?;
-        if !seen.insert(project.clone()) {
+        if !seen.insert(project.clone()) || seen_ids.contains(&project) {
             continue;
         }
         let Some(version) = modrinth_version(agent, &project, game)? else {
@@ -857,6 +864,11 @@ fn resolve_fps_mods(agent: &ureq::Agent, game: &str, mods: &Path, shaders: bool)
             }
             continue;
         };
+        if let Some(id) = str_at(&version, "project_id") {
+            if !seen_ids.insert(id.to_owned()) {
+                continue;
+            }
+        }
         for dep in version["dependencies"].as_array().into_iter().flatten() {
             if dep["dependency_type"] == "required" {
                 queue.extend(str_at(dep, "project_id").map(str::to_owned));

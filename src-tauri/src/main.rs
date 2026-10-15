@@ -6,6 +6,7 @@ mod minecraft_java_install;
 mod ely_auth;
 mod microsoft_auth;
 mod rekindle;
+mod skins;
 
 #[cfg(target_os = "windows")]
 mod minecraft_bedrock;
@@ -40,6 +41,11 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         ely_auth::ely_refresh_skin,
         rekindle::rekindle_check,
         rekindle::rekindle_install,
+        skins::skin_get_offline,
+        skins::skin_set_offline,
+        skins::skin_set_offline_model,
+        skins::skin_clear_offline,
+        skins::ely_open_skins,
         ely_auth::ely_open_register,
         minecraft_bedrock::bedrock_is_installed,
         minecraft_bedrock::bedrock_launch,
@@ -70,6 +76,11 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         ely_auth::ely_refresh_skin,
         rekindle::rekindle_check,
         rekindle::rekindle_install,
+        skins::skin_get_offline,
+        skins::skin_set_offline,
+        skins::skin_set_offline_model,
+        skins::skin_clear_offline,
+        skins::ely_open_skins,
         ely_auth::ely_open_register,
     ]
 }

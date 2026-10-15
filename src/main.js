@@ -608,6 +608,163 @@ async function initAccount() {
   renderAccount();
 }
 
+// ---------- skins ----------
+const skin = { offline: null }; // offline: { data_url, slim } for the current username
+
+/** Draws a whole player (front or back) from a skin texture onto a 16×32 canvas. */
+function drawSkinBody(canvas, img, slim, back) {
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, 16, 32);
+  const modern = img.height >= 64;
+  const aw = slim ? 3 : 4;
+  const part = (sx, sy, w, h, dx, dy, mirror = false) => {
+    if (!mirror) return ctx.drawImage(img, sx, sy, w, h, dx, dy, w, h);
+    ctx.save();
+    ctx.translate(dx + w, dy);
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, sx, sy, w, h, 0, 0, w, h);
+    ctx.restore();
+  };
+  // [front x, back x] of each texture block; old 64×32 skins mirror the right limbs.
+  const armR = back ? 52 - (4 - aw) : 44, armL = back ? 44 - (4 - aw) : 36;
+  const legR = back ? 12 : 4, legL = back ? 28 : 20;
+  const [leftX, rightX] = [4 - aw, 12]; // viewer's left/right
+  // Head and body.
+  part(back ? 24 : 8, 8, 8, 8, 4, 0);
+  part(back ? 32 : 20, 20, 8, 12, 4, 8);
+  // Arms: front view shows the right arm on the viewer's left; back view the opposite.
+  const rightArmX = back ? rightX : leftX, leftArmX = back ? leftX : rightX;
+  part(armR, 20, aw, 12, rightArmX, 8);
+  if (modern) part(armL, 52, aw, 12, leftArmX, 8);
+  else part(armR, 20, aw, 12, leftArmX, 8, true);
+  // Legs.
+  const rightLegX = back ? 8 : 4, leftLegX = back ? 4 : 8;
+  part(legR, 20, 4, 12, rightLegX, 20);
+  if (modern) part(legL, 52, 4, 12, leftLegX, 20);
+  else part(legR, 20, 4, 12, leftLegX, 20, true);
+  // Outer layer.
+  part(back ? 56 : 40, 8, 8, 8, 4, 0);
+  if (modern) {
+    part(back ? 32 : 20, 36, 8, 12, 4, 8);
+    part(armR, 36, aw, 12, rightArmX, 8);
+    part(armL + 16, 52, aw, 12, leftArmX, 8);
+    part(legR, 36, 4, 12, rightLegX, 20);
+    part(legR, 52, 4, 12, leftLegX, 20);
+  }
+}
+
+/** The skin texture for the current account mode, if any. */
+function currentSkin() {
+  if (account.mode === "offline") return skin.offline && { url: skin.offline.data_url, slim: skin.offline.slim };
+  const info = account.mode === "elyby" ? account.ely : account.info;
+  return info?.skin_url ? { url: info.skin_url, slim: false } : null;
+}
+
+function renderSkinPreview() {
+  const current = currentSkin();
+  const front = $("skin-front"), back = $("skin-back");
+  $("skin-empty").hidden = Boolean(current);
+  front.hidden = back.hidden = !current;
+  if (current) {
+    const img = new Image();
+    img.onload = () => {
+      drawSkinBody(front, img, current.slim, false);
+      drawSkinBody(back, img, current.slim, true);
+    };
+    img.src = current.url;
+  }
+  const offline = account.mode === "offline";
+  $("skin-offline").hidden = !offline;
+  $("skin-online").hidden = offline;
+  $("skin-reset").hidden = !skin.offline;
+  $("skin-model").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String((b.dataset.slim === "true") === Boolean(skin.offline?.slim))));
+  if (account.mode === "elyby") {
+    $("skin-online-text").textContent = "Ely.by skins are changed on ely.by — pick one from the catalogue or upload your own there. Ember shows it the next time it opens.";
+    $("skin-ely-open").hidden = false;
+  } else if (account.mode === "microsoft") {
+    $("skin-online-text").textContent = "Changing Microsoft skins from Ember comes together with Microsoft sign-in.";
+    $("skin-ely-open").hidden = true;
+  }
+}
+
+function skinError(message = "") {
+  $("skin-error").textContent = message;
+  $("skin-error").hidden = !message;
+}
+
+/** Loads the offline skin saved for the typed username and updates the avatar. */
+let skinLookup = 0;
+async function refreshOfflineSkin() {
+  const name = $("username").value.trim();
+  const ticket = ++skinLookup;
+  const found = USERNAME_RE.test(name) ? await invoke("skin_get_offline", { name }).catch(() => null) : null;
+  if (ticket !== skinLookup) return; // a newer lookup started
+  skin.offline = found;
+  if (found) drawSkinFace($("avatar"), found.data_url, name);
+  else drawAvatar(name);
+}
+
+function openSkinModal() {
+  if (account.mode === "offline" && !USERNAME_RE.test($("username").value.trim())) {
+    toast("Pick a username first (3–16 letters, numbers or _)", { error: true });
+    $("username").focus({ preventScroll: true });
+    return;
+  }
+  skinError();
+  renderSkinPreview();
+  $("skin-modal").hidden = false;
+  $("skin-close").focus({ preventScroll: true });
+}
+
+async function chooseSkinFile(file) {
+  if (!file) return;
+  skinError();
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    const slim = Boolean(skin.offline?.slim);
+    skin.offline = await invoke("skin_set_offline", { name: $("username").value.trim(), pngBase64: btoa(binary), slim });
+    drawSkinFace($("avatar"), skin.offline.data_url, $("username").value.trim());
+    renderSkinPreview();
+    toast("Skin saved — you'll see it in-game next time you press Play");
+  } catch (e) {
+    skinError(String(e));
+  }
+}
+
+function initSkins() {
+  document.querySelectorAll("[data-skin]").forEach((b) => b.addEventListener("click", openSkinModal));
+  $("skin-choose").addEventListener("click", () => $("skin-file").click());
+  $("skin-file").addEventListener("change", (e) => {
+    chooseSkinFile(e.target.files[0]);
+    e.target.value = "";
+  });
+  $("skin-model").addEventListener("click", async (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const slim = b.dataset.slim === "true";
+    if (skin.offline) {
+      await invoke("skin_set_offline_model", { name: $("username").value.trim(), slim }).catch((err) => skinError(String(err)));
+      skin.offline.slim = slim;
+    } else {
+      skin.offline = null;
+    }
+    renderSkinPreview();
+  });
+  $("skin-reset").addEventListener("click", async () => {
+    await invoke("skin_clear_offline", { name: $("username").value.trim() }).catch(() => {});
+    skin.offline = null;
+    drawAvatar($("username").value.trim());
+    renderSkinPreview();
+  });
+  $("skin-ely-open").addEventListener("click", () => invoke("ely_open_skins").catch((e) => toast(String(e), { error: true })));
+  const close = () => { $("skin-modal").hidden = true; };
+  $("skin-close").addEventListener("click", close);
+  $("skin-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+}
+
 // ---------- Rekindle (updates) ----------
 const formatSize = (bytes) => `${(bytes / 1048576).toFixed(1)} MB`;
 
@@ -767,7 +924,13 @@ async function initJava() {
   username.pattern = USERNAME_RE.source.slice(1, -1);
   username.value = load("username") ?? "";
   drawAvatar(username.value);
-  username.addEventListener("input", () => drawAvatar(username.value));
+  refreshOfflineSkin();
+  let skinTimer;
+  username.addEventListener("input", () => {
+    drawAvatar(username.value);
+    clearTimeout(skinTimer);
+    skinTimer = setTimeout(refreshOfflineSkin, 200);
+  });
   username.addEventListener("keydown", (e) => { if (e.key === "Enter") playJava(); });
 
   initPicker();
@@ -837,6 +1000,7 @@ drawLandscape();
 initJava().catch((e) => toast(String(e), { error: true }));
 initBedrock().catch((e) => toast(String(e), { error: true }));
 initRekindle();
+initSkins();
 
 /** Stand-in backend so the UI can be previewed in a regular browser. */
 function previewBackend() {
@@ -851,6 +1015,7 @@ function previewBackend() {
   ].map(([id, kind]) => ({ id, kind }));
   let progress;
   const listeners = {};
+  const demoSkins = {};
   const handlers = {
     java_game_dir: () => "/Users/you/Library/Application Support/minecraft",
     java_list_versions: () => [...installed],
@@ -870,6 +1035,12 @@ function previewBackend() {
     }, 700)),
     ely_logout: () => null,
     ely_refresh_skin: () => null,
+    // Demo: skins live in memory only.
+    skin_get_offline: ({ name }) => demoSkins[name.toLowerCase()] ?? null,
+    skin_set_offline: ({ name, pngBase64, slim }) => (demoSkins[name.toLowerCase()] = { data_url: `data:image/png;base64,${pngBase64}`, slim }),
+    skin_set_offline_model: ({ name, slim }) => { if (demoSkins[name.toLowerCase()]) demoSkins[name.toLowerCase()].slim = slim; },
+    skin_clear_offline: ({ name }) => { delete demoSkins[name.toLowerCase()]; },
+    ely_open_skins: () => window.open("https://ely.by/skins", "_blank"),
     // Demo: ?update shows the Rekindle pop-up.
     rekindle_check: () => (new URLSearchParams(location.search).has("update")
       ? { version: "0.5.1", current: "0.5.0", size: 4.7 * 1048576, notes: "- Faster version downloads\n- New shader pack picker\n- Bug fixes" }

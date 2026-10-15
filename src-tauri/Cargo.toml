@@ -13,9 +13,11 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 md-5 = "0.10"
-sha1 = "0.10"
+sha1 = { version = "0.10", features = ["oid"] }
 sha2 = "0.10"
 ed25519-dalek = "2"
+rsa = "0.9"
+rand = "0.8"
 ureq = { version = "3", features = ["json"] }
 keyring = { version = "3", features = ["apple-native", "windows-native"] }
 base64 = "0.22"

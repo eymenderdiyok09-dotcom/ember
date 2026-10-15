@@ -172,6 +172,23 @@ pub async fn ely_login(login: String, password: String, code: Option<String>) ->
     .map_err(|e| e.to_string())?
 }
 
+/// Re-reads the player's current skin from Ely.by (it may have changed since
+/// sign-in) and returns the updated account.
+#[tauri::command]
+pub async fn ely_refresh_skin() -> Result<Option<AccountInfo>, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        let Some(mut account) = load() else { return Ok(None) };
+        let skin = skin_url(&agent(), &account.name);
+        if skin != account.skin_url {
+            account.skin_url = skin;
+            store(&account)?;
+        }
+        Ok(Some(AccountInfo::from(&account)))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 #[tauri::command]
 pub async fn ely_logout() -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(|| {

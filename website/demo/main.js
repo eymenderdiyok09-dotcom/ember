@@ -117,8 +117,8 @@ function hash(str) {
 }
 
 /** Symmetric 8×8 pixel face, unique per username. */
-function drawAvatar(name) {
-  const ctx = $("avatar").getContext("2d");
+function drawAvatar(name, canvas = $("avatar")) {
+  const ctx = canvas.getContext("2d");
   let seed = hash(name.toLowerCase() || "ember");
   const rand = () => ((seed = Math.imul(seed ^ (seed >>> 15), 2246822519) >>> 0) / 4294967296);
   const hue = Math.floor(rand() * 360);
@@ -388,14 +388,15 @@ const account = { mode: "offline", info: null, ely: null };
 const ACCOUNT_MODES = ["offline", "microsoft", "elyby"];
 const hasAccount = () => account.mode === "offline" || Boolean(account.mode === "microsoft" ? account.info : account.ely);
 
-function drawSkinFace(canvas, skinUrl) {
+/** The face from a skin texture; players without a skin get a generated face. */
+function drawSkinFace(canvas, skinUrl, name = "") {
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = "#3a2f2c";
-  ctx.fillRect(0, 0, 8, 8);
+  drawAvatar(name, canvas);
   if (!skinUrl) return;
   const img = new Image();
   img.onload = () => {
+    ctx.clearRect(0, 0, 8, 8);
     ctx.drawImage(img, 8, 8, 8, 8, 0, 0, 8, 8);
     ctx.drawImage(img, 40, 8, 8, 8, 0, 0, 8, 8);
   };
@@ -410,11 +411,11 @@ function renderAccount() {
   $("ms-signin").hidden = !ms || Boolean(account.info);
   $("ms-row").hidden = !ms || !account.info;
   $("ms-name").textContent = account.info?.name ?? "";
-  drawSkinFace($("ms-avatar"), account.info?.skin_url);
+  drawSkinFace($("ms-avatar"), account.info?.skin_url, account.info?.name);
   $("ely-signin").hidden = !ely || Boolean(account.ely);
   $("ely-row").hidden = !ely || !account.ely;
   $("ely-name").textContent = account.ely?.name ?? "";
-  drawSkinFace($("ely-avatar"), account.ely?.skin_url);
+  drawSkinFace($("ely-avatar"), account.ely?.skin_url, account.ely?.name);
   updatePlayButton();
 }
 
@@ -475,6 +476,12 @@ async function submitElyLogin(e) {
 
 async function initEly() {
   account.ely = await invoke("ely_status");
+  // Pick up skin changes made on ely.by since the last sign-in.
+  if (account.ely) {
+    invoke("ely_refresh_skin").then((info) => {
+      if (info && account.ely) { account.ely = info; renderAccount(); }
+    }).catch(() => {});
+  }
   $("ely-login").value = load("elyLogin") ?? "";
   $("ely-signin").addEventListener("click", openElyLogin);
   $("ely-form").addEventListener("submit", submitElyLogin);
@@ -760,6 +767,7 @@ function previewBackend() {
       else resolve({ name: login.split("@")[0].slice(0, 16), uuid: "x", skin_url: null });
     }, 700)),
     ely_logout: () => null,
+    ely_refresh_skin: () => null,
     ely_open_register: () => window.open("https://account.ely.by/register", "_blank"),
     java_cancel_prepare: () => null,
     java_prepare: ({ target }) => new Promise((resolve) => {

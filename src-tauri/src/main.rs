@@ -36,6 +36,7 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         ely_auth::ely_status,
         ely_auth::ely_login,
         ely_auth::ely_logout,
+        ely_auth::ely_refresh_skin,
         ely_auth::ely_open_register,
         minecraft_bedrock::bedrock_is_installed,
         minecraft_bedrock::bedrock_launch,
@@ -63,6 +64,7 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         ely_auth::ely_status,
         ely_auth::ely_login,
         ely_auth::ely_logout,
+        ely_auth::ely_refresh_skin,
         ely_auth::ely_open_register,
     ]
 }

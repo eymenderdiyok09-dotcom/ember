@@ -432,6 +432,16 @@ h1 {
   color: #3c4450; font-size: 12px; font-weight: 500;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.lang-picker {
+  position: relative; display: flex; align-items: center; gap: 5px; margin-left: 8px;
+  padding: 5px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.75);
+  color: #3c4450; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.lang-picker svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.lang-picker select {
+  appearance: none; -webkit-appearance: none; border: 0; background: transparent; padding: 0;
+  color: inherit; font: inherit; cursor: pointer; outline: none;
+}
 .toast {
   position: fixed; z-index: 20; left: 50%; bottom: 52px;
   max-width: min(560px, calc(100vw - 48px));
@@ -500,3 +510,7 @@ h1 {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 .toggle-row + .toggle-row { margin-top: -10px; }
+/* Numbers and sizes read left-to-right even in Arabic and Persian. */
+.field-value, .menu-item .item-name, .picker-name, .play-sub { unicode-bidi: isolate; }
+.field-value { direction: ltr; }
+.slider { direction: ltr; }

@@ -7,7 +7,8 @@ const load = (key) => { try { return localStorage.getItem(key); } catch { return
 const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,16}$/;
-const KIND_LABEL = { release: "Release", snapshot: "Snapshot", old_beta: "Beta", old_alpha: "Alpha" };
+const KIND_KEY = { release: "kind_release", snapshot: "kind_snapshot", old_beta: "kind_beta", old_alpha: "kind_alpha" };
+const kindLabel = (kind) => (KIND_KEY[kind] ? t(KIND_KEY[kind]) : kind);
 
 // ---------- toast ----------
 let toastTimer;
@@ -179,13 +180,13 @@ const state = { installed: [], remote: { vanilla: [], fabric: [] }, entries: [],
 const runningPids = new Map();
 
 const TABS = [
-  ["installed", "Installed"],
-  ["release", "Releases"],
-  ["snapshot", "Snapshots"],
-  ["fabric", "Fabric"],
-  ["forge", "Forge"],
-  ["neoforge", "NeoForge"],
-  ["old", "Old"],
+  ["installed", () => t("tab_installed")],
+  ["release", () => t("tab_release")],
+  ["snapshot", () => t("tab_snapshot")],
+  ["fabric", () => "Fabric"],
+  ["forge", () => "Forge"],
+  ["neoforge", () => "NeoForge"],
+  ["old", () => t("tab_old")],
 ];
 const BADGE_CLASS = { release: "release", snapshot: "snapshot", old_beta: "legacy", old_alpha: "legacy", modded: "modded" };
 
@@ -195,8 +196,8 @@ function installedEntry(v) {
     key: v.id,
     tab: "installed",
     name: modded ? `${v.loader} ${v.base}` : v.id,
-    sub: modded ? v.id : KIND_LABEL[v.kind] ?? v.kind,
-    badge: modded ? v.loader : KIND_LABEL[v.kind] ?? v.kind,
+    sub: modded ? v.id : kindLabel(v.kind),
+    badge: modded ? v.loader : kindLabel(v.kind),
     badgeClass: BADGE_CLASS[v.kind] ?? "legacy",
     installed: true,
   };
@@ -212,8 +213,8 @@ function buildEntries() {
       key: v.id,
       tab: old ? "old" : v.kind,
       name: v.id,
-      sub: installedIds.has(v.id) ? "Installed" : KIND_LABEL[v.kind] ?? v.kind,
-      badge: KIND_LABEL[v.kind] ?? v.kind,
+      sub: installedIds.has(v.id) ? t("installed") : kindLabel(v.kind),
+      badge: kindLabel(v.kind),
       badgeClass: BADGE_CLASS[v.kind] ?? "legacy",
       installed: installedIds.has(v.id),
     });
@@ -225,7 +226,7 @@ function buildEntries() {
         key: `${prefix}:${game}`,
         tab,
         name: `${loader} ${game}`,
-        sub: installed.has(game) ? `Installed · latest ${loader}` : `Latest ${loader}`,
+        sub: installed.has(game) ? t("installed_latest", { loader }) : t("latest_loader", { loader }),
         badge: loader,
         badgeClass: "modded",
         installed: installed.has(game),
@@ -246,11 +247,11 @@ function selectEntry(key) {
   state.selected = entry ?? null;
   const badge = $("version-badge");
   if (!entry) {
-    $("version-name").textContent = state.remoteLoaded ? "No versions available" : "Loading versions…";
+    $("version-name").textContent = state.remoteLoaded ? t("no_versions") : t("loading_versions");
     badge.hidden = true;
   } else {
     $("version-name").textContent = entry.name;
-    badge.textContent = entry.installed ? entry.badge : "Download";
+    badge.textContent = entry.installed ? entry.badge : t("badge_download");
     badge.className = `badge ${entry.installed ? entry.badgeClass : "download"}`;
     badge.hidden = false;
     save("version", entry.key);
@@ -268,7 +269,7 @@ function renderTabs() {
     tab.className = "menu-tab";
     tab.dataset.tab = id;
     tab.setAttribute("aria-pressed", String(state.tab === id));
-    tab.textContent = title;
+    tab.textContent = title();
     tabs.append(tab);
   }
 }
@@ -290,9 +291,9 @@ function renderMenu() {
   if (!matches.length) {
     const empty = document.createElement("div");
     empty.className = "menu-empty";
-    empty.textContent = q ? "No matching versions"
-      : state.tab === "installed" ? "Nothing installed yet — pick a version from Releases"
-      : state.remoteLoaded ? "Nothing here" : "Loading versions…";
+    empty.textContent = q ? t("no_matching")
+      : state.tab === "installed" ? t("nothing_installed")
+      : state.remoteLoaded ? t("nothing_here") : t("loading_versions");
     list.append(empty);
     return;
   }
@@ -377,7 +378,8 @@ async function refreshInstalled() {
 
 // ---------- memory ----------
 const GB = 1024;
-const formatGB = (mb) => `${Number.isInteger(mb / GB) ? mb / GB : (mb / GB).toFixed(1)} GB`;
+// Wrapped in Unicode isolates so "4 GB" stays in order inside right-to-left sentences.
+const formatGB = (mb) => `\u2066${Number.isInteger(mb / GB) ? mb / GB : (mb / GB).toFixed(1)} GB\u2069`;
 
 async function initMemory() {
   const slider = $("memory");
@@ -393,7 +395,7 @@ async function initMemory() {
   const update = () => {
     const mb = Number(slider.value);
     $("memory-value").textContent = formatGB(mb);
-    $("memory-hint").textContent = `${formatGB(recommended)} recommended · ${formatGB(Math.round(totalMb / GB) * GB)} in this computer`;
+    $("memory-hint").textContent = t("memory_hint", { recommended: formatGB(recommended), total: formatGB(Math.round(totalMb / GB) * GB) });
     slider.style.setProperty("--fill", `${((mb - slider.min) / (max - slider.min)) * 100}%`);
     save("memoryMb", mb);
   };
@@ -474,7 +476,7 @@ function openElyLogin() {
   $("ely-code").value = "";
   $("ely-code-row").hidden = true;
   $("ely-submit").disabled = false;
-  $("ely-submit").textContent = "Sign in";
+  $("ely-submit").textContent = t("sign_in");
   $("ely-modal").hidden = false;
   $("ely-login").focus({ preventScroll: true });
 }
@@ -491,29 +493,29 @@ async function submitElyLogin(e) {
   const password = $("ely-password").value;
   const needsCode = !$("ely-code-row").hidden;
   const code = $("ely-code").value.trim();
-  if (!login || !password) return elyError("Enter your email or nickname and password.");
-  if (needsCode && !code) return elyError("Enter the code from your authenticator app.");
+  if (!login || !password) return elyError(t("ely_missing"));
+  if (needsCode && !code) return elyError(t("ely_need_code"));
   elyError("");
   $("ely-submit").disabled = true;
-  $("ely-submit").textContent = "Signing in…";
+  $("ely-submit").textContent = t("signing_in");
   try {
     account.ely = await invoke("ely_login", { login, password, code: needsCode ? code : null });
     save("elyLogin", login);
     closeElyLogin();
-    toast(`Signed in as ${account.ely.name}`);
+    toast(t("signed_in_as", { name: account.ely.name }));
     renderAccount();
   } catch (err) {
     if (String(err) === "TWO_FACTOR") {
       $("ely-code-row").hidden = false;
       elyError("");
       $("ely-code").focus({ preventScroll: true });
-      toast("This account uses two-factor sign-in. Enter the code from your authenticator app.");
+      toast(t("ely_two_factor"));
     } else {
       elyError(String(err));
     }
   } finally {
     $("ely-submit").disabled = false;
-    $("ely-submit").textContent = "Sign in";
+    $("ely-submit").textContent = t("sign_in");
   }
 }
 
@@ -542,15 +544,14 @@ function showLoginStep(step, message = "") {
   $("ms-step-code").hidden = step !== "code";
   $("ms-step-error").hidden = step !== "error";
   $("ms-error").textContent = message;
-  $("ms-cancel").textContent = step === "error" ? "Back" : "Cancel";
+  $("ms-cancel").textContent = step === "error" ? t("back") : t("cancel");
   $("ms-modal").hidden = false;
 }
 
 let loginActive = false;
 async function signIn() {
   if (!(await invoke("msa_configured"))) {
-    showLoginStep("error",
-      "Microsoft sign-in isn't switched on in this build of Ember yet. It needs an app ID approved by Mojang; until then, use Offline mode.");
+    showLoginStep("error", t("ms_not_configured"));
     $("ms-cancel").focus({ preventScroll: true });
     return;
   }
@@ -559,12 +560,12 @@ async function signIn() {
     const code = await invoke("msa_begin_login");
     if (!loginActive) return;
     $("ms-code").textContent = code.user_code;
-    $("ms-open-label").textContent = `Open ${code.verification_uri.replace(/^https:\/\/(www\.)?/, "")}`;
+    $("ms-open-label").textContent = t("ms_open", { url: code.verification_uri.replace(/^https:\/\/(www\.)?/, "") });
     showLoginStep("code");
     $("ms-open").focus({ preventScroll: true });
     account.info = await invoke("msa_finish_login");
     $("ms-modal").hidden = true;
-    toast(`Signed in as ${account.info.name}`);
+    toast(t("signed_in_as", { name: account.info.name }));
   } catch (e) {
     // Errors after the user pressed Cancel are expected; anything else is shown.
     if (loginActive) showLoginStep("error", String(e));
@@ -595,7 +596,7 @@ async function initAccount() {
   $("ms-code").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText($("ms-code").textContent);
-      toast("Code copied");
+      toast(t("code_copied"));
     } catch {}
   });
   const cancel = () => {
@@ -680,10 +681,10 @@ function renderSkinPreview() {
   $("skin-reset").hidden = !skin.offline;
   $("skin-model").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String((b.dataset.slim === "true") === Boolean(skin.offline?.slim))));
   if (account.mode === "elyby") {
-    $("skin-online-text").textContent = "Ely.by skins are changed on ely.by — pick one from the catalogue or upload your own there. Ember shows it the next time it opens.";
+    $("skin-online-text").textContent = t("skin_ely_text");
     $("skin-ely-open").hidden = false;
   } else if (account.mode === "microsoft") {
-    $("skin-online-text").textContent = "Changing Microsoft skins from Ember comes together with Microsoft sign-in.";
+    $("skin-online-text").textContent = t("skin_ms_text");
     $("skin-ely-open").hidden = true;
   }
 }
@@ -707,7 +708,7 @@ async function refreshOfflineSkin() {
 
 function openSkinModal() {
   if (account.mode === "offline" && !USERNAME_RE.test($("username").value.trim())) {
-    toast("Pick a username first (3–16 letters, numbers or _)", { error: true });
+    toast(t("skin_need_name"), { error: true });
     $("username").focus({ preventScroll: true });
     return;
   }
@@ -728,7 +729,7 @@ async function chooseSkinFile(file) {
     skin.offline = await invoke("skin_set_offline", { name: $("username").value.trim(), pngBase64: btoa(binary), slim });
     drawSkinFace($("avatar"), skin.offline.data_url, $("username").value.trim());
     renderSkinPreview();
-    toast("Skin saved — you'll see it in-game next time you press Play");
+    toast(t("skin_saved"));
   } catch (e) {
     skinError(String(e));
   }
@@ -776,8 +777,8 @@ async function checkForUpdate() {
     return; // Offline or GitHub unreachable: try again next launch.
   }
   if (!update) return;
-  $("rekindle-version").textContent = update.version;
-  $("rekindle-sub").textContent = `You have ${update.current}. The update is ${formatSize(update.size)} and Ember restarts by itself.`;
+  $("rekindle-title").textContent = t("rk_ready", { version: update.version });
+  $("rekindle-sub").textContent = t("rk_sub", { current: update.current, size: formatSize(update.size) });
   const notes = $("rekindle-notes");
   notes.replaceChildren(...update.notes.split("\n").map((l) => l.replace(/^[-•*]\s*/, "").trim()).filter(Boolean).map((line) => {
     const li = document.createElement("li");
@@ -789,20 +790,20 @@ async function checkForUpdate() {
 }
 
 async function installUpdate() {
-  if (state.busy) return toast("Wait for the current download to finish first.", { error: true });
+  if (state.busy) return toast(t("rk_busy"), { error: true });
   $("rekindle-update").disabled = true;
   $("rekindle-later").hidden = true;
   $("rekindle-error").hidden = true;
   $("rekindle-progress").hidden = false;
-  $("rekindle-update").textContent = "Downloading…";
+  $("rekindle-update").textContent = t("rk_downloading", { pct: 0 });
   try {
     await invoke("rekindle_install");
-    $("rekindle-update").textContent = "Restarting…";
+    $("rekindle-update").textContent = t("rk_restarting");
   } catch (e) {
     $("rekindle-error").textContent = String(e);
     $("rekindle-error").hidden = false;
     $("rekindle-update").disabled = false;
-    $("rekindle-update").textContent = "Try again";
+    $("rekindle-update").textContent = t("rk_retry");
     $("rekindle-later").hidden = false;
     $("rekindle-progress").hidden = true;
   }
@@ -815,8 +816,8 @@ function initRekindle() {
   listen("rekindle-progress", ({ payload }) => {
     const done = payload.total ? payload.done / payload.total : 0;
     $("rekindle-bar").style.width = `${Math.round(done * 100)}%`;
-    $("rekindle-update").textContent = `Downloading… ${Math.floor(done * 100)}%`;
-    if (done >= 1) $("rekindle-update").textContent = "Installing…";
+    $("rekindle-update").textContent = t("rk_downloading", { pct: Math.floor(done * 100) });
+    if (done >= 1) $("rekindle-update").textContent = t("rk_installing");
   });
   // Let the window settle before checking.
   setTimeout(checkForUpdate, 2500);
@@ -841,24 +842,38 @@ function updatePlayButton(status = null) {
     return;
   }
   button.style.setProperty("--progress", 0);
-  $("java-play-label").textContent = running ? "Playing" : e && !e.installed ? "Install & Play" : "Play";
-  $("java-play-sub").textContent = !e ? "Pick a version"
-    : needsAccount ? `Sign in with ${account.mode === "elyby" ? "Ely.by" : "Microsoft"} first`
+  $("java-play-label").textContent = running ? t("playing") : e && !e.installed ? t("install_play") : t("play");
+  $("java-play-sub").textContent = !e ? t("pick_version")
+    : needsAccount ? t("sign_in_first", { service: account.mode === "elyby" ? "Ely.by" : "Microsoft" })
     : e.installed ? e.name : `${e.name} · downloads from Mojang`;
+}
+
+/** Translates the backend's progress stage names. */
+const STAGE_KEYS = {
+  "Fetching version info": "stage_fetching",
+  "Preparing assets": "stage_assets",
+  "Downloading installer": "stage_installer",
+  "Setting up FPS Boost": "stage_fps",
+};
+const stageLabel = (stage) => (STAGE_KEYS[stage] ? t(STAGE_KEYS[stage]) : stage);
+function progressLabel(stage, pct) {
+  if (stage === "Downloading game files") return t("downloading_pct", { pct });
+  if (stage === "Downloading FPS Boost mods") return t("fps_mods_pct", { pct });
+  return `${stageLabel(stage)} ${pct}%`;
 }
 
 function showProgress(p) {
   if (!state.busy) return;
   if (!p.files_total) {
-    updatePlayButton({ label: "Preparing…", sub: p.stage });
+    updatePlayButton({ label: t("preparing"), sub: stageLabel(p.stage) });
     return;
   }
   const progress = p.bytes_total ? p.bytes_done / p.bytes_total : p.files_done / p.files_total;
   const amount = p.bytes_total
-    ? `${formatMB(p.bytes_done)} of ${formatMB(p.bytes_total)}`
-    : `${p.files_done.toLocaleString()} of ${p.files_total.toLocaleString()} files`;
+    ? t("of_mb", { done: formatMB(p.bytes_done), total: formatMB(p.bytes_total) })
+    : t("of_files", { done: p.files_done.toLocaleString(), total: p.files_total.toLocaleString() });
   updatePlayButton({
-    label: `${p.stage === "Downloading game files" ? "Downloading" : p.stage} ${Math.floor(progress * 100)}%`.replace("Downloading FPS Boost mods", "FPS mods"),
+    label: progressLabel(p.stage, Math.floor(progress * 100)),
     sub: amount,
     progress,
   });
@@ -875,7 +890,7 @@ async function playJava() {
     return;
   }
   if (offline && !USERNAME_RE.test(username)) {
-    toast("Pick a username: 3–16 letters, numbers or _", { error: true });
+    toast(t("username_invalid"), { error: true });
     $("username").focus({ preventScroll: true });
     return;
   }
@@ -883,7 +898,7 @@ async function playJava() {
   const fpsBoost = $("fps-boost").checked;
   setMenuOpen(false);
   state.busy = true;
-  updatePlayButton({ label: "Preparing…", sub: entry.name });
+  updatePlayButton({ label: t("preparing"), sub: entry.name });
   let runKey = entry.key;
   try {
     const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost, shaders: fpsBoost && $("shaders").checked });
@@ -892,7 +907,7 @@ async function playJava() {
       runKey = entry.key.includes(":") ? prepared.version : entry.key;
       selectEntry(runKey);
     }
-    updatePlayButton({ label: "Launching…", sub: state.selected.name, progress: 1 });
+    updatePlayButton({ label: t("launching"), sub: state.selected.name, progress: 1 });
     const info = await invoke("java_launch", {
       options: {
         version: prepared.version,
@@ -907,11 +922,11 @@ async function playJava() {
     state.running.add(runKey);
     runningPids.set(info.pid, runKey);
     if (prepared.notice) toast(prepared.notice);
-    else if (prepared.fps_mods.includes("Iris")) toast("Shaders on — change the pack in Options → Video Settings → Shader Packs");
-    else if (prepared.fps_mods.length) toast(`FPS Boost on: ${prepared.fps_mods.filter((m) => m !== "Fabric API").join(", ")}`);
-    else toast(`Starting ${state.selected.name} — the game window will open in a moment.`);
+    else if (prepared.fps_mods.includes("Iris")) toast(t("shaders_on"));
+    else if (prepared.fps_mods.length) toast(t("fps_on", { mods: prepared.fps_mods.filter((m) => m !== "Fabric API").join(", ") }));
+    else toast(t("starting", { name: state.selected.name }));
   } catch (e) {
-    if (String(e) === "Cancelled") toast("Download cancelled — press Play to resume.");
+    if (String(e) === "Cancelled") toast(t("download_cancelled"));
     else toast(String(e), { error: true, sticky: true });
   } finally {
     state.busy = false;
@@ -939,7 +954,7 @@ async function initJava() {
   $("java-play").addEventListener("click", playJava);
   $("java-cancel").addEventListener("click", () => {
     invoke("java_cancel_prepare");
-    updatePlayButton({ label: "Cancelling…", sub: state.selected?.name ?? "" });
+    updatePlayButton({ label: t("cancelling"), sub: state.selected?.name ?? "" });
   });
 
   await listen("java-progress", ({ payload }) => showProgress(payload));
@@ -951,7 +966,7 @@ async function initJava() {
   });
 
   const dir = await invoke("java_game_dir");
-  $("game-dir").textContent = dir ? `Game folder · ${dir.replace(/^\/Users\/[^/]+/, "~")}` : "Game folder will be created on first install";
+  $("game-dir").textContent = dir ? t("game_folder", { dir: dir.replace(/^\/Users\/[^/]+/, "~") }) : t("game_folder_new");
 
   await refreshInstalled();
   selectEntry(load("version"));
@@ -959,7 +974,7 @@ async function initJava() {
   try {
     state.remote = await invoke("java_available_versions");
   } catch (e) {
-    toast("Couldn't reach Mojang — showing installed versions only.", { error: true });
+    toast(t("mojang_unreachable"), { error: true });
   }
   state.remoteLoaded = true;
   buildEntries();
@@ -982,25 +997,37 @@ async function initBedrock() {
   });
 
   const installed = await invoke("bedrock_is_installed");
-  $("bedrock-status").textContent = installed ? "Installed and ready" : "Not installed — get it from the Microsoft Store";
+  $("bedrock-status").textContent = installed ? t("bedrock_ready") : t("bedrock_missing");
   $("bedrock-dot").className = `dot ${installed ? "ok" : "bad"}`;
   $("bedrock-play").disabled = !installed;
   $("bedrock-play").addEventListener("click", async () => {
     try {
       await invoke("bedrock_launch");
-      toast("Starting Bedrock Edition…");
+      toast(t("bedrock_starting"));
     } catch (e) {
       toast(String(e), { error: true });
     }
   });
 }
 
+function initLanguagePicker() {
+  const select = $("language");
+  for (const [code, name] of LANGUAGES) select.append(new Option(name, code, false, code === I18N.lang));
+  select.addEventListener("change", () => {
+    save("language", select.value);
+    location.reload();
+  });
+}
+
 drawLogo();
 drawLandscape();
-initJava().catch((e) => toast(String(e), { error: true }));
-initBedrock().catch((e) => toast(String(e), { error: true }));
-initRekindle();
-initSkins();
+initI18n(load("language")).then(() => {
+  initLanguagePicker();
+  initJava().catch((e) => toast(String(e), { error: true }));
+  initBedrock().catch((e) => toast(String(e), { error: true }));
+  initRekindle();
+  initSkins();
+});
 
 /** Stand-in backend so the UI can be previewed in a regular browser. */
 function previewBackend() {

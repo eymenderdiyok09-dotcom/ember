@@ -21,7 +21,7 @@ Get the latest build from [Releases](https://github.com/eymenderdiyok09-dotcom/e
 | Windows 10/11 x64 | `Ember_0.1.0_windows-x64.zip` |
 | Windows 11 ARM64 | `Ember_0.1.0_windows-arm64.zip` |
 
-Builds aren't code-signed yet. On macOS, use **System Settings → Privacy & Security → Open Anyway**. On Windows, click **More info → Run anyway**.
+The macOS build is signed and notarized. Windows builds aren't signed yet: click **More info → Run anyway**.
 
 ## Build
 
@@ -35,6 +35,8 @@ cargo tauri build --target x86_64-pc-windows-gnu --no-bundle     # Windows x64 (
 XWIN_CROSS_COMPILER=clang cargo tauri build --runner cargo-xwin \
   --target aarch64-pc-windows-msvc --no-bundle                  # Windows ARM64 (needs cargo-xwin + LLVM)
 ```
+
+To sign and notarize the macOS build, set `APPLE_SIGNING_IDENTITY="Developer ID Application: …"` for the build, then run `xcrun notarytool submit <dmg> --keychain-profile ember --wait` and `xcrun stapler staple <dmg>`.
 
 To enable Microsoft sign-in, build with `EMBER_MSA_CLIENT_ID=<your Azure app client ID>`.
 

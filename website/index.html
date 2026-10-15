@@ -107,10 +107,7 @@
           <a class="button primary wide" href="https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/Ember_0.1.0_universal.dmg">Download for macOS</a>
           <ol class="steps">
             <li>Open <b>Ember_0.1.0_universal.dmg</b> and drag <b>Ember</b> into <b>Applications</b>.</li>
-            <li>Open Ember. If macOS says it can't check it for malware, open <b>System Settings → Privacy &amp; Security</b>, scroll down and click <b>Open Anyway</b>.</li>
-            <li>If macOS says Ember “is damaged”, run this once in Terminal, then open it again:
-              <code class="copy" tabindex="0">xattr -dr com.apple.quarantine /Applications/Ember.app</code>
-            </li>
+            <li>Open Ember from Applications. It's signed and notarized by Apple, so it opens like any other app.</li>
           </ol>
         </article>
 
@@ -142,7 +139,7 @@
       </details>
       <details>
         <summary>Why does my computer warn me when I open it?</summary>
-        <p>Ember isn't code-signed yet — that needs a paid Apple and Windows developer certificate. The steps above show how to open it anyway.</p>
+        <p>On macOS it won't: Ember is signed and notarized by Apple. On Windows, Ember isn't code-signed yet, so SmartScreen shows a warning — click <b>More info → Run anyway</b>.</p>
       </details>
       <details>
         <summary>Can I play on online servers?</summary>

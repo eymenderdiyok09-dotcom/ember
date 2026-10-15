@@ -31,7 +31,12 @@ sh website/sync-demo.sh
 # 2. Builds.
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 # Microsoft sign-in: the Azure client ID lives in the Keychain, never in the repo.
-if MSA_ID=$(security find-generic-password -s "Ember Microsoft client ID" -w 2>/dev/null); then
+MSA_ID=$(security find-generic-password -s "Ember Microsoft client ID" -w 2>/dev/null) || MSA_ID=""
+if [ -n "$MSA_ID" ] && ! echo "$MSA_ID" | grep -Eqi '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+  echo "The Keychain's \"Ember Microsoft client ID\" isn't an Azure app client ID (Ember's own app registration is required)." >&2
+  exit 1
+fi
+if [ -n "$MSA_ID" ]; then
   export EMBER_MSA_CLIENT_ID="$MSA_ID"
   echo "Microsoft sign-in: on"
 else

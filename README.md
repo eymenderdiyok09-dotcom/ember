@@ -8,7 +8,7 @@ A tiny, fast launcher for Minecraft: Java Edition, built with Tauri.
 - One-click Fabric, Forge and NeoForge
 - **FPS Boost**, on by default: Sodium, Lithium, FerriteCore and more in a separate instance, plus tuned JVM flags
 - Correct Java runtime downloaded automatically for each version
-- Offline play, with Microsoft account sign-in built in (needs an approved client ID)
+- Offline play, free Ely.by accounts (skins + online servers via authlib-injector), and Microsoft sign-in built in (needs an approved client ID)
 - Starts Bedrock Edition on Windows if it's installed
 
 ## Download
@@ -17,9 +17,9 @@ Get the latest build from [Releases](https://github.com/eymenderdiyok09-dotcom/e
 
 | Platform | File |
 | --- | --- |
-| macOS 11+ (Apple Silicon & Intel) | `Ember_0.2.0_universal.dmg` |
-| Windows 10/11 x64 | `Ember_0.2.0_windows-x64.zip` |
-| Windows 11 ARM64 | `Ember_0.2.0_windows-arm64.zip` |
+| macOS 11+ (Apple Silicon & Intel) | `Ember_0.3.0_universal.dmg` |
+| Windows 10/11 x64 | `Ember_0.3.0_windows-x64.zip` |
+| Windows 11 ARM64 | `Ember_0.3.0_windows-arm64.zip` |
 
 The macOS build is signed and notarized. Windows builds aren't signed yet: click **More info → Run anyway**.
 

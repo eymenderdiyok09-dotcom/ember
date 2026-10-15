@@ -3,6 +3,7 @@
 
 mod minecraft_java;
 mod minecraft_java_install;
+mod ely_auth;
 mod microsoft_auth;
 
 #[cfg(target_os = "windows")]
@@ -32,6 +33,10 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         microsoft_auth::msa_finish_login,
         microsoft_auth::msa_cancel_login,
         microsoft_auth::msa_logout,
+        ely_auth::ely_status,
+        ely_auth::ely_login,
+        ely_auth::ely_logout,
+        ely_auth::ely_open_register,
         minecraft_bedrock::bedrock_is_installed,
         minecraft_bedrock::bedrock_launch,
     ]
@@ -55,6 +60,10 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         microsoft_auth::msa_finish_login,
         microsoft_auth::msa_cancel_login,
         microsoft_auth::msa_logout,
+        ely_auth::ely_status,
+        ely_auth::ely_login,
+        ely_auth::ely_logout,
+        ely_auth::ely_open_register,
     ]
 }
 

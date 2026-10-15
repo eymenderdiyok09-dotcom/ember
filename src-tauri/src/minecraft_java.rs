@@ -133,6 +133,9 @@ pub struct LaunchOptions {
     pub max_memory_mb: u32,
     /// Use the signed-in Microsoft account.
     pub online: bool,
+    /// Use the signed-in Ely.by account.
+    #[serde(default)]
+    pub ely: bool,
     /// Tuned JVM flags (the mods are handled by `java_prepare`).
     pub fps_boost: bool,
     /// Ember-managed game folder (`ember/instances/<name>`), e.g. for FPS Boost.
@@ -237,6 +240,16 @@ fn total_memory_bytes() -> Option<u64> {
 }
 
 fn identity(options: &LaunchOptions) -> Result<Identity, String> {
+    if options.ely {
+        let account = crate::ely_auth::session()?;
+        return Ok(Identity {
+            name: account.name,
+            uuid: account.uuid,
+            access_token: account.access_token,
+            xuid: "0".into(),
+            user_type: "mojang",
+        });
+    }
     if options.online {
         let account = crate::microsoft_auth::session()?;
         return Ok(Identity {
@@ -409,6 +422,11 @@ fn launch(options: &LaunchOptions, on_exit: impl FnOnce(u32) + Send + 'static) -
     // JVM and game arguments: modern `arguments` object or legacy string.
     let flags = if options.fps_boost { FPS_BOOST_JVM_FLAGS } else { DEFAULT_JVM_FLAGS };
     let mut jvm_args = vec![format!("-Xmx{}M", options.max_memory_mb)];
+    // Ely.by: authlib-injector points skins and server joins at Ely.by.
+    if options.ely {
+        let injector = crate::ely_auth::authlib_injector(&mc)?;
+        jvm_args.insert(0, format!("-javaagent:{}=ely.by", injector.display()));
+    }
     jvm_args.extend(flags.iter().map(|f| f.to_string()));
     let mut game_args = Vec::new();
     if json["arguments"].is_object() {
@@ -799,6 +817,7 @@ mod smoke {
             username: "Tester".into(),
             max_memory_mb: 2048,
             online: false,
+            ely: false,
             fps_boost: std::env::var("MC_SMOKE_FPS").is_ok(),
             instance: std::env::var("MC_SMOKE_INSTANCE").ok(),
         };

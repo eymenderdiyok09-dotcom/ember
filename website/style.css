@@ -234,3 +234,4 @@ details[open] > summary .chevron { transform: rotate(-90deg); }
   html { scroll-behavior: auto; }
   * { transition: none !important; }
 }
+.faq details p a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }

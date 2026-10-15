@@ -382,8 +382,11 @@ function initFpsBoost() {
   toggle.addEventListener("change", () => save("fpsBoost", toggle.checked));
 }
 
-// ---------- Microsoft account ----------
-const account = { mode: "offline", info: null };
+// ---------- accounts ----------
+// mode: offline | microsoft | elyby. `info` is the Microsoft account, `ely` the Ely.by one.
+const account = { mode: "offline", info: null, ely: null };
+const ACCOUNT_MODES = ["offline", "microsoft", "elyby"];
+const hasAccount = () => account.mode === "offline" || Boolean(account.mode === "microsoft" ? account.info : account.ely);
 
 function drawSkinFace(canvas, skinUrl) {
   const ctx = canvas.getContext("2d");
@@ -400,14 +403,89 @@ function drawSkinFace(canvas, skinUrl) {
 }
 
 function renderAccount() {
-  const online = account.mode === "microsoft";
+  const ms = account.mode === "microsoft";
+  const ely = account.mode === "elyby";
   $("account-mode").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === account.mode)));
-  $("offline-row").hidden = online;
-  $("ms-signin").hidden = !online || Boolean(account.info);
-  $("ms-row").hidden = !online || !account.info;
+  $("offline-row").hidden = account.mode !== "offline";
+  $("ms-signin").hidden = !ms || Boolean(account.info);
+  $("ms-row").hidden = !ms || !account.info;
   $("ms-name").textContent = account.info?.name ?? "";
   drawSkinFace($("ms-avatar"), account.info?.skin_url);
+  $("ely-signin").hidden = !ely || Boolean(account.ely);
+  $("ely-row").hidden = !ely || !account.ely;
+  $("ely-name").textContent = account.ely?.name ?? "";
+  drawSkinFace($("ely-avatar"), account.ely?.skin_url);
   updatePlayButton();
+}
+
+// ---------- Ely.by account ----------
+function elyError(message) {
+  $("ely-error").textContent = message;
+  $("ely-error").hidden = !message;
+}
+
+function openElyLogin() {
+  elyError("");
+  $("ely-password").value = "";
+  $("ely-code").value = "";
+  $("ely-code-row").hidden = true;
+  $("ely-submit").disabled = false;
+  $("ely-submit").textContent = "Sign in";
+  $("ely-modal").hidden = false;
+  $("ely-login").focus({ preventScroll: true });
+}
+
+function closeElyLogin() {
+  $("ely-modal").hidden = true;
+  $("ely-password").value = "";
+  $("ely-code").value = "";
+}
+
+async function submitElyLogin(e) {
+  e.preventDefault();
+  const login = $("ely-login").value.trim();
+  const password = $("ely-password").value;
+  const needsCode = !$("ely-code-row").hidden;
+  const code = $("ely-code").value.trim();
+  if (!login || !password) return elyError("Enter your email or nickname and password.");
+  if (needsCode && !code) return elyError("Enter the code from your authenticator app.");
+  elyError("");
+  $("ely-submit").disabled = true;
+  $("ely-submit").textContent = "Signing in…";
+  try {
+    account.ely = await invoke("ely_login", { login, password, code: needsCode ? code : null });
+    save("elyLogin", login);
+    closeElyLogin();
+    toast(`Signed in as ${account.ely.name}`);
+    renderAccount();
+  } catch (err) {
+    if (String(err) === "TWO_FACTOR") {
+      $("ely-code-row").hidden = false;
+      elyError("");
+      $("ely-code").focus({ preventScroll: true });
+      toast("This account uses two-factor sign-in. Enter the code from your authenticator app.");
+    } else {
+      elyError(String(err));
+    }
+  } finally {
+    $("ely-submit").disabled = false;
+    $("ely-submit").textContent = "Sign in";
+  }
+}
+
+async function initEly() {
+  account.ely = await invoke("ely_status");
+  $("ely-login").value = load("elyLogin") ?? "";
+  $("ely-signin").addEventListener("click", openElyLogin);
+  $("ely-form").addEventListener("submit", submitElyLogin);
+  $("ely-cancel").addEventListener("click", closeElyLogin);
+  $("ely-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") closeElyLogin(); });
+  $("ely-register").addEventListener("click", () => invoke("ely_open_register").catch((e) => toast(String(e), { error: true })));
+  $("ely-signout").addEventListener("click", async () => {
+    await invoke("ely_logout").catch(() => {});
+    account.ely = null;
+    renderAccount();
+  });
 }
 
 function showLoginStep(step, message = "") {
@@ -447,8 +525,9 @@ async function signIn() {
 }
 
 async function initAccount() {
-  account.mode = load("accountMode") === "microsoft" ? "microsoft" : "offline";
+  account.mode = ACCOUNT_MODES.includes(load("accountMode")) ? load("accountMode") : "offline";
   account.info = await invoke("msa_status");
+  await initEly();
   $("account-mode").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
@@ -486,7 +565,7 @@ function updatePlayButton(status = null) {
   const button = $("java-play");
   const e = state.selected;
   const running = e?.installed && state.running.has(e.key);
-  const needsAccount = account.mode === "microsoft" && !account.info;
+  const needsAccount = !hasAccount();
   button.classList.toggle("is-launching", Boolean(status));
   button.classList.toggle("is-running", Boolean(running) && !status);
   button.disabled = !e || state.busy || running;
@@ -500,7 +579,7 @@ function updatePlayButton(status = null) {
   button.style.setProperty("--progress", 0);
   $("java-play-label").textContent = running ? "Playing" : e && !e.installed ? "Install & Play" : "Play";
   $("java-play-sub").textContent = !e ? "Pick a version"
-    : needsAccount ? "Sign in with Microsoft first"
+    : needsAccount ? `Sign in with ${account.mode === "elyby" ? "Ely.by" : "Microsoft"} first`
     : e.installed ? e.name : `${e.name} · downloads from Mojang`;
 }
 
@@ -524,18 +603,19 @@ function showProgress(p) {
 async function playJava() {
   const entry = state.selected;
   if (!entry || state.busy) return;
-  const online = account.mode === "microsoft";
+  const offline = account.mode === "offline";
   const username = $("username").value.trim();
-  if (online && !account.info) {
-    signIn();
+  if (!hasAccount()) {
+    if (account.mode === "elyby") openElyLogin();
+    else signIn();
     return;
   }
-  if (!online && !USERNAME_RE.test(username)) {
+  if (offline && !USERNAME_RE.test(username)) {
     toast("Pick a username: 3–16 letters, numbers or _", { error: true });
     $("username").focus({ preventScroll: true });
     return;
   }
-  if (!online) save("username", username);
+  if (offline) save("username", username);
   const fpsBoost = $("fps-boost").checked;
   setMenuOpen(false);
   state.busy = true;
@@ -554,7 +634,8 @@ async function playJava() {
         version: prepared.version,
         username,
         maxMemoryMb: selectedMemory(),
-        online,
+        online: account.mode === "microsoft",
+        ely: account.mode === "elyby",
         fpsBoost,
         instance: prepared.instance,
       },
@@ -672,6 +753,14 @@ function previewBackend() {
     msa_finish_login: () => new Promise((resolve) => setTimeout(() => resolve({ name: "Notch", uuid: "x", skin_url: null }), 60000)),
     msa_cancel_login: () => null,
     msa_open_verification: () => null,
+    ely_status: () => null,
+    // Demo: any login works; the password "2fa" asks for a code first.
+    ely_login: ({ login, password, code }) => new Promise((resolve, reject) => setTimeout(() => {
+      if (password === "2fa" && !code) reject("TWO_FACTOR");
+      else resolve({ name: login.split("@")[0].slice(0, 16), uuid: "x", skin_url: null });
+    }, 700)),
+    ely_logout: () => null,
+    ely_open_register: () => window.open("https://account.ely.by/register", "_blank"),
     java_cancel_prepare: () => null,
     java_prepare: ({ target }) => new Promise((resolve) => {
       // Record the pretend install so the UI moves on to "Playing".

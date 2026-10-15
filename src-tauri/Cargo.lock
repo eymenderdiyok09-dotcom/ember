@@ -1827,7 +1827,7 @@ dependencies = [
 
 [[package]]
 name = "mc-launcher"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "base64 0.22.1",
  "keyring",
@@ -1836,6 +1836,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha1",
+ "sha2",
  "tauri",
  "tauri-build",
  "ureq",

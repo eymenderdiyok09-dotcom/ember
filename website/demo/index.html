@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ember</title>
-  <link rel="stylesheet" href="styles.css?v=1792078264" />
-  <link rel="stylesheet" href="demo.css?v=1792078264" />
-  <script src="main.js?v=1792078264" defer></script>
+  <link rel="stylesheet" href="styles.css?v=1792079828" />
+  <link rel="stylesheet" href="demo.css?v=1792079828" />
+  <script src="main.js?v=1792079828" defer></script>
 </head>
 <body>
   <canvas class="backdrop" id="landscape" aria-hidden="true"></canvas>
@@ -34,6 +34,7 @@
           <div class="mini-switch" id="account-mode" role="radiogroup" aria-label="Account type">
             <button role="radio" data-mode="offline" title="Play offline with any name">Offline</button>
             <button role="radio" data-mode="microsoft" title="Play online with your Minecraft account">Microsoft</button>
+            <button role="radio" data-mode="elyby" title="Play online with a free Ely.by account">Ely.by</button>
           </div>
         </div>
         <div class="input-wrap" id="offline-row">
@@ -44,6 +45,18 @@
           <span class="mc-button-logo"><svg class="ms-mark" viewBox="0 0 20 20" aria-hidden="true"><rect width="9" height="9" fill="#f25022" /><rect x="11" width="9" height="9" fill="#7fba00" /><rect y="11" width="9" height="9" fill="#00a4ef" /><rect x="11" y="11" width="9" height="9" fill="#ffb900" /></svg></span>
           <span>Sign in with Microsoft</span>
         </button>
+        <button class="mc-button" id="ely-signin" hidden>
+          <span class="ely-mark" aria-hidden="true">e</span>
+          <span>Sign in with Ely.by</span>
+        </button>
+        <div class="input-wrap account-row" id="ely-row" hidden>
+          <canvas id="ely-avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas>
+          <span class="account-text">
+            <span class="account-name" id="ely-name"></span>
+            <span class="account-sub">Ely.by account · online play</span>
+          </span>
+          <button class="small-button" id="ely-signout">Sign out</button>
+        </div>
         <div class="input-wrap account-row" id="ms-row" hidden>
           <canvas id="ms-avatar" class="avatar" width="8" height="8" aria-hidden="true"></canvas>
           <span class="account-text">
@@ -141,6 +154,33 @@
 
       <button class="mc-button is-stone" id="ms-cancel">Cancel</button>
     </div>
+  </div>
+
+  <div class="modal-backdrop" id="ely-modal" hidden>
+    <form class="modal ely-modal" id="ely-form" role="dialog" aria-modal="true" aria-labelledby="ely-title" novalidate>
+      <div class="mc-modal-head">
+        <span class="ely-mark is-large" aria-hidden="true">e</span>
+        <h2 id="ely-title">Ely.by Account</h2>
+      </div>
+      <p class="modal-text">Sign in to play on servers that support Ely.by, with your Ely.by skin.</p>
+      <div class="ely-fields">
+        <label class="input-wrap">
+          <input id="ely-login" placeholder="Email or nickname" autocomplete="username" spellcheck="false" autocapitalize="off" />
+        </label>
+        <label class="input-wrap">
+          <input id="ely-password" type="password" placeholder="Password" autocomplete="current-password" />
+        </label>
+        <label class="input-wrap" id="ely-code-row" hidden>
+          <input id="ely-code" placeholder="6-digit code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" />
+        </label>
+      </div>
+      <p class="modal-error" id="ely-error" role="alert" hidden></p>
+      <button class="primary-button" id="ely-submit" type="submit">Sign in</button>
+      <div class="modal-links">
+        <button class="link-button" id="ely-register" type="button">Create a free account</button>
+        <button class="link-button" id="ely-cancel" type="button">Cancel</button>
+      </div>
+    </form>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

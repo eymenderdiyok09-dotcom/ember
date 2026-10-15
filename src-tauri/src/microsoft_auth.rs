@@ -173,15 +173,20 @@ pub fn msa_open_verification() -> Result<(), String> {
         .as_ref()
         .map(|p| p.verification_uri.clone())
         .ok_or("No sign-in in progress")?;
+    open_url(&url)
+}
+
+/// Opens an https URL in the default browser.
+pub(crate) fn open_url(url: &str) -> Result<(), String> {
     if !url.starts_with("https://") {
         return Err("Unexpected sign-in URL".into());
     }
     #[cfg(target_os = "macos")]
-    let result = std::process::Command::new("open").arg(&url).status();
+    let result = std::process::Command::new("open").arg(url).status();
     #[cfg(target_os = "windows")]
-    let result = std::process::Command::new("rundll32").args(["url.dll,FileProtocolHandler", &url]).status();
+    let result = std::process::Command::new("rundll32").args(["url.dll,FileProtocolHandler", url]).status();
     #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    let result = std::process::Command::new("xdg-open").arg(&url).status();
+    let result = std::process::Command::new("xdg-open").arg(url).status();
     result.map(|_| ()).map_err(|e| e.to_string())
 }
 

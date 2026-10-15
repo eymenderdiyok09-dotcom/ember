@@ -347,6 +347,33 @@ h1 {
 }
 @keyframes pulse { 50% { transform: scale(0.6); opacity: 0.5; } }
 
+/* Ely.by */
+.ely-mark {
+  width: 20px; height: 20px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 6px; background: #207e5c; color: #fff;
+  font: 800 14px/1 var(--font-display); padding-bottom: 2px;
+}
+.ely-mark.is-large { width: 40px; height: 40px; border-radius: 11px; font-size: 26px; padding-bottom: 4px; }
+.ely-modal { gap: 14px; }
+.ely-fields { display: grid; gap: 10px; align-self: stretch; }
+.ely-fields .input-wrap { cursor: text; }
+.ely-fields input { text-align: left; }
+.modal-error { margin: -2px 0 0; color: var(--red); font-size: 13px; font-weight: 500; }
+.modal-error[hidden] { display: none; }
+.primary-button {
+  align-self: stretch; height: 50px; border: 0; border-radius: var(--radius);
+  background: var(--accent); color: #fff; font-weight: 700; font-size: 16px;
+  box-shadow: 0 6px 18px rgba(242, 97, 29, 0.3);
+  transition: background 0.15s;
+}
+.primary-button:hover:not(:disabled) { background: var(--accent-hover); }
+.primary-button:disabled { opacity: 0.7; cursor: default; }
+.modal-links { display: flex; justify-content: space-between; align-self: stretch; }
+.link-button { border: 0; background: none; padding: 4px 2px; color: var(--muted); font-size: 13px; font-weight: 600; }
+.link-button:hover { color: var(--text); text-decoration: underline; }
+#ely-register { color: #207e5c; }
+
 /* ---------- bedrock ---------- */
 .bedrock-status { display: flex; align-items: center; gap: 10px; color: #3c4450; font-weight: 500; padding: 4px 2px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--faint); }

@@ -1,6 +1,6 @@
 [package]
 name = "mc-launcher"
-version = "0.6.1"
+version = "0.6.2"
 description = "Ember — a lightweight Minecraft launcher"
 license = "MIT"
 repository = "https://github.com/eymenderdiyok09-dotcom/ember"

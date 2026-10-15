@@ -49,6 +49,9 @@ I18N.add("ja", {
   fps_boost_sub: "Sodium・Lithium など + 最適化した Java",
   shaders: "シェーダー",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "シェーダーの品質",
+  shaders_fast: "軽量",
+  shaders_fancy: "高画質",
 
   play: "プレイ",
   playing: "プレイ中",

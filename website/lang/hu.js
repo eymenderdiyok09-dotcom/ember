@@ -29,7 +29,7 @@ I18N.add("hu", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Alapból bekapcsolva. Sodium, Lithium, FerriteCore és még több saját mappában, folyamatos képre hangolt Javával. A világaid közösek maradnak.",
   f_shaders_t: "Shaderek egy kattintással",
-  f_shaders_d: "Kapcsold be a shadereket, és az Ember hozzáadja az Irist és a Complementary Reimaginedet. Csomagot bármikor válthatsz a játék grafikai beállításaiban.",
+  f_shaders_d: "Kapcsold be a shadereket, és válassz: Gyors (MakeUp – Ultra Fast, a legtöbb gépen akadásmentes) vagy Szép (Complementary Reimagined). Az Ember hozzáadja az Irist és a csomagot.",
   f_loaders_t: "Modböngésző",
   f_loaders_d: "Keress a Modrinthon közvetlenül az Emberben, és telepíts modokat egy kattintással — Fabrickel, Forge-dzsal vagy NeoForge-dzsal és minden szükséges könyvtárral. A CurseForge már beépült, és hamarosan bekapcsol.",
   f_skins_t: "A te skined",

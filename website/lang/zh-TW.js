@@ -29,7 +29,7 @@ I18N.add("zh-TW", {
   f_fps_t: "FPS Boost",
   f_fps_d: "預設開啟。Sodium、Lithium、FerriteCore 等模組放在獨立資料夾,並為流暢畫面調校 Java。你的世界維持共用。",
   f_shaders_t: "一鍵光影",
-  f_shaders_d: "打開光影,Ember 會加入 Iris 與 Complementary Reimagined。隨時可在遊戲的顯示設定中更換光影包。",
+  f_shaders_d: "打開光影，選擇「流暢」（MakeUp – Ultra Fast，大多數電腦都很順）或「精美」（Complementary Reimagined）。Ember 會幫你裝好 Iris 和光影包。",
   f_loaders_t: "模組瀏覽器",
   f_loaders_d: "直接在 Ember 裡搜尋 Modrinth，一鍵安裝模組，並自動備妥 Fabric、Forge 或 NeoForge 與所需的所有前置。CurseForge 已內建，即將開放。",
   f_skins_t: "你的外觀",

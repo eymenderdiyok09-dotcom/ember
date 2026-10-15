@@ -49,6 +49,9 @@ I18N.add("pt-BR", {
   fps_boost_sub: "Sodium, Lithium e mais + Java otimizado",
   shaders: "Shaders",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Qualidade dos shaders",
+  shaders_fast: "Rápido",
+  shaders_fancy: "Bonito",
 
   play: "Jogar",
   playing: "Jogando",

@@ -29,7 +29,7 @@ I18N.add("ja", {
   f_fps_t: "FPS Boost",
   f_fps_d: "最初からオン。Sodium・Lithium・FerriteCore などを専用フォルダーに入れ、なめらかな描画向けに Java を調整します。ワールドはそのまま共有されます。",
   f_shaders_t: "ワンクリックでシェーダー",
-  f_shaders_d: "シェーダーをオンにすると、Ember が Iris と Complementary Reimagined を追加します。パックはゲームのビデオ設定からいつでも変更できます。",
+  f_shaders_d: "シェーダーをオンにして「軽量」(MakeUp – Ultra Fast、ほとんどのパソコンでなめらか)か「高画質」(Complementary Reimagined)を選ぶだけ。Iris とパックは Ember が追加します。",
   f_loaders_t: "Mod ブラウザー",
   f_loaders_d: "Ember の中で Modrinth を検索し、ワンクリックで Mod をインストール。Fabric・Forge・NeoForge と必要なライブラリもまとめて入ります。CurseForge も組み込み済みで、まもなく使えるようになります。",
   f_skins_t: "自分のスキン",

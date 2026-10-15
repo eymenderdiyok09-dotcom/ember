@@ -29,7 +29,7 @@ I18N.add("id", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Aktif secara bawaan. Sodium, Lithium, FerriteCore, dan lainnya di folder tersendiri, plus Java yang disetel untuk gambar yang mulus. Dunia-duniamu tetap dipakai bersama.",
   f_shaders_t: "Shader sekali klik",
-  f_shaders_d: "Nyalakan Shader dan Ember menambahkan Iris serta Complementary Reimagined. Ganti paket kapan saja di pengaturan video game.",
+  f_shaders_d: "Nyalakan Shader dan pilih Cepat (MakeUp – Ultra Fast, mulus di sebagian besar komputer) atau Cantik (Complementary Reimagined). Ember menambahkan Iris dan paketnya untukmu.",
   f_loaders_t: "Penjelajah mod",
   f_loaders_d: "Cari di Modrinth langsung dari Ember dan pasang mod sekali klik, lengkap dengan Fabric, Forge, atau NeoForge dan semua library yang dibutuhkan. CurseForge sudah tertanam dan segera aktif.",
   f_skins_t: "Skin-mu",

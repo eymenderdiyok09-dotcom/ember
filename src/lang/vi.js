@@ -49,6 +49,9 @@ I18N.add("vi", {
   fps_boost_sub: "Sodium, Lithium và hơn nữa + Java tối ưu",
   shaders: "Shader",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Chất lượng shader",
+  shaders_fast: "Nhanh",
+  shaders_fancy: "Đẹp",
 
   play: "Chơi",
   playing: "Đang chơi",

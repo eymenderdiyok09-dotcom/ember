@@ -49,6 +49,9 @@ I18N.add("ko", {
   fps_boost_sub: "Sodium, Lithium 등 + 최적화된 Java",
   shaders: "셰이더",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "셰이더 품질",
+  shaders_fast: "빠르게",
+  shaders_fancy: "예쁘게",
 
   play: "플레이",
   playing: "플레이 중",

@@ -29,7 +29,7 @@ I18N.add("vi", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Bật sẵn. Sodium, Lithium, FerriteCore và hơn nữa trong thư mục riêng, kèm Java được tinh chỉnh cho hình ảnh mượt. Thế giới của bạn vẫn dùng chung.",
   f_shaders_t: "Shader chỉ một cú nhấp",
-  f_shaders_d: "Bật Shader và Ember sẽ thêm Iris cùng Complementary Reimagined. Đổi gói bất cứ lúc nào trong cài đặt video của game.",
+  f_shaders_d: "Bật Shader và chọn Nhanh (MakeUp – Ultra Fast, mượt trên hầu hết máy tính) hoặc Đẹp (Complementary Reimagined). Ember sẽ thêm Iris và gói shader cho bạn.",
   f_loaders_t: "Trình duyệt mod",
   f_loaders_d: "Tìm trên Modrinth ngay trong Ember và cài mod chỉ với một cú nhấp, kèm Fabric, Forge hoặc NeoForge và mọi thư viện cần thiết. CurseForge đã được tích hợp và sắp bật.",
   f_skins_t: "Skin của bạn",

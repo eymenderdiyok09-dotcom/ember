@@ -29,7 +29,7 @@ I18N.add("th", {
   f_fps_t: "FPS Boost",
   f_fps_d: "เปิดไว้ตั้งแต่แรก Sodium, Lithium, FerriteCore และอื่นๆ ในโฟลเดอร์แยก พร้อม Java ที่ปรับให้ภาพลื่น โลกของคุณยังใช้ร่วมกันได้",
   f_shaders_t: "เชดเดอร์ในคลิกเดียว",
-  f_shaders_d: "เปิดเชดเดอร์ แล้ว Ember จะเพิ่ม Iris และ Complementary Reimagined ให้ เปลี่ยนแพ็กได้ทุกเมื่อในการตั้งค่าวิดีโอของเกม",
+  f_shaders_d: "เปิดเชดเดอร์แล้วเลือก เร็ว (MakeUp – Ultra Fast ลื่นบนคอมพิวเตอร์ส่วนใหญ่) หรือ สวย (Complementary Reimagined) Ember จะเพิ่ม Iris และแพ็กให้",
   f_loaders_t: "ตัวค้นหาม็อด",
   f_loaders_d: "ค้นหาบน Modrinth ได้ใน Ember และติดตั้งม็อดในคลิกเดียว พร้อม Fabric, Forge หรือ NeoForge และไลบรารีที่ต้องใช้ทั้งหมด CurseForge มีในตัวแล้วและจะเปิดเร็วๆ นี้",
   f_skins_t: "สกินของคุณ",

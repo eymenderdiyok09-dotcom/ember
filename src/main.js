@@ -424,6 +424,22 @@ function initFpsBoost() {
       save("shaders", false);
     }
   });
+  // Fast (MakeUp - Ultra Fast) or Fancy (Complementary Reimagined).
+  const quality = $("shader-quality");
+  const showQuality = () => quality.querySelectorAll("button").forEach((b) =>
+    b.setAttribute("aria-checked", String(b.dataset.quality === (load("shaderQuality") === "fancy" ? "fancy" : "fast"))));
+  showQuality();
+  quality.addEventListener("click", (e) => {
+    e.preventDefault();
+    const b = e.target.closest("button");
+    if (!b) return;
+    save("shaderQuality", b.dataset.quality);
+    showQuality();
+    if (!shaders.checked) {
+      shaders.checked = true;
+      shaders.dispatchEvent(new Event("change"));
+    }
+  });
   shaders.addEventListener("change", () => {
     save("shaders", shaders.checked);
     if (shaders.checked && !fps.checked) {
@@ -1223,7 +1239,7 @@ async function playJava() {
   updatePlayButton({ label: t("preparing"), sub: entry.name });
   let runKey = entry.key;
   try {
-    const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost, shaders: fpsBoost && $("shaders").checked });
+    const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost, shaders: fpsBoost && $("shaders").checked, shaderQuality: load("shaderQuality") === "fancy" ? "fancy" : "fast" });
     if (!entry.installed) {
       await refreshInstalled();
       runKey = entry.key.includes(":") ? prepared.version : entry.key;

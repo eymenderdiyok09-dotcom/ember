@@ -29,7 +29,7 @@ I18N.add("el", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Ενεργό από προεπιλογή. Sodium, Lithium, FerriteCore και άλλα σε δικό τους φάκελο, με Java ρυθμισμένη για ομαλή εικόνα. Οι κόσμοι σου μένουν κοινοί.",
   f_shaders_t: "Shaders με ένα κλικ",
-  f_shaders_d: "Άνοιξε τα Shaders και το Ember προσθέτει Iris και Complementary Reimagined. Άλλαξε πακέτο όποτε θέλεις από τις ρυθμίσεις γραφικών του παιχνιδιού.",
+  f_shaders_d: "Άνοιξε τα Shaders και διάλεξε Γρήγορο (MakeUp – Ultra Fast, ομαλό στους περισσότερους υπολογιστές) ή Ωραίο (Complementary Reimagined). Το Ember προσθέτει το Iris και το πακέτο για σένα.",
   f_loaders_t: "Περιηγητής mods",
   f_loaders_d: "Ψάξε στο Modrinth μέσα από το Ember και εγκατάστησε mods με ένα κλικ, με Fabric, Forge ή NeoForge και όλες τις βιβλιοθήκες που χρειάζονται. Το CurseForge είναι ενσωματωμένο και ενεργοποιείται σύντομα.",
   f_skins_t: "Το skin σου",

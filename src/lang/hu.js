@@ -49,6 +49,9 @@ I18N.add("hu", {
   fps_boost_sub: "Sodium, Lithium és társai + hangolt Java",
   shaders: "Shaderek",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Shaderminőség",
+  shaders_fast: "Gyors",
+  shaders_fancy: "Szép",
 
   play: "Játék",
   playing: "Játékban",

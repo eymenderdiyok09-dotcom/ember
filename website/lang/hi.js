@@ -29,7 +29,7 @@ I18N.add("hi", {
   f_fps_t: "FPS Boost",
   f_fps_d: "पहले से चालू। Sodium, Lithium, FerriteCore और भी, अपने अलग फ़ोल्डर में, साथ में स्मूद फ़्रेम के लिए ट्यून की गई Java। आपकी दुनियाएँ साझा रहती हैं।",
   f_shaders_t: "एक क्लिक में शेडर",
-  f_shaders_d: "शेडर चालू करें और Ember, Iris व Complementary Reimagined जोड़ देगा। पैक जब चाहें गेम की वीडियो सेटिंग में बदलें।",
+  f_shaders_d: "शेडर चालू करें और तेज़ (MakeUp – Ultra Fast, ज़्यादातर कंप्यूटरों पर स्मूद) या सुंदर (Complementary Reimagined) चुनें। Ember आपके लिए Iris और पैक जोड़ देगा।",
   f_loaders_t: "मॉड ब्राउज़र",
   f_loaders_d: "Ember के अंदर ही Modrinth पर खोजें और एक क्लिक में मॉड इंस्टॉल करें — Fabric, Forge या NeoForge और ज़रूरी सभी लाइब्रेरी के साथ। CurseForge भी अंदर है और जल्द चालू होगा।",
   f_skins_t: "आपकी स्किन",

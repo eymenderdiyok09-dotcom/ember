@@ -29,7 +29,7 @@ I18N.add("ko", {
   f_fps_t: "FPS Boost",
   f_fps_d: "기본으로 켜져 있어요. Sodium, Lithium, FerriteCore 등을 전용 폴더에 넣고 부드러운 화면에 맞게 Java를 조정해요. 월드는 그대로 공유돼요.",
   f_shaders_t: "클릭 한 번으로 셰이더",
-  f_shaders_d: "셰이더를 켜면 Ember가 Iris와 Complementary Reimagined를 추가해요. 팩은 게임의 비디오 설정에서 언제든 바꿀 수 있어요.",
+  f_shaders_d: "셰이더를 켜고 빠르게(MakeUp – Ultra Fast, 대부분의 컴퓨터에서 부드럽게) 또는 예쁘게(Complementary Reimagined)를 고르세요. Iris와 팩은 Ember가 넣어 줘요.",
   f_loaders_t: "모드 브라우저",
   f_loaders_d: "Ember 안에서 Modrinth를 검색하고 클릭 한 번으로 모드를 설치하세요. Fabric, Forge, NeoForge와 필요한 라이브러리까지 함께 들어가요. CurseForge도 이미 들어 있고 곧 열려요.",
   f_skins_t: "나만의 스킨",

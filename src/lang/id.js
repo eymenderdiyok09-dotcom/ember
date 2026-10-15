@@ -49,6 +49,9 @@ I18N.add("id", {
   fps_boost_sub: "Sodium, Lithium & lainnya + Java yang disetel",
   shaders: "Shader",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Kualitas shader",
+  shaders_fast: "Cepat",
+  shaders_fancy: "Cantik",
 
   play: "Main",
   playing: "Sedang main",

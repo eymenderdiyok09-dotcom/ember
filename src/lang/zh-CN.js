@@ -49,6 +49,9 @@ I18N.add("zh-CN", {
   fps_boost_sub: "Sodium、Lithium 等 + 优化的 Java",
   shaders: "光影",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "光影质量",
+  shaders_fast: "流畅",
+  shaders_fancy: "精美",
 
   play: "开始游戏",
   playing: "游戏中",

@@ -49,6 +49,9 @@ I18N.add("fa", {
   fps_boost_sub: "Sodium، Lithium و بیشتر + Java تنظیم‌شده",
   shaders: "شیدرها",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "کیفیت شیدر",
+  shaders_fast: "سریع",
+  shaders_fancy: "زیبا",
 
   play: "بازی",
   playing: "در حال بازی",

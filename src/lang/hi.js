@@ -49,6 +49,9 @@ I18N.add("hi", {
   fps_boost_sub: "Sodium, Lithium और भी + ट्यून की गई Java",
   shaders: "शेडर",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "शेडर क्वालिटी",
+  shaders_fast: "तेज़",
+  shaders_fancy: "सुंदर",
 
   play: "खेलें",
   playing: "खेल रहे हैं",

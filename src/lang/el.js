@@ -49,6 +49,9 @@ I18N.add("el", {
   fps_boost_sub: "Sodium, Lithium κ.ά. + ρυθμισμένη Java",
   shaders: "Shaders",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Ποιότητα shaders",
+  shaders_fast: "Γρήγορο",
+  shaders_fancy: "Ωραίο",
 
   play: "Παίξε",
   playing: "Σε παιχνίδι",

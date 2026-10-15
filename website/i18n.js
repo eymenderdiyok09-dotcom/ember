@@ -63,7 +63,7 @@ const EN = {
   f_fps_t: "FPS Boost",
   f_fps_d: "On by default. Sodium, Lithium, FerriteCore and more in their own folder, plus Java tuned for smooth frames. Your worlds stay shared.",
   f_shaders_t: "Shaders in one click",
-  f_shaders_d: "Switch on Shaders and Ember adds Iris and Complementary Reimagined. Change packs any time in the game's video settings.",
+  f_shaders_d: "Switch on Shaders and pick Fast (MakeUp – Ultra Fast, smooth on most computers) or Fancy (Complementary Reimagined). Ember adds Iris and the pack for you.",
   f_loaders_t: "Mod browser",
   f_loaders_d: "Search Modrinth inside Ember and install mods in one click, with Fabric, Forge or NeoForge and every library they need. CurseForge is built in and switching on soon.",
   f_skins_t: "Your skin",
@@ -165,7 +165,7 @@ async function initI18n() {
   if (lang !== "en") {
     await new Promise((resolve) => {
       const script = document.createElement("script");
-      script.src = `lang/${lang}.js?v=2`;
+      script.src = `lang/${lang}.js?v=3`;
       script.onload = script.onerror = resolve;
       document.head.append(script);
     });

@@ -29,7 +29,7 @@ I18N.add("uk", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Увімкнено за замовчуванням. Sodium, Lithium, FerriteCore та інші моди в окремій теці плюс Java, налаштована на плавну картинку. Світи лишаються спільними.",
   f_shaders_t: "Шейдери в один клік",
-  f_shaders_d: "Увімкни шейдери, і Ember додасть Iris та Complementary Reimagined. Змінити пакет можна будь-коли в налаштуваннях графіки гри.",
+  f_shaders_d: "Увімкни шейдери й обери «Швидко» (MakeUp – Ultra Fast, плавно на більшості комп'ютерів) або «Гарно» (Complementary Reimagined). Ember сам додасть Iris і пакет.",
   f_loaders_t: "Каталог модів",
   f_loaders_d: "Шукай моди на Modrinth просто в Ember і встановлюй в один клік — з Fabric, Forge або NeoForge та всіма потрібними бібліотеками. CurseForge уже вбудовано, і він скоро запрацює.",
   f_skins_t: "Твій скін",

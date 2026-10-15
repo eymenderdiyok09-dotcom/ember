@@ -29,7 +29,7 @@ I18N.add("cs", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Ve výchozím stavu zapnutý. Sodium, Lithium, FerriteCore a další ve vlastní složce a Java vyladěná pro plynulý obraz. Tvoje světy zůstávají sdílené.",
   f_shaders_t: "Shadery jedním klikem",
-  f_shaders_d: "Zapni shadery a Ember přidá Iris a Complementary Reimagined. Balíček můžeš kdykoli změnit v grafickém nastavení hry.",
+  f_shaders_d: "Zapni shadery a vyber Rychlé (MakeUp – Ultra Fast, plynulé na většině počítačů) nebo Pěkné (Complementary Reimagined). Ember za tebe přidá Iris i balíček.",
   f_loaders_t: "Prohlížeč módů",
   f_loaders_d: "Hledej na Modrinthu přímo v Emberu a instaluj módy jedním klikem — s Fabricem, Forgem nebo NeoForgem a všemi potřebnými knihovnami. CurseForge je zabudovaný a brzy se zapne.",
   f_skins_t: "Tvůj skin",

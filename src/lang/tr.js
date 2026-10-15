@@ -49,6 +49,9 @@ I18N.add("tr", {
   fps_boost_sub: "Sodium, Lithium ve fazlası + ayarlı Java",
   shaders: "Shader'lar",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Shader kalitesi",
+  shaders_fast: "Hızlı",
+  shaders_fancy: "Şık",
 
   play: "Oyna",
   playing: "Oynanıyor",

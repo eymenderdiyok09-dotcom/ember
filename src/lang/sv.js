@@ -49,6 +49,9 @@ I18N.add("sv", {
   fps_boost_sub: "Sodium, Lithium med mera + finjusterad Java",
   shaders: "Shaders",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Shaderkvalitet",
+  shaders_fast: "Snabb",
+  shaders_fancy: "Snygg",
 
   play: "Spela",
   playing: "Spelar",

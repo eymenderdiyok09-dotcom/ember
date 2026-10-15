@@ -29,7 +29,7 @@ I18N.add("fa", {
   f_fps_t: "FPS Boost",
   f_fps_d: "از اول روشن است. Sodium، Lithium، FerriteCore و بیشتر در پوشهٔ جداگانه، همراه با Java تنظیم‌شده برای تصویر روان. دنیاهایت مشترک می‌مانند.",
   f_shaders_t: "شیدر با یک کلیک",
-  f_shaders_d: "شیدرها را روشن کن تا Ember، Iris و Complementary Reimagined را اضافه کند. هر وقت خواستی بسته را از تنظیمات تصویر بازی عوض کن.",
+  f_shaders_d: "شیدرها را روشن کن و «سریع» (MakeUp – Ultra Fast، روان روی بیشتر رایانه‌ها) یا «زیبا» (Complementary Reimagined) را انتخاب کن. Ember خودش Iris و بسته را اضافه می‌کند.",
   f_loaders_t: "مرورگر ماد",
   f_loaders_d: "داخل خود Ember در Modrinth جست‌وجو کن و مادها را با یک کلیک نصب کن؛ همراه با Fabric، Forge یا NeoForge و همهٔ کتابخانه‌های لازم. CurseForge هم داخل برنامه هست و به‌زودی فعال می‌شود.",
   f_skins_t: "اسکین خودت",

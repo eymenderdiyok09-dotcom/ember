@@ -29,7 +29,7 @@ I18N.add("de", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Standardmäßig an. Sodium, Lithium, FerriteCore und mehr in einem eigenen Ordner, dazu Java für flüssige Bilder. Deine Welten bleiben geteilt.",
   f_shaders_t: "Shader mit einem Klick",
-  f_shaders_d: "Schalte Shader ein und Ember fügt Iris und Complementary Reimagined hinzu. Pakete wechselst du jederzeit in den Grafikeinstellungen.",
+  f_shaders_d: "Schalte Shader ein und wähle Schnell (MakeUp – Ultra Fast, flüssig auf den meisten Computern) oder Schön (Complementary Reimagined). Ember fügt Iris und das Paket hinzu.",
   f_loaders_t: "Mod-Browser",
   f_loaders_d: "Durchsuche Modrinth direkt in Ember und installiere Mods mit einem Klick — mit Fabric, Forge oder NeoForge und allen nötigen Bibliotheken. CurseForge ist eingebaut und kommt bald.",
   f_skins_t: "Dein Skin",

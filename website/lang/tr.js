@@ -29,7 +29,7 @@ I18N.add("tr", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Varsayılan olarak açık. Sodium, Lithium, FerriteCore ve fazlası kendi klasöründe, akıcı kareler için ayarlanmış Java ile. Dünyaların ortak kalır.",
   f_shaders_t: "Tek tıkla shader",
-  f_shaders_d: "Shader'ları aç, Ember Iris ve Complementary Reimagined'ı ekler. Paketi istediğin zaman oyunun görüntü ayarlarından değiştir.",
+  f_shaders_d: "Shader'ları aç ve Hızlı (MakeUp – Ultra Fast, çoğu bilgisayarda akıcı) ya da Şık (Complementary Reimagined) seç. Ember, Iris'i ve paketi senin için ekler.",
   f_loaders_t: "Mod tarayıcısı",
   f_loaders_d: "Modrinth'te Ember'ın içinden ara ve modları tek tıkla kur; Fabric, Forge veya NeoForge ve gereken tüm kütüphanelerle birlikte. CurseForge desteği hazır ve yakında açılıyor.",
   f_skins_t: "Senin skinin",

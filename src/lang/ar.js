@@ -49,6 +49,9 @@ I18N.add("ar", {
   fps_boost_sub: "Sodium وLithium وغيرها + Java مضبوطة",
   shaders: "الظلال (Shaders)",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "جودة الظلال",
+  shaders_fast: "سريع",
+  shaders_fancy: "جميل",
 
   play: "العب",
   playing: "قيد اللعب",

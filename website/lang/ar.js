@@ -29,7 +29,7 @@ I18N.add("ar", {
   f_fps_t: "FPS Boost",
   f_fps_d: "مفعّل افتراضيًا. Sodium وLithium وFerriteCore وغيرها في مجلد خاص، مع Java مضبوطة لصورة سلسة. وتبقى عوالمك مشتركة.",
   f_shaders_t: "الظلال بنقرة واحدة",
-  f_shaders_d: "شغّل الظلال وسيضيف Ember كلًا من Iris وComplementary Reimagined. غيّر الحزمة متى شئت من إعدادات الفيديو في اللعبة.",
+  f_shaders_d: "شغّل الظلال واختر «سريع» (MakeUp – Ultra Fast، سلس على معظم الحواسيب) أو «جميل» (Complementary Reimagined). يضيف Ember كلًا من Iris والحزمة لك.",
   f_loaders_t: "متصفّح التعديلات",
   f_loaders_d: "ابحث في Modrinth من داخل Ember وثبّت التعديلات بنقرة واحدة، مع Fabric أو Forge أو NeoForge وكل المكتبات التي تحتاجها. CurseForge مدمج وسيُفعَّل قريبًا.",
   f_skins_t: "سكنك الخاص",

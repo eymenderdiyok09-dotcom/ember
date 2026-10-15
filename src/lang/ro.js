@@ -49,6 +49,9 @@ I18N.add("ro", {
   fps_boost_sub: "Sodium, Lithium și altele + Java optimizat",
   shaders: "Shadere",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Calitatea shaderelor",
+  shaders_fast: "Rapid",
+  shaders_fancy: "Frumos",
 
   play: "Joacă",
   playing: "Se joacă",

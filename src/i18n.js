@@ -83,6 +83,9 @@ const EN = {
   fps_boost_sub: "Sodium, Lithium & more + tuned Java",
   shaders: "Shaders",
   shaders_sub: "Iris + Complementary Reimagined",
+  shaders_quality: "Shader quality",
+  shaders_fast: "Fast",
+  shaders_fancy: "Fancy",
 
   play: "Play",
   playing: "Playing",

@@ -29,7 +29,7 @@ I18N.add("ro", {
   f_fps_t: "FPS Boost",
   f_fps_d: "Pornit implicit. Sodium, Lithium, FerriteCore și altele într-un folder separat, plus Java reglat pentru o imagine fluidă. Lumile tale rămân comune.",
   f_shaders_t: "Shadere dintr-un clic",
-  f_shaders_d: "Pornește shaderele și Ember adaugă Iris și Complementary Reimagined. Schimbi pachetul oricând din setările grafice ale jocului.",
+  f_shaders_d: "Pornește shaderele și alege Rapid (MakeUp – Ultra Fast, fluid pe majoritatea calculatoarelor) sau Frumos (Complementary Reimagined). Ember adaugă Iris și pachetul pentru tine.",
   f_loaders_t: "Browser de moduri",
   f_loaders_d: "Caută pe Modrinth direct din Ember și instalează moduri dintr-un clic, cu Fabric, Forge sau NeoForge și toate bibliotecile necesare. CurseForge e integrat și pornește în curând.",
   f_skins_t: "Skinul tău",

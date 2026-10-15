@@ -196,5 +196,12 @@ details p { margin: 0 4px 20px; color: var(--muted); }
   html { scroll-behavior: auto; }
   * { transition: none !important; }
 }
-.alt-download { margin-top: -6px; text-align: center; color: var(--muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
-.alt-download:hover { color: inherit; }
+
+
+.button-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.button-pair .button { flex-direction: column; gap: 3px; height: auto; min-height: 64px; padding: 10px 12px; line-height: 1.2; text-align: center; }
+.button-main { font-weight: 700; }
+.button-sub { font-size: 12px; font-weight: 500; opacity: 0.8; }
+.card-hint { margin: -8px 0 0; color: var(--muted); font-size: 13px; text-align: center; }
+.button-pair .button.is-recommended { box-shadow: 0 0 0 3px rgba(255, 244, 200, 0.55); }
+@media (max-width: 420px) { .button-pair { grid-template-columns: 1fr; } }

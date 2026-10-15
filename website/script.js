@@ -26,7 +26,11 @@ if (os) {
   card.classList.add("is-detected");
   // Windows on ARM gets the native ARM64 build.
   if (os === "win") navigator.userAgentData?.getHighEntropyValues(["architecture"])
-    .then(({ architecture }) => { if (architecture === "arm") hero.href = document.getElementById("win-arm64").href; })
+    .then(({ architecture }) => {
+      const pick = document.getElementById(architecture === "arm" ? "win-arm64" : "win-x64");
+      hero.href = pick.href;
+      pick.classList.add("is-recommended");
+    })
     .catch(() => {});
   // After downloading, show the install steps.
   hero.addEventListener("click", () => setTimeout(() => card.scrollIntoView({ behavior: "smooth", block: "center" }), 300));

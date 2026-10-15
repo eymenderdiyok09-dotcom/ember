@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ember — Code signing policy and privacy</title>
+  <meta name="description" content="How Ember's downloads are signed, who signs them, and what Ember sends over the network." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css?v=6" />
+  <style>
+    .policy { max-width: 860px; margin: 0 auto; padding: 120px 24px 40px; }
+    .policy h1 { margin: 0 0 12px; font-size: clamp(36px, 5vw, 56px); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; }
+    .policy .lead { color: var(--muted); font-size: 18px; margin: 0 0 40px; }
+    .policy h2 { margin: 48px 0 12px; font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+    .policy p, .policy li { color: #3c4450; font-size: 17px; }
+    .policy ul { padding-left: 22px; display: grid; gap: 8px; }
+    .policy a { color: var(--accent); }
+    .policy .note { padding: 16px 18px; border-radius: 16px; background: var(--accent-soft); color: #7a3410; }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="./">
+      <img src="icon.png" alt="" width="34" height="34" />
+      <span>Ember</span>
+    </a>
+  </header>
+
+  <main class="policy">
+    <h1>Code signing policy and privacy</h1>
+    <p class="lead">How Ember's downloads are signed, who can sign them, and exactly what Ember talks to over the network.</p>
+
+    <h2 id="signing">Code signing</h2>
+    <p><b>macOS:</b> Ember for macOS is signed with an Apple Developer ID certificate belonging to Eymen Derdiyok and notarized by Apple.</p>
+    <p><b>Windows:</b> Free code signing provided by <a href="https://signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>.</p>
+    <p class="note">Windows signing through SignPath Foundation has been applied for. Until it is approved, Windows builds are unsigned and Windows shows a warning the first time you open Ember.</p>
+    <p>Signed Windows binaries are built by GitHub Actions directly from the source code in the <a href="https://github.com/eymenderdiyok09-dotcom/ember">public repository</a>. Every signing request is approved by hand.</p>
+    <p><b>Updates:</b> Ember (0.5.0 and newer) only installs updates whose manifest is signed with the project's Ed25519 release key and whose download matches the SHA-256 hash in that manifest.</p>
+
+    <h2 id="team">Team roles</h2>
+    <ul>
+      <li><b>Committers and reviewers:</b> <a href="https://github.com/eymenderdiyok09-dotcom/ember/graphs/contributors">members of the repository</a> — currently Eymen Derdiyok (<a href="https://github.com/eymenderdiyok09-dotcom">@eymenderdiyok09-dotcom</a>).</li>
+      <li><b>Approvers:</b> Eymen Derdiyok (<a href="https://github.com/eymenderdiyok09-dotcom">@eymenderdiyok09-dotcom</a>), owner of the repository.</li>
+    </ul>
+    <p>Contributions from people outside the team are reviewed before they are merged. All team members use multi-factor authentication for GitHub and SignPath.</p>
+
+    <h2 id="privacy">Privacy policy</h2>
+    <p>Ember has no accounts of its own, no ads, no analytics and no telemetry. It does not collect, store or send personal data to the Ember project.</p>
+    <p>To work, Ember connects only to these services, and only for the purpose listed:</p>
+    <ul>
+      <li><b>Mojang</b> (piston-meta.mojang.com, piston-data.mojang.com, launchermeta.mojang.com, resources.download.minecraft.net, libraries.minecraft.net) — the list of Minecraft versions, the game files and Java runtimes.</li>
+      <li><b>Maven Central</b> (repo1.maven.org) — a newer version of one game library (JNA) that older Minecraft versions need on recent macOS.</li>
+      <li><b>Fabric, Forge and NeoForge</b> (meta.fabricmc.net, maven.fabricmc.net, files.minecraftforge.net, maven.minecraftforge.net, maven.neoforged.net) — mod loaders, when you pick one.</li>
+      <li><b>Modrinth</b> (api.modrinth.com, cdn.modrinth.com) — the FPS Boost mods and the shader pack, when those are switched on.</li>
+      <li><b>GitHub</b> (github.com) — checking for and downloading Ember updates when Ember opens.</li>
+      <li><b>Ely.by</b> (authserver.ely.by, skinsystem.ely.by, ely.by) and <b>authlib-injector</b> (authlib-injector.yushi.moe) — only if you sign in with Ely.by or use a custom offline skin. Your Ely.by password is sent only to Ely.by and is never stored; Ember keeps a login token in your system's keychain.</li>
+      <li><b>Microsoft and Xbox</b> (login.microsoftonline.com, xboxlive.com, minecraftservices.com) — only if you sign in with Microsoft.</li>
+    </ul>
+    <p>These services see your IP address like any website you visit; their own privacy policies apply. Custom offline skins are served to the game by a small server that runs on your own computer (127.0.0.1) and is not reachable from the network.</p>
+    <p><b>This website</b> is hosted on GitHub Pages behind Cloudflare, loads fonts from Google Fonts, and reads the public Minecraft version list from Mojang to show the version count. It sets no cookies of its own; your language choice is remembered in your browser only.</p>
+
+    <h2 id="contact">Contact</h2>
+    <p>Questions or reports: <a href="https://github.com/eymenderdiyok09-dotcom/ember/issues">GitHub Issues</a>.</p>
+  </main>
+
+  <footer class="footer">
+    <p>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+    <p><a href="./">← Back to Ember</a></p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,87 @@
+name: Windows builds
+
+# Builds Ember for Windows x64 and ARM64 on GitHub's own Windows machines, so
+# the binaries are reproducible from this repository's source. When SignPath
+# is set up (see docs/SIGNING.md), each build is also sent for code signing.
+#
+# The signed zips are uploaded as workflow artifacts only. Release assets are
+# published by scripts/release.sh, which also writes the signed update manifest
+# (latest.json) — replacing a release zip without regenerating the manifest
+# would make Rekindle reject the update.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - arch: arm64
+            runner: windows-11-arm
+            target: aarch64-pc-windows-msvc
+    runs-on: ${{ matrix.runner }}
+    env:
+      SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Build
+        working-directory: src-tauri
+        run: cargo tauri build --target ${{ matrix.target }} --no-bundle
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $dir = "Ember-windows-${{ matrix.arch }}"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          Copy-Item "src-tauri/target/${{ matrix.target }}/release/mc-launcher.exe" "$dir/Ember.exe"
+
+      - name: Upload unsigned build
+        id: unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ember-windows-${{ matrix.arch }}-unsigned
+          path: Ember-windows-${{ matrix.arch }}
+
+      # Runs once the SignPath organization is configured as a repository
+      # variable and its API token as a secret.
+      - name: Sign with SignPath
+        if: env.SIGNPATH_ORGANIZATION_ID != ''
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ember
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: windows-zip
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Upload signed build
+        if: env.SIGNPATH_ORGANIZATION_ID != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ember-windows-${{ matrix.arch }}-signed
+          path: signed

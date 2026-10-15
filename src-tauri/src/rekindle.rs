@@ -105,6 +105,47 @@ fn hex_sha256(bytes: &[u8]) -> String {
     Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// The newest correctly signed release, if it's newer than `current`.
+fn find_update(current: &str) -> Result<Option<(Update, Asset)>, String> {
+    let agent = agent();
+    let manifest_bytes = fetch(&agent, MANIFEST_URL, 1024 * 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
+    let signature = fetch(&agent, SIGNATURE_URL, 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
+    verify(&manifest_bytes, &signature)?;
+    let manifest: Manifest = serde_json::from_slice(&manifest_bytes).map_err(|e| format!("Update info is unreadable: {e}"))?;
+    if !is_newer(&manifest.version, current) {
+        return Ok(None);
+    }
+    let Some(asset) = manifest.platforms.get(platform()).cloned() else { return Ok(None) };
+    if !asset.url.starts_with(DOWNLOAD_PREFIX) || asset.size > MAX_DOWNLOAD {
+        return Err("Update info points somewhere unexpected — refusing to install".into());
+    }
+    let update = Update { version: manifest.version, current: current.into(), notes: manifest.notes, size: asset.size };
+    Ok(Some((update, asset)))
+}
+
+/// Downloads an update and checks it against the manifest's size and hash.
+fn download(asset: &Asset, progress: impl Fn(u64)) -> Result<Vec<u8>, String> {
+    let mut response = agent().get(&asset.url).call().map_err(|e| format!("Download failed: {e}"))?;
+    if response.status() != 200 {
+        return Err(format!("Download failed (HTTP {}).", response.status()));
+    }
+    let mut reader = response.body_mut().with_config().limit(MAX_DOWNLOAD).reader();
+    let mut bytes = Vec::with_capacity(asset.size as usize);
+    let mut buf = vec![0u8; 256 * 1024];
+    loop {
+        let n = reader.read(&mut buf).map_err(|e| format!("Download failed: {e}"))?;
+        if n == 0 {
+            break;
+        }
+        bytes.extend_from_slice(&buf[..n]);
+        progress(bytes.len() as u64);
+    }
+    if bytes.len() as u64 != asset.size || hex_sha256(&bytes) != asset.sha256 {
+        return Err("The update download was corrupted. Try again.".into());
+    }
+    Ok(bytes)
+}
+
 /// Checks GitHub for a newer, correctly signed Ember for this platform.
 #[tauri::command]
 pub async fn rekindle_check() -> Result<Option<Update>, String> {
@@ -113,21 +154,9 @@ pub async fn rekindle_check() -> Result<Option<Update>, String> {
     }
     tauri::async_runtime::spawn_blocking(|| {
         cleanup_previous_update();
-        let agent = agent();
-        let manifest_bytes = fetch(&agent, MANIFEST_URL, 1024 * 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
-        let signature = fetch(&agent, SIGNATURE_URL, 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
-        verify(&manifest_bytes, &signature)?;
-        let manifest: Manifest = serde_json::from_slice(&manifest_bytes).map_err(|e| format!("Update info is unreadable: {e}"))?;
-        let current = env!("CARGO_PKG_VERSION");
-        if !is_newer(&manifest.version, current) {
-            return Ok(None);
-        }
-        let Some(asset) = manifest.platforms.get(platform()).cloned() else { return Ok(None) };
-        if !asset.url.starts_with(DOWNLOAD_PREFIX) || asset.size > MAX_DOWNLOAD {
-            return Err("Update info points somewhere unexpected — refusing to install".into());
-        }
-        *PENDING.lock().unwrap() = Some(asset.clone());
-        Ok(Some(Update { version: manifest.version, current: current.into(), notes: manifest.notes, size: asset.size }))
+        let found = find_update(env!("CARGO_PKG_VERSION"))?;
+        *PENDING.lock().unwrap() = found.as_ref().map(|(_, asset)| asset.clone());
+        Ok(found.map(|(update, _)| update))
     })
     .await
     .map_err(|e| e.to_string())?
@@ -140,24 +169,9 @@ pub async fn rekindle_install(app: AppHandle) -> Result<(), String> {
     let asset = PENDING.lock().unwrap().clone().ok_or("No update to install")?;
     let handle = app.clone();
     let relaunch = tauri::async_runtime::spawn_blocking(move || -> Result<Box<dyn FnOnce() + Send>, String> {
-        let mut response = agent().get(&asset.url).call().map_err(|e| format!("Download failed: {e}"))?;
-        if response.status() != 200 {
-            return Err(format!("Download failed (HTTP {}).", response.status()));
-        }
-        let mut reader = response.body_mut().with_config().limit(MAX_DOWNLOAD).reader();
-        let mut bytes = Vec::with_capacity(asset.size as usize);
-        let mut buf = vec![0u8; 256 * 1024];
-        loop {
-            let n = reader.read(&mut buf).map_err(|e| format!("Download failed: {e}"))?;
-            if n == 0 {
-                break;
-            }
-            bytes.extend_from_slice(&buf[..n]);
-            let _ = handle.emit("rekindle-progress", Progress { done: bytes.len() as u64, total: asset.size });
-        }
-        if bytes.len() as u64 != asset.size || hex_sha256(&bytes) != asset.sha256 {
-            return Err("The update download was corrupted. Try again.".into());
-        }
+        let bytes = download(&asset, |done| {
+            let _ = handle.emit("rekindle-progress", Progress { done, total: asset.size });
+        })?;
         install(&bytes)
     })
     .await
@@ -189,6 +203,16 @@ fn app_bundle() -> Result<PathBuf, String> {
 #[cfg(target_os = "macos")]
 fn install(zip: &[u8]) -> Result<Box<dyn FnOnce() + Send>, String> {
     let bundle = app_bundle()?;
+    install_into(&bundle, zip)?;
+    Ok(Box::new(move || {
+        let _ = Command::new("/bin/sh").arg("-c").arg("sleep 1; /usr/bin/open \"$0\"").arg(&bundle).spawn();
+    }))
+}
+
+/// Replaces the app bundle at `bundle` with the one inside the update zip.
+#[cfg(target_os = "macos")]
+fn install_into(bundle: &Path, zip: &[u8]) -> Result<(), String> {
+    let bundle = bundle.to_path_buf();
     let parent = bundle.parent().ok_or("bad bundle path")?.to_path_buf();
     let work = parent.join(format!(".ember-update-{}", std::process::id()));
     let _ = fs::remove_dir_all(&work);
@@ -221,10 +245,7 @@ fn install(zip: &[u8]) -> Result<Box<dyn FnOnce() + Send>, String> {
         Ok(())
     })();
     let _ = fs::remove_dir_all(&work);
-    result?;
-    Ok(Box::new(move || {
-        let _ = Command::new("/bin/sh").arg("-c").arg("sleep 1; /usr/bin/open \"$0\"").arg(&bundle).spawn();
-    }))
+    result
 }
 
 #[cfg(target_os = "windows")]
@@ -304,6 +325,28 @@ mod tests {
     fn rejects_tampered_manifests() {
         assert!(verify(b"{\"version\":\"9.9.9\"}", &[0u8; 64]).is_err());
         assert!(verify(b"anything", b"short").is_err());
+    }
+
+    /// End-to-end against the real GitHub release: finds the latest signed
+    /// update, downloads and verifies it, and installs it over a copy of an
+    /// app bundle. Run with REKINDLE_TEST_APP=/path/to/Ember.app.
+    #[test]
+    #[ignore]
+    #[cfg(target_os = "macos")]
+    fn updates_a_real_bundle() {
+        let source = std::env::var("REKINDLE_TEST_APP").expect("set REKINDLE_TEST_APP");
+        let dir = std::env::temp_dir().join(format!("rekindle-e2e-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let bundle = dir.join("Ember.app");
+        assert!(Command::new("/usr/bin/ditto").arg(&source).arg(&bundle).status().unwrap().success());
+        let (update, asset) = find_update("0.0.1").unwrap().expect("no release found");
+        println!("found {} ({} bytes)", update.version, update.size);
+        let bytes = download(&asset, |_| {}).unwrap();
+        install_into(&bundle, &bytes).unwrap();
+        let plist = fs::read_to_string(bundle.join("Contents/Info.plist")).unwrap();
+        assert!(plist.contains(&format!("<string>{}</string>", update.version)), "bundle wasn't replaced");
+        assert!(Command::new("/usr/bin/codesign").args(["--verify", "--deep", "--strict"]).arg(&bundle).status().unwrap().success());
+        let _ = fs::remove_dir_all(&dir);
     }
 
     /// Set REKINDLE_MANIFEST and REKINDLE_SIG to a signed pair to check the

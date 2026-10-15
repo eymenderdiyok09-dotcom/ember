@@ -30,7 +30,7 @@
     "active": true,
     "targets": "all",
     "category": "Game",
-    "shortDescription": "A fast, lightweight Minecraft launcher",
+    "shortDescription": "Ember — a lightweight Minecraft launcher",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -45,6 +45,8 @@
       "nsis": {
         "installMode": "currentUser"
       }
-    }
+    },
+    "publisher": "Eymen Derdiyok",
+    "copyright": "© 2026 Eymen Derdiyok · MIT License"
   }
 }

@@ -36,15 +36,22 @@ cargo tauri build --target x86_64-pc-windows-gnu --no-bundle
 XWIN_CROSS_COMPILER=clang cargo tauri build --runner cargo-xwin --target aarch64-pc-windows-msvc --no-bundle
 cd "$ROOT"
 
+mkdir -p "$DIST/Ember-windows-x64" "$DIST/Ember-windows-arm64"
+
 # 3. Notarize the DMG (its ticket also covers the app inside), staple both.
 BUNDLE=src-tauri/target/universal-apple-darwin/release/bundle
 DMG="$BUNDLE/dmg/Ember_${VERSION}_universal.dmg"
 xcrun notarytool submit "$DMG" --keychain-profile ember --wait | tee /dev/stderr | grep -q "status: Accepted"
 xcrun stapler staple "$DMG"
-xcrun stapler staple "$BUNDLE/macos/Ember.app"
+# The DMG's ticket normally covers the app inside; if not, notarize the app on its own.
+if ! xcrun stapler staple "$BUNDLE/macos/Ember.app"; then
+  ditto -c -k --keepParent "$BUNDLE/macos/Ember.app" "$DIST/notarize-app.zip"
+  xcrun notarytool submit "$DIST/notarize-app.zip" --keychain-profile ember --wait | grep -q "status: Accepted"
+  rm -f "$DIST/notarize-app.zip"
+  xcrun stapler staple "$BUNDLE/macos/Ember.app"
+fi
 
 # 4. Package.
-mkdir -p "$DIST/Ember-windows-x64" "$DIST/Ember-windows-arm64"
 cp "$DMG" "$DIST/"
 MAC_ZIP="Ember_${VERSION}_macos.app.zip"
 rm -f "$DIST/$MAC_ZIP"

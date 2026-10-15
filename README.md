@@ -7,8 +7,11 @@ A tiny, fast launcher for Minecraft: Java Edition, built with Tauri.
 - Every release and snapshot, plus Beta and Alpha versions, downloaded directly from Mojang
 - One-click Fabric, Forge and NeoForge
 - **FPS Boost**, on by default: Sodium, Lithium, FerriteCore and more in a separate instance, plus tuned JVM flags
+- **Shaders** in one click: Iris + Complementary Reimagined on top of FPS Boost
 - Correct Java runtime downloaded automatically for each version
-- Offline play, free Ely.by accounts (skins + online servers via authlib-injector), and Microsoft sign-in built in (needs an approved client ID)
+- Offline play with **custom skins**, free Ely.by accounts (skins + online servers via authlib-injector), and Microsoft sign-in built in (needs an approved client ID)
+- **Rekindle**: signed, one-click self-updates
+- **26 languages**, picked automatically (right-to-left included)
 - Starts Bedrock Edition on Windows if it's installed
 
 ## Download
@@ -38,6 +41,12 @@ XWIN_CROSS_COMPILER=clang cargo tauri build --runner cargo-xwin \
 
 To sign and notarize the macOS build, set `APPLE_SIGNING_IDENTITY="Developer ID Application: …"` for the build, then run `xcrun notarytool submit <dmg> --keychain-profile ember --wait` and `xcrun stapler staple <dmg>`.
 
+To publish a release (builds, signs, notarizes, writes the signed `latest.json` for Rekindle and uploads everything):
+
+```bash
+scripts/release.sh 0.5.1 "- First change\n- Second change"
+```
+
 To enable Microsoft sign-in, build with `EMBER_MSA_CLIENT_ID=<your Azure app client ID>`.
 
 ## Layout
@@ -45,6 +54,10 @@ To enable Microsoft sign-in, build with `EMBER_MSA_CLIENT_ID=<your Azure app cli
 - `src/`: the UI (vanilla HTML, CSS and JS)
 - `src-tauri/src/`: game installer, launcher, Microsoft auth, Bedrock (Windows)
 - `website/`: the download page, with a live demo of the UI (`website/sync-demo.sh` refreshes it)
+
+## License
+
+MIT — see [LICENSE](LICENSE). Code signing policy and privacy: https://emberlauncher.app/code-signing.html. Windows signing setup: [docs/SIGNING.md](docs/SIGNING.md).
 
 ---
 

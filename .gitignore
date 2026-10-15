@@ -1,0 +1,5 @@
+src-tauri/target/
+src-tauri/gen/
+dist/
+website/downloads/
+.DS_Store

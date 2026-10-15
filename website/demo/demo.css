@@ -1,0 +1,4 @@
+/* Website demo: no native title bar to make room for. */
+.titlebar { height: 14px; }
+.footer { display: none; }
+.stage { padding-bottom: 16px; }

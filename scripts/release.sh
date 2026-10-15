@@ -30,6 +30,13 @@ sh website/sync-demo.sh
 
 # 2. Builds.
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+# Microsoft sign-in: the Azure client ID lives in the Keychain, never in the repo.
+if MSA_ID=$(security find-generic-password -s "Ember Microsoft client ID" -w 2>/dev/null); then
+  export EMBER_MSA_CLIENT_ID="$MSA_ID"
+  echo "Microsoft sign-in: on"
+else
+  echo "Microsoft sign-in: off (no \"Ember Microsoft client ID\" in the Keychain)"
+fi
 cd src-tauri
 APPLE_SIGNING_IDENTITY="$IDENTITY" cargo tauri build --target universal-apple-darwin --bundles app,dmg
 cargo tauri build --target x86_64-pc-windows-gnu --no-bundle

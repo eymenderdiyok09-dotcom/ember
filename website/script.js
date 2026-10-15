@@ -108,7 +108,7 @@ if (os) {
   row.classList.add("is-detected");
   row.open = true;
   row.parentElement.prepend(row);
-  document.getElementById("hero-label").textContent = os === "mac" ? "Download for macOS" : "Download for Windows";
+  document.getElementById("hero-label").dataset.i18n = os === "mac" ? "download_mac" : "download_windows";
   document.querySelector("#hero-icon use").setAttribute("href", os === "mac" ? "#i-apple" : "#i-windows");
   hero.href = (os === "mac" ? row.querySelector("[data-file]") : document.getElementById("win-x64")).href;
   if (os === "win") {
@@ -144,4 +144,16 @@ addEventListener("load", () => {
     .then((r) => r.json())
     .then((m) => { document.getElementById("stat-versions").textContent = m.versions.length.toLocaleString("en-US"); })
     .catch(() => {});
+});
+
+// Language: load the picked (or system) language, then fill the picker.
+initI18n().then((lang) => {
+  const select = document.getElementById("language");
+  for (const [code, name] of LANGUAGES) select.append(new Option(name, code, false, code === lang));
+  select.addEventListener("change", () => {
+    try { localStorage.setItem("language", select.value); } catch {}
+    const url = new URL(location.href);
+    url.searchParams.delete("lang");
+    location.replace(url);
+  });
 });

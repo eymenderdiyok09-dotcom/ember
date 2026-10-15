@@ -7,7 +7,8 @@ const load = (key) => { try { return localStorage.getItem(key); } catch { return
 const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,16}$/;
-const KIND_LABEL = { release: "Release", snapshot: "Snapshot", old_beta: "Beta", old_alpha: "Alpha" };
+const KIND_KEY = { release: "kind_release", snapshot: "kind_snapshot", old_beta: "kind_beta", old_alpha: "kind_alpha" };
+const kindLabel = (kind) => (KIND_KEY[kind] ? t(KIND_KEY[kind]) : kind);
 
 // ---------- toast ----------
 let toastTimer;
@@ -28,9 +29,8 @@ const FLAME = [
 ];
 const FLAME_COLORS = { "#": "#e8481c", o: "#ff8a24", y: "#ffcc40", W: "#fff4c8" };
 
-function drawLogo() {
+function drawLogo(svg = $("logo")) {
   const ns = "http://www.w3.org/2000/svg";
-  const svg = $("logo");
   FLAME.forEach((row, y) => [...row].forEach((c, x) => {
     if (!FLAME_COLORS[c]) return;
     const rect = document.createElementNS(ns, "rect");
@@ -180,13 +180,13 @@ const state = { installed: [], remote: { vanilla: [], fabric: [] }, entries: [],
 const runningPids = new Map();
 
 const TABS = [
-  ["installed", "Installed"],
-  ["release", "Releases"],
-  ["snapshot", "Snapshots"],
-  ["fabric", "Fabric"],
-  ["forge", "Forge"],
-  ["neoforge", "NeoForge"],
-  ["old", "Old"],
+  ["installed", () => t("tab_installed")],
+  ["release", () => t("tab_release")],
+  ["snapshot", () => t("tab_snapshot")],
+  ["fabric", () => "Fabric"],
+  ["forge", () => "Forge"],
+  ["neoforge", () => "NeoForge"],
+  ["old", () => t("tab_old")],
 ];
 const BADGE_CLASS = { release: "release", snapshot: "snapshot", old_beta: "legacy", old_alpha: "legacy", modded: "modded" };
 
@@ -196,8 +196,8 @@ function installedEntry(v) {
     key: v.id,
     tab: "installed",
     name: modded ? `${v.loader} ${v.base}` : v.id,
-    sub: modded ? v.id : KIND_LABEL[v.kind] ?? v.kind,
-    badge: modded ? v.loader : KIND_LABEL[v.kind] ?? v.kind,
+    sub: modded ? v.id : kindLabel(v.kind),
+    badge: modded ? v.loader : kindLabel(v.kind),
     badgeClass: BADGE_CLASS[v.kind] ?? "legacy",
     installed: true,
   };
@@ -213,8 +213,8 @@ function buildEntries() {
       key: v.id,
       tab: old ? "old" : v.kind,
       name: v.id,
-      sub: installedIds.has(v.id) ? "Installed" : KIND_LABEL[v.kind] ?? v.kind,
-      badge: KIND_LABEL[v.kind] ?? v.kind,
+      sub: installedIds.has(v.id) ? t("installed") : kindLabel(v.kind),
+      badge: kindLabel(v.kind),
       badgeClass: BADGE_CLASS[v.kind] ?? "legacy",
       installed: installedIds.has(v.id),
     });
@@ -226,7 +226,7 @@ function buildEntries() {
         key: `${prefix}:${game}`,
         tab,
         name: `${loader} ${game}`,
-        sub: installed.has(game) ? `Installed · latest ${loader}` : `Latest ${loader}`,
+        sub: installed.has(game) ? t("installed_latest", { loader }) : t("latest_loader", { loader }),
         badge: loader,
         badgeClass: "modded",
         installed: installed.has(game),
@@ -247,11 +247,11 @@ function selectEntry(key) {
   state.selected = entry ?? null;
   const badge = $("version-badge");
   if (!entry) {
-    $("version-name").textContent = state.remoteLoaded ? "No versions available" : "Loading versions…";
+    $("version-name").textContent = state.remoteLoaded ? t("no_versions") : t("loading_versions");
     badge.hidden = true;
   } else {
     $("version-name").textContent = entry.name;
-    badge.textContent = entry.installed ? entry.badge : "Download";
+    badge.textContent = entry.installed ? entry.badge : t("badge_download");
     badge.className = `badge ${entry.installed ? entry.badgeClass : "download"}`;
     badge.hidden = false;
     save("version", entry.key);
@@ -269,7 +269,7 @@ function renderTabs() {
     tab.className = "menu-tab";
     tab.dataset.tab = id;
     tab.setAttribute("aria-pressed", String(state.tab === id));
-    tab.textContent = title;
+    tab.textContent = title();
     tabs.append(tab);
   }
 }
@@ -291,9 +291,9 @@ function renderMenu() {
   if (!matches.length) {
     const empty = document.createElement("div");
     empty.className = "menu-empty";
-    empty.textContent = q ? "No matching versions"
-      : state.tab === "installed" ? "Nothing installed yet — pick a version from Releases"
-      : state.remoteLoaded ? "Nothing here" : "Loading versions…";
+    empty.textContent = q ? t("no_matching")
+      : state.tab === "installed" ? t("nothing_installed")
+      : state.remoteLoaded ? t("nothing_here") : t("loading_versions");
     list.append(empty);
     return;
   }
@@ -378,7 +378,8 @@ async function refreshInstalled() {
 
 // ---------- memory ----------
 const GB = 1024;
-const formatGB = (mb) => `${Number.isInteger(mb / GB) ? mb / GB : (mb / GB).toFixed(1)} GB`;
+// Wrapped in Unicode isolates so "4 GB" stays in order inside right-to-left sentences.
+const formatGB = (mb) => `\u2066${Number.isInteger(mb / GB) ? mb / GB : (mb / GB).toFixed(1)} GB\u2069`;
 
 async function initMemory() {
   const slider = $("memory");
@@ -394,7 +395,7 @@ async function initMemory() {
   const update = () => {
     const mb = Number(slider.value);
     $("memory-value").textContent = formatGB(mb);
-    $("memory-hint").textContent = `${formatGB(recommended)} recommended · ${formatGB(Math.round(totalMb / GB) * GB)} in this computer`;
+    $("memory-hint").textContent = t("memory_hint", { recommended: formatGB(recommended), total: formatGB(Math.round(totalMb / GB) * GB) });
     slider.style.setProperty("--fill", `${((mb - slider.min) / (max - slider.min)) * 100}%`);
     save("memoryMb", mb);
   };
@@ -405,9 +406,25 @@ const selectedMemory = () => Number($("memory").value);
 
 // ---------- FPS Boost ----------
 function initFpsBoost() {
-  const toggle = $("fps-boost");
-  toggle.checked = load("fpsBoost") !== "false";
-  toggle.addEventListener("change", () => save("fpsBoost", toggle.checked));
+  const fps = $("fps-boost");
+  const shaders = $("shaders");
+  fps.checked = load("fpsBoost") !== "false";
+  shaders.checked = fps.checked && load("shaders") === "true";
+  // Shaders run on top of FPS Boost (Iris needs Sodium), so they go together.
+  fps.addEventListener("change", () => {
+    save("fpsBoost", fps.checked);
+    if (!fps.checked && shaders.checked) {
+      shaders.checked = false;
+      save("shaders", false);
+    }
+  });
+  shaders.addEventListener("change", () => {
+    save("shaders", shaders.checked);
+    if (shaders.checked && !fps.checked) {
+      fps.checked = true;
+      save("fpsBoost", true);
+    }
+  });
 }
 
 // ---------- accounts ----------
@@ -459,7 +476,7 @@ function openElyLogin() {
   $("ely-code").value = "";
   $("ely-code-row").hidden = true;
   $("ely-submit").disabled = false;
-  $("ely-submit").textContent = "Sign in";
+  $("ely-submit").textContent = t("sign_in");
   $("ely-modal").hidden = false;
   $("ely-login").focus({ preventScroll: true });
 }
@@ -476,29 +493,29 @@ async function submitElyLogin(e) {
   const password = $("ely-password").value;
   const needsCode = !$("ely-code-row").hidden;
   const code = $("ely-code").value.trim();
-  if (!login || !password) return elyError("Enter your email or nickname and password.");
-  if (needsCode && !code) return elyError("Enter the code from your authenticator app.");
+  if (!login || !password) return elyError(t("ely_missing"));
+  if (needsCode && !code) return elyError(t("ely_need_code"));
   elyError("");
   $("ely-submit").disabled = true;
-  $("ely-submit").textContent = "Signing in…";
+  $("ely-submit").textContent = t("signing_in");
   try {
     account.ely = await invoke("ely_login", { login, password, code: needsCode ? code : null });
     save("elyLogin", login);
     closeElyLogin();
-    toast(`Signed in as ${account.ely.name}`);
+    toast(t("signed_in_as", { name: account.ely.name }));
     renderAccount();
   } catch (err) {
     if (String(err) === "TWO_FACTOR") {
       $("ely-code-row").hidden = false;
       elyError("");
       $("ely-code").focus({ preventScroll: true });
-      toast("This account uses two-factor sign-in. Enter the code from your authenticator app.");
+      toast(t("ely_two_factor"));
     } else {
       elyError(String(err));
     }
   } finally {
     $("ely-submit").disabled = false;
-    $("ely-submit").textContent = "Sign in";
+    $("ely-submit").textContent = t("sign_in");
   }
 }
 
@@ -527,15 +544,14 @@ function showLoginStep(step, message = "") {
   $("ms-step-code").hidden = step !== "code";
   $("ms-step-error").hidden = step !== "error";
   $("ms-error").textContent = message;
-  $("ms-cancel").textContent = step === "error" ? "Back" : "Cancel";
+  $("ms-cancel").textContent = step === "error" ? t("back") : t("cancel");
   $("ms-modal").hidden = false;
 }
 
 let loginActive = false;
 async function signIn() {
   if (!(await invoke("msa_configured"))) {
-    showLoginStep("error",
-      "Microsoft sign-in isn't switched on in this build of Ember yet. It needs an app ID approved by Mojang; until then, use Offline mode.");
+    showLoginStep("error", t("ms_not_configured"));
     $("ms-cancel").focus({ preventScroll: true });
     return;
   }
@@ -544,12 +560,12 @@ async function signIn() {
     const code = await invoke("msa_begin_login");
     if (!loginActive) return;
     $("ms-code").textContent = code.user_code;
-    $("ms-open-label").textContent = `Open ${code.verification_uri.replace(/^https:\/\/(www\.)?/, "")}`;
+    $("ms-open-label").textContent = t("ms_open", { url: code.verification_uri.replace(/^https:\/\/(www\.)?/, "") });
     showLoginStep("code");
     $("ms-open").focus({ preventScroll: true });
     account.info = await invoke("msa_finish_login");
     $("ms-modal").hidden = true;
-    toast(`Signed in as ${account.info.name}`);
+    toast(t("signed_in_as", { name: account.info.name }));
   } catch (e) {
     // Errors after the user pressed Cancel are expected; anything else is shown.
     if (loginActive) showLoginStep("error", String(e));
@@ -580,7 +596,7 @@ async function initAccount() {
   $("ms-code").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText($("ms-code").textContent);
-      toast("Code copied");
+      toast(t("code_copied"));
     } catch {}
   });
   const cancel = () => {
@@ -591,6 +607,220 @@ async function initAccount() {
   $("ms-cancel").addEventListener("click", cancel);
   $("ms-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") cancel(); });
   renderAccount();
+}
+
+// ---------- skins ----------
+const skin = { offline: null }; // offline: { data_url, slim } for the current username
+
+/** Draws a whole player (front or back) from a skin texture onto a 16×32 canvas. */
+function drawSkinBody(canvas, img, slim, back) {
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, 16, 32);
+  const modern = img.height >= 64;
+  const aw = slim ? 3 : 4;
+  const part = (sx, sy, w, h, dx, dy, mirror = false) => {
+    if (!mirror) return ctx.drawImage(img, sx, sy, w, h, dx, dy, w, h);
+    ctx.save();
+    ctx.translate(dx + w, dy);
+    ctx.scale(-1, 1);
+    ctx.drawImage(img, sx, sy, w, h, 0, 0, w, h);
+    ctx.restore();
+  };
+  // [front x, back x] of each texture block; old 64×32 skins mirror the right limbs.
+  const armR = back ? 52 - (4 - aw) : 44, armL = back ? 44 - (4 - aw) : 36;
+  const legR = back ? 12 : 4, legL = back ? 28 : 20;
+  const [leftX, rightX] = [4 - aw, 12]; // viewer's left/right
+  // Head and body.
+  part(back ? 24 : 8, 8, 8, 8, 4, 0);
+  part(back ? 32 : 20, 20, 8, 12, 4, 8);
+  // Arms: front view shows the right arm on the viewer's left; back view the opposite.
+  const rightArmX = back ? rightX : leftX, leftArmX = back ? leftX : rightX;
+  part(armR, 20, aw, 12, rightArmX, 8);
+  if (modern) part(armL, 52, aw, 12, leftArmX, 8);
+  else part(armR, 20, aw, 12, leftArmX, 8, true);
+  // Legs.
+  const rightLegX = back ? 8 : 4, leftLegX = back ? 4 : 8;
+  part(legR, 20, 4, 12, rightLegX, 20);
+  if (modern) part(legL, 52, 4, 12, leftLegX, 20);
+  else part(legR, 20, 4, 12, leftLegX, 20, true);
+  // Outer layer.
+  part(back ? 56 : 40, 8, 8, 8, 4, 0);
+  if (modern) {
+    part(back ? 32 : 20, 36, 8, 12, 4, 8);
+    part(armR, 36, aw, 12, rightArmX, 8);
+    part(armL + 16, 52, aw, 12, leftArmX, 8);
+    part(legR, 36, 4, 12, rightLegX, 20);
+    part(legR, 52, 4, 12, leftLegX, 20);
+  }
+}
+
+/** The skin texture for the current account mode, if any. */
+function currentSkin() {
+  if (account.mode === "offline") return skin.offline && { url: skin.offline.data_url, slim: skin.offline.slim };
+  const info = account.mode === "elyby" ? account.ely : account.info;
+  return info?.skin_url ? { url: info.skin_url, slim: false } : null;
+}
+
+function renderSkinPreview() {
+  const current = currentSkin();
+  const front = $("skin-front"), back = $("skin-back");
+  $("skin-empty").hidden = Boolean(current);
+  front.hidden = back.hidden = !current;
+  if (current) {
+    const img = new Image();
+    img.onload = () => {
+      drawSkinBody(front, img, current.slim, false);
+      drawSkinBody(back, img, current.slim, true);
+    };
+    img.src = current.url;
+  }
+  const offline = account.mode === "offline";
+  $("skin-offline").hidden = !offline;
+  $("skin-online").hidden = offline;
+  $("skin-reset").hidden = !skin.offline;
+  $("skin-model").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String((b.dataset.slim === "true") === Boolean(skin.offline?.slim))));
+  if (account.mode === "elyby") {
+    $("skin-online-text").textContent = t("skin_ely_text");
+    $("skin-ely-open").hidden = false;
+  } else if (account.mode === "microsoft") {
+    $("skin-online-text").textContent = t("skin_ms_text");
+    $("skin-ely-open").hidden = true;
+  }
+}
+
+function skinError(message = "") {
+  $("skin-error").textContent = message;
+  $("skin-error").hidden = !message;
+}
+
+/** Loads the offline skin saved for the typed username and updates the avatar. */
+let skinLookup = 0;
+async function refreshOfflineSkin() {
+  const name = $("username").value.trim();
+  const ticket = ++skinLookup;
+  const found = USERNAME_RE.test(name) ? await invoke("skin_get_offline", { name }).catch(() => null) : null;
+  if (ticket !== skinLookup) return; // a newer lookup started
+  skin.offline = found;
+  if (found) drawSkinFace($("avatar"), found.data_url, name);
+  else drawAvatar(name);
+}
+
+function openSkinModal() {
+  if (account.mode === "offline" && !USERNAME_RE.test($("username").value.trim())) {
+    toast(t("skin_need_name"), { error: true });
+    $("username").focus({ preventScroll: true });
+    return;
+  }
+  skinError();
+  renderSkinPreview();
+  $("skin-modal").hidden = false;
+  $("skin-close").focus({ preventScroll: true });
+}
+
+async function chooseSkinFile(file) {
+  if (!file) return;
+  skinError();
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    const slim = Boolean(skin.offline?.slim);
+    skin.offline = await invoke("skin_set_offline", { name: $("username").value.trim(), pngBase64: btoa(binary), slim });
+    drawSkinFace($("avatar"), skin.offline.data_url, $("username").value.trim());
+    renderSkinPreview();
+    toast(t("skin_saved"));
+  } catch (e) {
+    skinError(String(e));
+  }
+}
+
+function initSkins() {
+  document.querySelectorAll("[data-skin]").forEach((b) => b.addEventListener("click", openSkinModal));
+  $("skin-choose").addEventListener("click", () => $("skin-file").click());
+  $("skin-file").addEventListener("change", (e) => {
+    chooseSkinFile(e.target.files[0]);
+    e.target.value = "";
+  });
+  $("skin-model").addEventListener("click", async (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const slim = b.dataset.slim === "true";
+    if (skin.offline) {
+      await invoke("skin_set_offline_model", { name: $("username").value.trim(), slim }).catch((err) => skinError(String(err)));
+      skin.offline.slim = slim;
+    } else {
+      skin.offline = null;
+    }
+    renderSkinPreview();
+  });
+  $("skin-reset").addEventListener("click", async () => {
+    await invoke("skin_clear_offline", { name: $("username").value.trim() }).catch(() => {});
+    skin.offline = null;
+    drawAvatar($("username").value.trim());
+    renderSkinPreview();
+  });
+  $("skin-ely-open").addEventListener("click", () => invoke("ely_open_skins").catch((e) => toast(String(e), { error: true })));
+  const close = () => { $("skin-modal").hidden = true; };
+  $("skin-close").addEventListener("click", close);
+  $("skin-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+}
+
+// ---------- Rekindle (updates) ----------
+const formatSize = (bytes) => `${(bytes / 1048576).toFixed(1)} MB`;
+
+async function checkForUpdate() {
+  let update;
+  try {
+    update = await invoke("rekindle_check");
+  } catch {
+    return; // Offline or GitHub unreachable: try again next launch.
+  }
+  if (!update) return;
+  $("rekindle-title").textContent = t("rk_ready", { version: update.version });
+  $("rekindle-sub").textContent = t("rk_sub", { current: update.current, size: formatSize(update.size) });
+  const notes = $("rekindle-notes");
+  notes.replaceChildren(...update.notes.split("\n").map((l) => l.replace(/^[-•*]\s*/, "").trim()).filter(Boolean).map((line) => {
+    const li = document.createElement("li");
+    li.textContent = line;
+    return li;
+  }));
+  $("rekindle-modal").hidden = false;
+  $("rekindle-update").focus({ preventScroll: true });
+}
+
+async function installUpdate() {
+  if (state.busy) return toast(t("rk_busy"), { error: true });
+  $("rekindle-update").disabled = true;
+  $("rekindle-later").hidden = true;
+  $("rekindle-error").hidden = true;
+  $("rekindle-progress").hidden = false;
+  $("rekindle-update").textContent = t("rk_downloading", { pct: 0 });
+  try {
+    await invoke("rekindle_install");
+    $("rekindle-update").textContent = t("rk_restarting");
+  } catch (e) {
+    $("rekindle-error").textContent = String(e);
+    $("rekindle-error").hidden = false;
+    $("rekindle-update").disabled = false;
+    $("rekindle-update").textContent = t("rk_retry");
+    $("rekindle-later").hidden = false;
+    $("rekindle-progress").hidden = true;
+  }
+}
+
+function initRekindle() {
+  drawLogo($("rekindle-logo"));
+  $("rekindle-update").addEventListener("click", installUpdate);
+  $("rekindle-later").addEventListener("click", () => { $("rekindle-modal").hidden = true; });
+  listen("rekindle-progress", ({ payload }) => {
+    const done = payload.total ? payload.done / payload.total : 0;
+    $("rekindle-bar").style.width = `${Math.round(done * 100)}%`;
+    $("rekindle-update").textContent = t("rk_downloading", { pct: Math.floor(done * 100) });
+    if (done >= 1) $("rekindle-update").textContent = t("rk_installing");
+  });
+  // Let the window settle before checking.
+  setTimeout(checkForUpdate, 2500);
 }
 
 // ---------- play ----------
@@ -612,24 +842,38 @@ function updatePlayButton(status = null) {
     return;
   }
   button.style.setProperty("--progress", 0);
-  $("java-play-label").textContent = running ? "Playing" : e && !e.installed ? "Install & Play" : "Play";
-  $("java-play-sub").textContent = !e ? "Pick a version"
-    : needsAccount ? `Sign in with ${account.mode === "elyby" ? "Ely.by" : "Microsoft"} first`
+  $("java-play-label").textContent = running ? t("playing") : e && !e.installed ? t("install_play") : t("play");
+  $("java-play-sub").textContent = !e ? t("pick_version")
+    : needsAccount ? t("sign_in_first", { service: account.mode === "elyby" ? "Ely.by" : "Microsoft" })
     : e.installed ? e.name : `${e.name} · downloads from Mojang`;
+}
+
+/** Translates the backend's progress stage names. */
+const STAGE_KEYS = {
+  "Fetching version info": "stage_fetching",
+  "Preparing assets": "stage_assets",
+  "Downloading installer": "stage_installer",
+  "Setting up FPS Boost": "stage_fps",
+};
+const stageLabel = (stage) => (STAGE_KEYS[stage] ? t(STAGE_KEYS[stage]) : stage);
+function progressLabel(stage, pct) {
+  if (stage === "Downloading game files") return t("downloading_pct", { pct });
+  if (stage === "Downloading FPS Boost mods") return t("fps_mods_pct", { pct });
+  return `${stageLabel(stage)} ${pct}%`;
 }
 
 function showProgress(p) {
   if (!state.busy) return;
   if (!p.files_total) {
-    updatePlayButton({ label: "Preparing…", sub: p.stage });
+    updatePlayButton({ label: t("preparing"), sub: stageLabel(p.stage) });
     return;
   }
   const progress = p.bytes_total ? p.bytes_done / p.bytes_total : p.files_done / p.files_total;
   const amount = p.bytes_total
-    ? `${formatMB(p.bytes_done)} of ${formatMB(p.bytes_total)}`
-    : `${p.files_done.toLocaleString()} of ${p.files_total.toLocaleString()} files`;
+    ? t("of_mb", { done: formatMB(p.bytes_done), total: formatMB(p.bytes_total) })
+    : t("of_files", { done: p.files_done.toLocaleString(), total: p.files_total.toLocaleString() });
   updatePlayButton({
-    label: `${p.stage === "Downloading game files" ? "Downloading" : p.stage} ${Math.floor(progress * 100)}%`.replace("Downloading FPS Boost mods", "FPS mods"),
+    label: progressLabel(p.stage, Math.floor(progress * 100)),
     sub: amount,
     progress,
   });
@@ -646,7 +890,7 @@ async function playJava() {
     return;
   }
   if (offline && !USERNAME_RE.test(username)) {
-    toast("Pick a username: 3–16 letters, numbers or _", { error: true });
+    toast(t("username_invalid"), { error: true });
     $("username").focus({ preventScroll: true });
     return;
   }
@@ -654,16 +898,16 @@ async function playJava() {
   const fpsBoost = $("fps-boost").checked;
   setMenuOpen(false);
   state.busy = true;
-  updatePlayButton({ label: "Preparing…", sub: entry.name });
+  updatePlayButton({ label: t("preparing"), sub: entry.name });
   let runKey = entry.key;
   try {
-    const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost });
+    const prepared = await invoke("java_prepare", { target: entry.key, fpsBoost, shaders: fpsBoost && $("shaders").checked });
     if (!entry.installed) {
       await refreshInstalled();
       runKey = entry.key.includes(":") ? prepared.version : entry.key;
       selectEntry(runKey);
     }
-    updatePlayButton({ label: "Launching…", sub: state.selected.name, progress: 1 });
+    updatePlayButton({ label: t("launching"), sub: state.selected.name, progress: 1 });
     const info = await invoke("java_launch", {
       options: {
         version: prepared.version,
@@ -678,10 +922,11 @@ async function playJava() {
     state.running.add(runKey);
     runningPids.set(info.pid, runKey);
     if (prepared.notice) toast(prepared.notice);
-    else if (prepared.fps_mods.length) toast(`FPS Boost on: ${prepared.fps_mods.filter((m) => m !== "Fabric API").join(", ")}`);
-    else toast(`Starting ${state.selected.name} — the game window will open in a moment.`);
+    else if (prepared.fps_mods.includes("Iris")) toast(t("shaders_on"));
+    else if (prepared.fps_mods.length) toast(t("fps_on", { mods: prepared.fps_mods.filter((m) => m !== "Fabric API").join(", ") }));
+    else toast(t("starting", { name: state.selected.name }));
   } catch (e) {
-    if (String(e) === "Cancelled") toast("Download cancelled — press Play to resume.");
+    if (String(e) === "Cancelled") toast(t("download_cancelled"));
     else toast(String(e), { error: true, sticky: true });
   } finally {
     state.busy = false;
@@ -694,7 +939,13 @@ async function initJava() {
   username.pattern = USERNAME_RE.source.slice(1, -1);
   username.value = load("username") ?? "";
   drawAvatar(username.value);
-  username.addEventListener("input", () => drawAvatar(username.value));
+  refreshOfflineSkin();
+  let skinTimer;
+  username.addEventListener("input", () => {
+    drawAvatar(username.value);
+    clearTimeout(skinTimer);
+    skinTimer = setTimeout(refreshOfflineSkin, 200);
+  });
   username.addEventListener("keydown", (e) => { if (e.key === "Enter") playJava(); });
 
   initPicker();
@@ -703,7 +954,7 @@ async function initJava() {
   $("java-play").addEventListener("click", playJava);
   $("java-cancel").addEventListener("click", () => {
     invoke("java_cancel_prepare");
-    updatePlayButton({ label: "Cancelling…", sub: state.selected?.name ?? "" });
+    updatePlayButton({ label: t("cancelling"), sub: state.selected?.name ?? "" });
   });
 
   await listen("java-progress", ({ payload }) => showProgress(payload));
@@ -715,7 +966,7 @@ async function initJava() {
   });
 
   const dir = await invoke("java_game_dir");
-  $("game-dir").textContent = dir ? `Game folder · ${dir.replace(/^\/Users\/[^/]+/, "~")}` : "Game folder will be created on first install";
+  $("game-dir").textContent = dir ? t("game_folder", { dir: dir.replace(/^\/Users\/[^/]+/, "~") }) : t("game_folder_new");
 
   await refreshInstalled();
   selectEntry(load("version"));
@@ -723,7 +974,7 @@ async function initJava() {
   try {
     state.remote = await invoke("java_available_versions");
   } catch (e) {
-    toast("Couldn't reach Mojang — showing installed versions only.", { error: true });
+    toast(t("mojang_unreachable"), { error: true });
   }
   state.remoteLoaded = true;
   buildEntries();
@@ -746,23 +997,37 @@ async function initBedrock() {
   });
 
   const installed = await invoke("bedrock_is_installed");
-  $("bedrock-status").textContent = installed ? "Installed and ready" : "Not installed — get it from the Microsoft Store";
+  $("bedrock-status").textContent = installed ? t("bedrock_ready") : t("bedrock_missing");
   $("bedrock-dot").className = `dot ${installed ? "ok" : "bad"}`;
   $("bedrock-play").disabled = !installed;
   $("bedrock-play").addEventListener("click", async () => {
     try {
       await invoke("bedrock_launch");
-      toast("Starting Bedrock Edition…");
+      toast(t("bedrock_starting"));
     } catch (e) {
       toast(String(e), { error: true });
     }
   });
 }
 
+function initLanguagePicker() {
+  const select = $("language");
+  for (const [code, name] of LANGUAGES) select.append(new Option(name, code, false, code === I18N.lang));
+  select.addEventListener("change", () => {
+    save("language", select.value);
+    location.reload();
+  });
+}
+
 drawLogo();
 drawLandscape();
-initJava().catch((e) => toast(String(e), { error: true }));
-initBedrock().catch((e) => toast(String(e), { error: true }));
+initI18n(load("language")).then(() => {
+  initLanguagePicker();
+  initJava().catch((e) => toast(String(e), { error: true }));
+  initBedrock().catch((e) => toast(String(e), { error: true }));
+  initRekindle();
+  initSkins();
+});
 
 /** Stand-in backend so the UI can be previewed in a regular browser. */
 function previewBackend() {
@@ -777,6 +1042,7 @@ function previewBackend() {
   ].map(([id, kind]) => ({ id, kind }));
   let progress;
   const listeners = {};
+  const demoSkins = {};
   const handlers = {
     java_game_dir: () => "/Users/you/Library/Application Support/minecraft",
     java_list_versions: () => [...installed],
@@ -796,6 +1062,25 @@ function previewBackend() {
     }, 700)),
     ely_logout: () => null,
     ely_refresh_skin: () => null,
+    // Demo: skins live in memory only.
+    skin_get_offline: ({ name }) => demoSkins[name.toLowerCase()] ?? null,
+    skin_set_offline: ({ name, pngBase64, slim }) => (demoSkins[name.toLowerCase()] = { data_url: `data:image/png;base64,${pngBase64}`, slim }),
+    skin_set_offline_model: ({ name, slim }) => { if (demoSkins[name.toLowerCase()]) demoSkins[name.toLowerCase()].slim = slim; },
+    skin_clear_offline: ({ name }) => { delete demoSkins[name.toLowerCase()]; },
+    ely_open_skins: () => window.open("https://ely.by/skins", "_blank"),
+    // Demo: ?update shows the Rekindle pop-up.
+    rekindle_check: () => (new URLSearchParams(location.search).has("update")
+      ? { version: "0.5.1", current: "0.5.0", size: 4.7 * 1048576, notes: "- Faster version downloads\n- New shader pack picker\n- Bug fixes" }
+      : null),
+    rekindle_install: () => new Promise((resolve) => {
+      let done = 0;
+      const total = 4.7 * 1048576;
+      const t = setInterval(() => {
+        done = Math.min(total, done + total / 25);
+        listeners["rekindle-progress"]?.({ payload: { done, total } });
+        if (done >= total) { clearInterval(t); resolve(); }
+      }, 80);
+    }),
     ely_open_register: () => window.open("https://account.ely.by/register", "_blank"),
     java_cancel_prepare: () => null,
     java_prepare: ({ target }) => new Promise((resolve) => {

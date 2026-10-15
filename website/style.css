@@ -38,7 +38,7 @@ svg { flex: none; }
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
 .brand img { image-rendering: pixelated; }
-.nav-links { display: flex; gap: 28px; margin-left: auto; font-size: 15px; font-weight: 500; color: #3c4450; }
+.nav-links { display: flex; gap: 28px; margin-inline-start: auto; font-size: 15px; font-weight: 500; color: #3c4450; }
 .nav-links a:hover { color: var(--text); }
 .pill {
   display: inline-flex; align-items: center; gap: 8px;
@@ -150,7 +150,7 @@ svg { flex: none; }
 .row.is-detected .badge { display: inline-block; }
 .chevron { width: 26px; height: 26px; margin-left: auto; color: #8a929e; transition: transform 0.25s; }
 details[open] > summary .chevron { transform: rotate(-90deg); }
-.row-body { display: grid; gap: 22px; justify-items: start; padding: 0 34px 34px 110px; }
+.row-body { display: grid; gap: 22px; justify-items: start; padding: 0 34px 34px; padding-inline-start: 110px; }
 
 .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; width: 100%; }
 .choice {
@@ -198,7 +198,6 @@ details[open] > summary .chevron { transform: rotate(-90deg); }
 @media (max-width: 900px) {
   .nav { padding: 0 18px; gap: 14px; height: 64px; }
   .nav-links { display: none; }
-  .pill { margin-left: auto; }
   .stats { gap: 14px; margin-top: 60px; }
   .stat { padding: 26px 16px 18px; }
   .stat span { font-size: 15px; }
@@ -232,3 +231,11 @@ details[open] > summary .chevron { transform: rotate(-90deg); }
   * { transition: none !important; }
 }
 .faq details p a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Language picker in the header */
+.lang-pill { position: relative; cursor: pointer; }
+.lang-pill select {
+  appearance: none; -webkit-appearance: none; border: 0; background: transparent; padding: 0;
+  color: inherit; font: inherit; cursor: pointer; outline: none; max-width: 150px;
+}
+@media (max-width: 900px) { .lang-pill { margin-inline-start: auto; } }

@@ -352,9 +352,9 @@ h1 {
   width: 20px; height: 20px; flex: none;
   display: grid; place-items: center;
   border-radius: 6px; background: #207e5c; color: #fff;
-  font: 800 14px/1 var(--font-display); padding-bottom: 2px;
+  font: 800 13px/1 var(--font-display);
 }
-.ely-mark.is-large { width: 40px; height: 40px; border-radius: 11px; font-size: 26px; padding-bottom: 4px; }
+.ely-mark.is-large { width: 40px; height: 40px; border-radius: 11px; font-size: 24px; }
 .ely-modal { gap: 14px; }
 .ely-fields { display: grid; gap: 10px; align-self: stretch; }
 .ely-fields .input-wrap { cursor: text; }

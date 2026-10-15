@@ -17,9 +17,9 @@ Get the latest build from [Releases](https://github.com/eymenderdiyok09-dotcom/e
 
 | Platform | File |
 | --- | --- |
-| macOS 11+ (Apple Silicon & Intel) | `Ember_0.3.1_universal.dmg` |
-| Windows 10/11 x64 | `Ember_0.3.1_windows-x64.zip` |
-| Windows 11 ARM64 | `Ember_0.3.1_windows-arm64.zip` |
+| macOS 11+ (Apple Silicon & Intel) | `Ember_0.3.2_universal.dmg` |
+| Windows 10/11 x64 | `Ember_0.3.2_windows-x64.zip` |
+| Windows 11 ARM64 | `Ember_0.3.2_windows-arm64.zip` |
 
 The macOS build is signed and notarized. Windows builds aren't signed yet: click **More info → Run anyway**.
 

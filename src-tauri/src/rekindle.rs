@@ -19,7 +19,6 @@ use std::time::Duration;
 use tauri::{AppHandle, Emitter};
 
 const MANIFEST_URL: &str = "https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/latest.json";
-const SIGNATURE_URL: &str = "https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/latest.json.sig";
 /// Downloads must come from this repository's releases.
 const DOWNLOAD_PREFIX: &str = "https://github.com/eymenderdiyok09-dotcom/ember/releases/download/";
 /// Ed25519 public key (base64) matching the private release key.
@@ -109,7 +108,15 @@ fn hex_sha256(bytes: &[u8]) -> String {
 fn find_update(current: &str) -> Result<Option<(Update, Asset)>, String> {
     let agent = agent();
     let manifest_bytes = fetch(&agent, MANIFEST_URL, 1024 * 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
-    let signature = fetch(&agent, SIGNATURE_URL, 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
+    // GitHub's "latest" links are cached separately and can briefly disagree
+    // right after a release, so fetch the signature of exactly this version.
+    let version = serde_json::from_slice::<serde_json::Value>(&manifest_bytes)
+        .ok()
+        .and_then(|m| m["version"].as_str().map(str::to_owned))
+        .filter(|v| v.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'.' || b == b'-'))
+        .ok_or("Update info is unreadable")?;
+    let signature_url = format!("{DOWNLOAD_PREFIX}v{version}/latest.json.sig");
+    let signature = fetch(&agent, &signature_url, 1024).map_err(|e| format!("Couldn't check for updates: {e}"))?;
     verify(&manifest_bytes, &signature)?;
     let manifest: Manifest = serde_json::from_slice(&manifest_bytes).map_err(|e| format!("Update info is unreadable: {e}"))?;
     if !is_newer(&manifest.version, current) {

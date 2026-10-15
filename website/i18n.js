@@ -64,8 +64,8 @@ const EN = {
   f_fps_d: "On by default. Sodium, Lithium, FerriteCore and more in their own folder, plus Java tuned for smooth frames. Your worlds stay shared.",
   f_shaders_t: "Shaders in one click",
   f_shaders_d: "Switch on Shaders and Ember adds Iris and Complementary Reimagined. Change packs any time in the game's video settings.",
-  f_loaders_t: "Fabric, Forge, NeoForge",
-  f_loaders_d: "Install any mod loader in one click. Ember picks the latest stable build for your game version.",
+  f_loaders_t: "Mod browser",
+  f_loaders_d: "Search Modrinth inside Ember and install mods in one click, with Fabric, Forge or NeoForge and every library they need. CurseForge is built in and switching on soon.",
   f_skins_t: "Your skin",
   f_skins_d: "Pick any skin PNG for offline play and see it in-game, or bring your Ely.by skin to Ely.by servers.",
   f_accounts_t: "Offline, Ely.by & Microsoft",
@@ -104,9 +104,9 @@ const EN = {
   q_updates: "How do I update Ember?",
   a_updates: "You don't have to. Ember 0.5.0 and newer check for updates when they open and ask before installing. Older versions need one last download from this page.",
   q_skins: "How do I change my skin?",
-  a_skins: "Click your player's face next to the name in Ember. Offline: choose any 64×64 PNG — you'll see it in-game, other players won't. Ely.by: change it on ely.by and Ember picks it up.",
+  a_skins: "Click your player's face next to the name in Ember. Offline: pick one from your skin library, add a PNG, or import any Minecraft or Ely.by player's skin by name — you'll see it in-game, other players won't. Ely.by: change it on ely.by and Ember picks it up.",
   q_mods: "Can I install mods?",
-  a_mods: "Yes. Pick a Fabric, Forge or NeoForge version and put your mods in the <code>mods</code> folder of your Minecraft directory.",
+  a_mods: "Yes. Click <b>Mods</b> next to Version to search and install with one click. Each loader and game version gets its own mods folder, so mods never clash — <b>Open mods folder</b> shows it.",
   q_fps: "Does FPS Boost touch my mods or worlds?",
   a_fps: "No. FPS Boost runs from its own folder (<code>ember/instances</code>) and links to your real worlds, resource packs, shader packs and screenshots. Your own <code>mods</code> folder is never changed.",
   q_online: "Can I play on online servers?",
@@ -165,7 +165,7 @@ async function initI18n() {
   if (lang !== "en") {
     await new Promise((resolve) => {
       const script = document.createElement("script");
-      script.src = `lang/${lang}.js?v=1`;
+      script.src = `lang/${lang}.js?v=2`;
       script.onload = script.onerror = resolve;
       document.head.append(script);
     });

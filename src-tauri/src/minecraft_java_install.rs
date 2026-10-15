@@ -134,7 +134,7 @@ struct Download {
     executable: bool,
 }
 
-fn agent() -> ureq::Agent {
+pub(crate) fn agent() -> ureq::Agent {
     ureq::Agent::config_builder()
         .timeout_connect(Some(Duration::from_secs(15)))
         .timeout_recv_body(Some(Duration::from_secs(60)))
@@ -143,7 +143,7 @@ fn agent() -> ureq::Agent {
         .into()
 }
 
-fn get_json(agent: &ureq::Agent, url: &str) -> Result<Value, String> {
+pub(crate) fn get_json(agent: &ureq::Agent, url: &str) -> Result<Value, String> {
     agent
         .get(url)
         .call()
@@ -155,7 +155,7 @@ fn get_json(agent: &ureq::Agent, url: &str) -> Result<Value, String> {
         .map_err(|e| format!("{url}: {e}"))
 }
 
-fn write_json(path: &Path, json: &Value) -> Result<(), String> {
+pub(crate) fn write_json(path: &Path, json: &Value) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
@@ -255,7 +255,15 @@ pub(crate) fn prepare(target: &str, fps_boost: bool, shaders: bool, report: Repo
     install_version(&agent, &mc, &id, report)?;
 
     let mut prepared = Prepared { version: id.clone(), instance: None, fps_mods: Vec::new(), notice: None };
-    let is_vanilla = matches!(target, Target::Vanilla(_)) && read_version_json(&mc, &id)?.get("inheritsFrom").is_none();
+    let base = read_version_json(&mc, &id)?.get("inheritsFrom").and_then(Value::as_str).map(str::to_owned);
+    let is_vanilla = matches!(target, Target::Vanilla(_)) && base.is_none();
+    // Modded versions run in their own folder so each loader + game version
+    // keeps its own mods; worlds and packs stay shared.
+    if let Some(game) = &base {
+        let loader = crate::minecraft_java::loader_name(&id).to_ascii_lowercase();
+        let (instance, _) = mod_instance(&mc, &loader, game)?;
+        prepared.instance = Some(instance);
+    }
     if fps_boost && is_vanilla {
         match fps_boost_instance(&agent, &mc, &id, shaders, report) {
             Ok(Some(boosted)) => prepared = boosted,
@@ -811,7 +819,7 @@ struct InstanceRecord {
 }
 
 /// Percent-encodes a query value (game ids can contain spaces).
-fn encode(value: &str) -> String {
+pub(crate) fn encode(value: &str) -> String {
     value
         .bytes()
         .map(|b| match b {
@@ -1032,9 +1040,23 @@ fn enable_shader_pack(instance: &Path, pack: &str) -> Result<(), String> {
     fs::write(&path, lines.join("\n") + "\n").map_err(|e| e.to_string())
 }
 
+/// The game folder for `loader` + `game` (e.g. `fabric-1.20.1`), created and
+/// linked to the shared worlds and packs on first use.
+pub(crate) fn mod_instance(mc: &Path, loader: &str, game: &str) -> Result<(String, std::path::PathBuf), String> {
+    if loader.is_empty() || !loader.bytes().all(|b| b.is_ascii_lowercase()) {
+        return Err(format!("Unknown mod loader '{loader}'"));
+    }
+    validate_id(game)?;
+    let name = format!("{loader}-{game}");
+    let dir = instance_dir(mc, &name)?;
+    fs::create_dir_all(dir.join("mods")).map_err(|e| e.to_string())?;
+    link_shared_folders(mc, &dir)?;
+    Ok((name, dir))
+}
+
 /// Points an instance's world/pack folders at the main game folder, and seeds
 /// its settings from the main ones.
-fn link_shared_folders(mc: &Path, dir: &Path) -> Result<(), String> {
+pub(crate) fn link_shared_folders(mc: &Path, dir: &Path) -> Result<(), String> {
     for name in SHARED_FOLDERS {
         let target = mc.join(name);
         let link = dir.join(name);

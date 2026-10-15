@@ -200,6 +200,8 @@ function installedEntry(v) {
     badge: modded ? v.loader : kindLabel(v.kind),
     badgeClass: BADGE_CLASS[v.kind] ?? "legacy",
     installed: true,
+    modLoader: modded ? v.loader.toLowerCase() : null,
+    modGame: modded ? v.base : v.id,
   };
 }
 
@@ -217,6 +219,8 @@ function buildEntries() {
       badge: kindLabel(v.kind),
       badgeClass: BADGE_CLASS[v.kind] ?? "legacy",
       installed: installedIds.has(v.id),
+      modLoader: null,
+      modGame: v.id,
     });
   }
   for (const [tab, loader, prefix] of [["fabric", "Fabric", "fabric"], ["forge", "Forge", "forge"], ["neoforge", "NeoForge", "neoforge"]]) {
@@ -230,6 +234,8 @@ function buildEntries() {
         badge: loader,
         badgeClass: "modded",
         installed: installed.has(game),
+        modLoader: prefix,
+        modGame: game,
       });
     }
   }
@@ -610,7 +616,7 @@ async function initAccount() {
 }
 
 // ---------- skins ----------
-const skin = { offline: null }; // offline: { data_url, slim } for the current username
+const skin = { offline: null, library: [] }; // offline: { data_url, slim } for the current username
 
 /** Draws a whole player (front or back) from a skin texture onto a 16×32 canvas. */
 function drawSkinBody(canvas, img, slim, back) {
@@ -678,7 +684,8 @@ function renderSkinPreview() {
   const offline = account.mode === "offline";
   $("skin-offline").hidden = !offline;
   $("skin-online").hidden = offline;
-  $("skin-reset").hidden = !skin.offline;
+  $("skin-model").hidden = !offline || !skin.offline;
+  $("skin-reset").hidden = !offline || !skin.offline;
   $("skin-model").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String((b.dataset.slim === "true") === Boolean(skin.offline?.slim))));
   if (account.mode === "elyby") {
     $("skin-online-text").textContent = t("skin_ely_text");
@@ -686,6 +693,69 @@ function renderSkinPreview() {
   } else if (account.mode === "microsoft") {
     $("skin-online-text").textContent = t("skin_ms_text");
     $("skin-ely-open").hidden = true;
+  }
+  if (offline) renderLibrary();
+}
+
+/** The library grid: one tile per saved skin, plus an "add" tile. */
+function renderLibrary() {
+  const grid = $("library-grid");
+  grid.replaceChildren();
+  for (const item of skin.library) {
+    const tile = document.createElement("button");
+    tile.className = "library-tile";
+    tile.classList.toggle("is-active", item.data_url === skin.offline?.data_url);
+    tile.title = item.name;
+    const canvas = document.createElement("canvas");
+    canvas.width = 16;
+    canvas.height = 32;
+    const img = new Image();
+    img.onload = () => drawSkinBody(canvas, img, item.slim, false);
+    img.src = item.data_url;
+    const name = document.createElement("span");
+    name.className = "tile-name";
+    name.textContent = item.name;
+    const remove = document.createElement("span");
+    remove.className = "tile-remove";
+    remove.setAttribute("role", "button");
+    remove.setAttribute("aria-label", t("skin_remove"));
+    remove.title = t("skin_remove");
+    remove.textContent = "×";
+    remove.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      await invoke("skin_library_remove", { id: item.id }).catch((err) => skinError(String(err)));
+      await loadLibrary();
+      renderLibrary();
+    });
+    tile.append(canvas, name, remove);
+    tile.addEventListener("click", () => wearSkin(item.id));
+    grid.append(tile);
+  }
+  const add = document.createElement("button");
+  add.className = "library-tile is-add";
+  add.innerHTML = "<b>+</b>";
+  const label = document.createElement("span");
+  label.textContent = t("skin_add");
+  add.append(label);
+  add.addEventListener("click", () => $("skin-file").click());
+  grid.append(add);
+}
+
+async function loadLibrary() {
+  skin.library = await invoke("skin_library").catch(() => []) ?? [];
+}
+
+/** Puts a library skin on the current offline player. */
+async function wearSkin(id) {
+  skinError();
+  try {
+    const name = $("username").value.trim();
+    skin.offline = await invoke("skin_use", { name, id });
+    drawSkinFace($("avatar"), skin.offline.data_url, name);
+    renderSkinPreview();
+    toast(t("skin_saved"));
+  } catch (e) {
+    skinError(String(e));
   }
 }
 
@@ -706,52 +776,74 @@ async function refreshOfflineSkin() {
   else drawAvatar(name);
 }
 
-function openSkinModal() {
+async function openSkinModal() {
   if (account.mode === "offline" && !USERNAME_RE.test($("username").value.trim())) {
     toast(t("skin_need_name"), { error: true });
     $("username").focus({ preventScroll: true });
     return;
   }
   skinError();
+  if (account.mode === "offline") await loadLibrary();
   renderSkinPreview();
   $("skin-modal").hidden = false;
   $("skin-close").focus({ preventScroll: true });
 }
 
-async function chooseSkinFile(file) {
+async function addSkinFile(file) {
   if (!file) return;
   skinError();
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
     let binary = "";
     for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-    const slim = Boolean(skin.offline?.slim);
-    skin.offline = await invoke("skin_set_offline", { name: $("username").value.trim(), pngBase64: btoa(binary), slim });
-    drawSkinFace($("avatar"), skin.offline.data_url, $("username").value.trim());
-    renderSkinPreview();
-    toast(t("skin_saved"));
+    const name = file.name.replace(/\.png$/i, "");
+    const item = await invoke("skin_library_add", { name, pngBase64: btoa(binary), slim: Boolean(skin.offline?.slim) });
+    await loadLibrary();
+    await wearSkin(item.id);
   } catch (e) {
     skinError(String(e));
   }
 }
 
+async function importSkin(e) {
+  e.preventDefault();
+  const username = $("import-name").value.trim();
+  if (!username) return $("import-name").focus({ preventScroll: true });
+  skinError();
+  const button = $("import-button");
+  button.disabled = true;
+  button.textContent = t("skin_importing");
+  try {
+    const item = await invoke("skin_library_import", { source: $("import-source").value, username });
+    $("import-name").value = "";
+    await loadLibrary();
+    await wearSkin(item.id);
+  } catch (err) {
+    skinError(String(err));
+  } finally {
+    button.disabled = false;
+    button.textContent = t("skin_import");
+  }
+}
+
 function initSkins() {
   document.querySelectorAll("[data-skin]").forEach((b) => b.addEventListener("click", openSkinModal));
-  $("skin-choose").addEventListener("click", () => $("skin-file").click());
   $("skin-file").addEventListener("change", (e) => {
-    chooseSkinFile(e.target.files[0]);
+    addSkinFile(e.target.files[0]);
     e.target.value = "";
   });
+  $("library-import").addEventListener("submit", importSkin);
   $("skin-model").addEventListener("click", async (e) => {
     const b = e.target.closest("button");
-    if (!b) return;
+    if (!b || !skin.offline) return;
     const slim = b.dataset.slim === "true";
-    if (skin.offline) {
-      await invoke("skin_set_offline_model", { name: $("username").value.trim(), slim }).catch((err) => skinError(String(err)));
-      skin.offline.slim = slim;
-    } else {
-      skin.offline = null;
-    }
+    const item = skin.library.find((i) => i.data_url === skin.offline.data_url);
+    const done = item
+      ? invoke("skin_library_set_slim", { id: item.id, slim })
+      : invoke("skin_set_offline_model", { name: $("username").value.trim(), slim });
+    await done.catch((err) => skinError(String(err)));
+    skin.offline.slim = slim;
+    if (item) item.slim = slim;
     renderSkinPreview();
   });
   $("skin-reset").addEventListener("click", async () => {
@@ -764,6 +856,236 @@ function initSkins() {
   const close = () => { $("skin-modal").hidden = true; };
   $("skin-close").addEventListener("click", close);
   $("skin-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+}
+
+// ---------- mods ----------
+const MOD_LOADERS = new Set(["fabric", "forge", "neoforge", "quilt"]);
+const mods = { tab: "browse", source: "modrinth", query: "", offset: 0, hits: [], total: 0, loading: false, cfAvailable: false, ticket: 0 };
+
+/** Loader + game version the mod browser works on, from the selected version. */
+function modTarget() {
+  const e = state.selected;
+  if (!e) return null;
+  return { loader: e.modLoader ?? null, game: e.modGame, name: e.name };
+}
+
+const compact = (n) => {
+  try { return new Intl.NumberFormat(I18N.lang, { notation: "compact", maximumFractionDigits: 1 }).format(n); } catch { return String(n); }
+};
+
+function openMods() {
+  const target = modTarget();
+  if (!target) return;
+  const ok = target.loader && MOD_LOADERS.has(target.loader);
+  $("mods-title").textContent = ok ? t("mods_title", { name: target.name }) : t("mods");
+  $("mods-need").hidden = ok;
+  $("mods-body").hidden = !ok;
+  if (!ok) {
+    const fabric = findEntry(`fabric:${target.game}`) ?? state.entries.find((e) => e.modLoader === "fabric" && e.modGame === target.game);
+    $("mods-need-text").textContent = t("mods_need_loader", { game: target.game ?? target.name });
+    $("mods-use-fabric").hidden = !fabric;
+    $("mods-use-fabric").textContent = t("mods_use_fabric", { game: target.game });
+    $("mods-use-fabric").onclick = () => {
+      selectEntry(fabric.key);
+      openMods();
+    };
+  } else {
+    renderModTabs();
+    if (mods.tab === "browse") searchMods(true);
+    else loadInstalledMods();
+  }
+  $("mods-modal").hidden = false;
+  $("mods-close").focus({ preventScroll: true });
+}
+
+function renderModTabs() {
+  $("mods-tabs").querySelectorAll("button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === mods.tab)));
+  $("mods-tabs").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.tab === mods.tab)));
+  $("mods-source").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.source === mods.source)));
+  $("mods-source").hidden = mods.tab !== "browse";
+  $("mods-browse").hidden = mods.tab !== "browse";
+  $("mods-installed").hidden = mods.tab !== "installed";
+}
+
+function modsMessage(list, text) {
+  const p = document.createElement("p");
+  p.className = "mods-empty";
+  p.textContent = text;
+  list.replaceChildren(p);
+}
+
+async function searchMods(reset) {
+  const target = modTarget();
+  const list = $("mods-results");
+  if (mods.source === "curseforge" && !mods.cfAvailable) return modsMessage(list, t("mods_cf_unavailable"));
+  if (reset) {
+    mods.offset = 0;
+    mods.hits = [];
+    modsMessage(list, t("loading"));
+  }
+  const ticket = ++mods.ticket;
+  mods.loading = true;
+  try {
+    const result = await invoke("mods_search", { source: mods.source, query: mods.query, loader: target.loader, game: target.game, offset: mods.offset });
+    if (ticket !== mods.ticket) return;
+    mods.hits = reset ? result.hits : mods.hits.concat(result.hits);
+    mods.total = result.total;
+    mods.offset = mods.hits.length;
+    renderModResults();
+  } catch (e) {
+    if (ticket === mods.ticket) modsMessage(list, String(e));
+  } finally {
+    mods.loading = false;
+  }
+}
+
+function modIcon(url) {
+  const img = document.createElement("img");
+  img.className = "mod-icon";
+  img.alt = "";
+  img.loading = "lazy";
+  if (url) img.src = url;
+  return img;
+}
+
+function renderModResults() {
+  const list = $("mods-results");
+  if (!mods.hits.length) return modsMessage(list, t("mods_none_found"));
+  list.replaceChildren();
+  for (const hit of mods.hits) {
+    const row = document.createElement("div");
+    row.className = "mod-row";
+    const text = document.createElement("div");
+    text.className = "mod-text";
+    const title = document.createElement("button");
+    title.className = "mod-title";
+    title.textContent = hit.title;
+    title.addEventListener("click", () => invoke("mods_open_page", { url: hit.url }).catch((e) => toast(String(e), { error: true })));
+    const meta = document.createElement("span");
+    meta.className = "mod-meta";
+    meta.textContent = `${t("mods_by", { author: hit.author })} · ${t("mods_downloads", { count: compact(hit.downloads) })}`;
+    const desc = document.createElement("span");
+    desc.className = "mod-desc";
+    desc.textContent = hit.description;
+    text.append(title, meta, desc);
+    const action = document.createElement("button");
+    action.className = "mod-action";
+    const markDone = () => {
+      action.disabled = true;
+      action.classList.add("is-done");
+      action.textContent = `✓ ${t("mods_installed_badge")}`;
+    };
+    if (hit.installed) markDone();
+    else action.textContent = t("mods_install");
+    action.addEventListener("click", async () => {
+      const target = modTarget();
+      action.disabled = true;
+      action.textContent = t("mods_installing");
+      try {
+        const titles = await invoke("mods_install", { source: hit.source, id: hit.id, loader: target.loader, game: target.game });
+        hit.installed = true;
+        markDone();
+        if (titles.length) toast(t("mods_installed_toast", { mods: titles.join(", ") }));
+      } catch (e) {
+        action.disabled = false;
+        action.textContent = t("mods_install");
+        toast(String(e), { error: true, sticky: true });
+      }
+    });
+    row.append(modIcon(hit.icon), text, action);
+    list.append(row);
+  }
+  if (mods.hits.length < mods.total) {
+    const more = document.createElement("button");
+    more.className = "link-button mods-more";
+    more.textContent = t("mods_load_more");
+    more.addEventListener("click", () => { more.remove(); searchMods(false); });
+    list.append(more);
+  }
+}
+
+async function loadInstalledMods() {
+  const target = modTarget();
+  const list = $("mods-installed-list");
+  let installed;
+  try {
+    installed = await invoke("mods_list", { loader: target.loader, game: target.game });
+  } catch (e) {
+    return modsMessage(list, String(e));
+  }
+  if (!installed.length) return modsMessage(list, t("mods_none_installed"));
+  list.replaceChildren();
+  for (const mod of installed) {
+    const row = document.createElement("div");
+    row.className = "mod-row";
+    const text = document.createElement("div");
+    text.className = "mod-text";
+    const title = document.createElement("span");
+    title.className = "mod-title";
+    title.textContent = mod.title;
+    const meta = document.createElement("span");
+    meta.className = "mod-meta";
+    meta.textContent = [mod.source === "curseforge" ? "CurseForge" : mod.source === "modrinth" ? "Modrinth" : null, mod.dependency ? t("mods_dependency") : null]
+      .filter(Boolean).join(" · ") || mod.file;
+    text.append(title, meta);
+    const toggle = document.createElement("input");
+    toggle.type = "checkbox";
+    toggle.className = "switch";
+    toggle.setAttribute("role", "switch");
+    toggle.checked = mod.enabled;
+    toggle.setAttribute("aria-label", mod.title);
+    toggle.addEventListener("change", async () => {
+      await invoke("mods_set_enabled", { loader: target.loader, game: target.game, file: mod.file, enabled: toggle.checked })
+        .catch((e) => toast(String(e), { error: true }));
+      loadInstalledMods();
+    });
+    const remove = document.createElement("button");
+    remove.className = "icon-button mod-remove";
+    remove.title = t("mods_remove");
+    remove.setAttribute("aria-label", `${t("mods_remove")}: ${mod.title}`);
+    remove.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" /></svg>';
+    remove.addEventListener("click", async () => {
+      await invoke("mods_remove", { loader: target.loader, game: target.game, file: mod.file }).catch((e) => toast(String(e), { error: true }));
+      loadInstalledMods();
+    });
+    row.append(text, toggle, remove);
+    list.append(row);
+  }
+}
+
+async function initMods() {
+  mods.cfAvailable = await invoke("mods_curseforge_available").catch(() => false);
+  $("mods-button").addEventListener("click", openMods);
+  $("mods-tabs").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    mods.tab = b.dataset.tab;
+    renderModTabs();
+    if (mods.tab === "browse") searchMods(true);
+    else loadInstalledMods();
+  });
+  $("mods-source").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || b.dataset.source === mods.source) return;
+    mods.source = b.dataset.source;
+    renderModTabs();
+    searchMods(true);
+  });
+  let timer;
+  $("mods-search").addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      mods.query = $("mods-search").value;
+      searchMods(true);
+    }, 300);
+  });
+  $("mods-folder").addEventListener("click", () => {
+    const target = modTarget();
+    invoke("mods_open_folder", { loader: target.loader, game: target.game }).catch((e) => toast(String(e), { error: true }));
+  });
+  const close = () => { $("mods-modal").hidden = true; };
+  $("mods-close").addEventListener("click", close);
+  $("mods-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 }
 
 // ---------- Rekindle (updates) ----------
@@ -1027,6 +1349,7 @@ initI18n(load("language")).then(() => {
   initBedrock().catch((e) => toast(String(e), { error: true }));
   initRekindle();
   initSkins();
+  initMods();
 });
 
 /** Stand-in backend so the UI can be previewed in a regular browser. */
@@ -1043,6 +1366,15 @@ function previewBackend() {
   let progress;
   const listeners = {};
   const demoSkins = {};
+  const demoLibrary = [];
+  const demoMods = [];
+  const DEMO_MODS = [
+    { id: "sodium", title: "Sodium", author: "jellysquid3", downloads: 245e6, description: "The fastest and most compatible rendering optimization mod for Minecraft.", icon: null, url: "https://modrinth.com/mod/sodium" },
+    { id: "iris", title: "Iris Shaders", author: "coderbot", downloads: 120e6, description: "A modern shader pack loader for Minecraft intended to be compatible with existing OptiFine shader packs.", icon: null, url: "https://modrinth.com/mod/iris", needs: ["Sodium"] },
+    { id: "jei", title: "Just Enough Items", author: "mezz", downloads: 95e6, description: "View items and recipes in game.", icon: null, url: "https://modrinth.com/mod/jei" },
+    { id: "journeymap", title: "JourneyMap", author: "techbrew", downloads: 40e6, description: "Real-time mapping in game or in a web browser as you explore.", icon: null, url: "https://modrinth.com/mod/journeymap", needs: ["Fabric API"] },
+    { id: "modmenu", title: "Mod Menu", author: "Prospector", downloads: 80e6, description: "Adds a mod menu to view the list of mods you have installed.", icon: null, url: "https://modrinth.com/mod/modmenu", needs: ["Fabric API"] },
+  ];
   const handlers = {
     java_game_dir: () => "/Users/you/Library/Application Support/minecraft",
     java_list_versions: () => [...installed],
@@ -1068,6 +1400,37 @@ function previewBackend() {
     skin_set_offline_model: ({ name, slim }) => { if (demoSkins[name.toLowerCase()]) demoSkins[name.toLowerCase()].slim = slim; },
     skin_clear_offline: ({ name }) => { delete demoSkins[name.toLowerCase()]; },
     ely_open_skins: () => window.open("https://ely.by/skins", "_blank"),
+    skin_library: () => demoLibrary.map((i) => ({ ...i })),
+    skin_library_add: ({ name, pngBase64, slim }) => {
+      const item = { id: String(Date.now()).padStart(64, "0"), name, slim, data_url: `data:image/png;base64,${pngBase64}` };
+      demoLibrary.push(item);
+      return item;
+    },
+    skin_library_import: () => Promise.reject("Importing skins works in the real app."),
+    skin_library_remove: ({ id }) => { demoLibrary.splice(demoLibrary.findIndex((i) => i.id === id), 1); },
+    skin_library_set_slim: ({ id, slim }) => { const i = demoLibrary.find((x) => x.id === id); if (i) i.slim = slim; },
+    skin_use: ({ name, id }) => {
+      const i = demoLibrary.find((x) => x.id === id);
+      return (demoSkins[name.toLowerCase()] = { data_url: i.data_url, slim: i.slim });
+    },
+    // Demo mod browser with a few well-known Fabric mods.
+    mods_curseforge_available: () => false,
+    mods_search: ({ query }) => {
+      const hits = DEMO_MODS.filter((m) => !query || m.title.toLowerCase().includes(query.toLowerCase()))
+        .map((m) => ({ ...m, source: "modrinth", installed: demoMods.some((d) => d.title === m.title) }));
+      return new Promise((r) => setTimeout(() => r({ hits, total: hits.length }), 250));
+    },
+    mods_install: ({ id }) => new Promise((resolve) => setTimeout(() => {
+      const m = DEMO_MODS.find((x) => x.id === id);
+      const added = [m.title, ...(m.needs ?? [])].filter((title) => !demoMods.some((d) => d.title === title));
+      added.forEach((title) => demoMods.push({ file: `${title.toLowerCase().replace(/\W+/g, "-")}.jar`, title, source: "modrinth", enabled: true, dependency: title !== m.title }));
+      resolve(added);
+    }, 900)),
+    mods_list: () => demoMods.map((m) => ({ ...m })),
+    mods_set_enabled: ({ file, enabled }) => { const m = demoMods.find((x) => x.file === file); if (m) m.enabled = enabled; },
+    mods_remove: ({ file }) => { demoMods.splice(demoMods.findIndex((x) => x.file === file), 1); },
+    mods_open_folder: () => null,
+    mods_open_page: ({ url }) => window.open(url, "_blank"),
     // Demo: ?update shows the Rekindle pop-up.
     rekindle_check: () => (new URLSearchParams(location.search).has("update")
       ? { version: "0.5.1", current: "0.5.0", size: 4.7 * 1048576, notes: "- Faster version downloads\n- New shader pack picker\n- Bug fixes" }

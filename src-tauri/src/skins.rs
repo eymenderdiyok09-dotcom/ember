@@ -135,6 +135,222 @@ pub fn skin_clear_offline(name: String) -> Result<(), String> {
     Ok(())
 }
 
+// ---------- skin library ----------
+
+/// A skin kept in the library (`library.json`); the PNG is `<id>.png`.
+#[derive(Serialize, Deserialize, Clone)]
+struct LibrarySkin {
+    /// SHA-256 of the PNG.
+    id: String,
+    name: String,
+    slim: bool,
+}
+
+/// What the UI sees for a library skin.
+#[derive(Serialize)]
+pub struct LibraryItem {
+    pub id: String,
+    pub name: String,
+    pub slim: bool,
+    pub data_url: String,
+}
+
+fn library_path(dir: &Path) -> PathBuf {
+    dir.join("library.json")
+}
+
+fn load_library(dir: &Path) -> Vec<LibrarySkin> {
+    fs::read_to_string(library_path(dir)).ok().and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default()
+}
+
+fn save_library(dir: &Path, library: &[LibrarySkin]) -> Result<(), String> {
+    fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let text = serde_json::to_string_pretty(library).map_err(|e| e.to_string())?;
+    fs::write(library_path(dir), text).map_err(|e| e.to_string())
+}
+
+fn item(dir: &Path, skin: &LibrarySkin) -> Option<LibraryItem> {
+    let png = fs::read(dir.join(format!("{}.png", skin.id))).ok()?;
+    Some(LibraryItem {
+        id: skin.id.clone(),
+        name: skin.name.clone(),
+        slim: skin.slim,
+        data_url: format!("data:image/png;base64,{}", B64.encode(png)),
+    })
+}
+
+fn valid_id(id: &str) -> Result<&str, String> {
+    if id.len() == 64 && id.bytes().all(|b| b.is_ascii_hexdigit()) {
+        Ok(id)
+    } else {
+        Err("Unknown skin".into())
+    }
+}
+
+/// Stores a PNG in the library (or returns the existing entry for the same image).
+fn add_to_library(png: &[u8], name: &str, slim: bool) -> Result<LibraryItem, String> {
+    validate_skin(png)?;
+    let dir = skins_dir()?;
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let id: String = Sha256::digest(png).iter().map(|b| format!("{b:02x}")).collect();
+    fs::write(dir.join(format!("{id}.png")), png).map_err(|e| e.to_string())?;
+    let mut library = load_library(&dir);
+    if !library.iter().any(|s| s.id == id) {
+        let name: String = name.trim().chars().take(40).collect();
+        let name = if name.is_empty() { format!("Skin {}", library.len() + 1) } else { name };
+        library.push(LibrarySkin { id: id.clone(), name, slim });
+        save_library(&dir, &library)?;
+    }
+    let skin = library.into_iter().find(|s| s.id == id).ok_or("Couldn't save the skin.")?;
+    item(&dir, &skin).ok_or_else(|| "Couldn't save the skin.".into())
+}
+
+/// Every skin in the library, oldest first. Skins that were set before the
+/// library existed are added to it.
+#[tauri::command]
+pub fn skin_library() -> Result<Vec<LibraryItem>, String> {
+    let dir = skins_dir()?;
+    let mut library = load_library(&dir);
+    let mut changed = false;
+    for saved in load_index(&dir).values() {
+        if !library.iter().any(|s| s.id == saved.hash) && dir.join(format!("{}.png", saved.hash)).is_file() {
+            library.push(LibrarySkin { id: saved.hash.clone(), name: format!("Skin {}", library.len() + 1), slim: saved.slim });
+            changed = true;
+        }
+    }
+    if changed {
+        save_library(&dir, &library)?;
+    }
+    Ok(library.iter().filter_map(|s| item(&dir, s)).collect())
+}
+
+/// Adds a skin file (PNG as base64) to the library.
+#[tauri::command]
+pub fn skin_library_add(name: String, png_base64: String, slim: bool) -> Result<LibraryItem, String> {
+    let png = B64.decode(png_base64.trim()).map_err(|_| "That image couldn't be read.")?;
+    add_to_library(&png, &name, slim)
+}
+
+/// Copies another player's current skin into the library, by name, from
+/// Minecraft (`mojang`) or Ely.by (`elyby`).
+#[tauri::command]
+pub async fn skin_library_import(source: String, username: String) -> Result<LibraryItem, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let username = username.trim().to_owned();
+        let valid = (1..=16).contains(&username.len()) && username.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_');
+        if !valid {
+            return Err("Enter a player name (letters, numbers or _).".into());
+        }
+        let agent = crate::minecraft_java_install::agent();
+        let (url, slim) = match source.as_str() {
+            "mojang" => mojang_skin(&agent, &username)?,
+            "elyby" => ely_skin(&agent, &username)?,
+            _ => return Err("Unknown skin source".into()),
+        };
+        let mut response = agent.get(&url).call().map_err(|e| format!("Couldn't download the skin: {e}"))?;
+        let png = response
+            .body_mut()
+            .with_config()
+            .limit(256 * 1024)
+            .read_to_vec()
+            .map_err(|e| format!("Couldn't download the skin: {e}"))?;
+        add_to_library(&png, &username, slim)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// (skin URL, slim) for a Minecraft player.
+fn mojang_skin(agent: &ureq::Agent, username: &str) -> Result<(String, bool), String> {
+    let not_found = || format!("There's no Minecraft player called {username}.");
+    let profile = crate::minecraft_java_install::get_json(agent, &format!("https://api.mojang.com/users/profiles/minecraft/{username}"))
+        .map_err(|_| not_found())?;
+    let id = profile["id"].as_str().ok_or_else(not_found)?;
+    let session = crate::minecraft_java_install::get_json(agent, &format!("https://sessionserver.mojang.com/session/minecraft/profile/{id}"))?;
+    let textures = session["properties"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|p| p["name"] == "textures")
+        .and_then(|p| p["value"].as_str())
+        .and_then(|v| B64.decode(v).ok())
+        .and_then(|bytes| serde_json::from_slice::<Value>(&bytes).ok())
+        .ok_or_else(|| format!("{username} uses the default skin."))?;
+    let skin = &textures["textures"]["SKIN"];
+    let url = skin["url"].as_str().ok_or_else(|| format!("{username} uses the default skin."))?;
+    let url = url.replacen("http://", "https://", 1);
+    if !url.starts_with("https://textures.minecraft.net/") {
+        return Err("Unexpected skin address".into());
+    }
+    Ok((url, skin["metadata"]["model"] == "slim"))
+}
+
+/// (skin URL, slim) for an Ely.by player.
+fn ely_skin(agent: &ureq::Agent, username: &str) -> Result<(String, bool), String> {
+    let mut response = agent
+        .get(&format!("https://skinsystem.ely.by/textures/{username}"))
+        .call()
+        .map_err(|e| format!("Couldn't reach Ely.by: {e}"))?;
+    if response.status() != 200 {
+        return Err(format!("{username} has no skin on Ely.by."));
+    }
+    let body: Value = response.body_mut().read_json().map_err(|e| e.to_string())?;
+    let skin = &body["SKIN"];
+    let url = skin["url"].as_str().ok_or_else(|| format!("{username} has no skin on Ely.by."))?;
+    let url = url.replacen("http://", "https://", 1);
+    if !url.starts_with("https://ely.by/") {
+        return Err("Unexpected skin address".into());
+    }
+    Ok((url, skin["metadata"]["model"] == "slim"))
+}
+
+/// Removes a skin from the library (its file stays while a player still uses it).
+#[tauri::command]
+pub fn skin_library_remove(id: String) -> Result<(), String> {
+    let id = valid_id(&id)?;
+    let dir = skins_dir()?;
+    let mut library = load_library(&dir);
+    library.retain(|s| s.id != id);
+    save_library(&dir, &library)?;
+    if !load_index(&dir).values().any(|s| s.hash == id) {
+        let _ = fs::remove_file(dir.join(format!("{id}.png")));
+    }
+    Ok(())
+}
+
+/// Switches a library skin between classic and slim arms (and any player using it).
+#[tauri::command]
+pub fn skin_library_set_slim(id: String, slim: bool) -> Result<(), String> {
+    let id = valid_id(&id)?;
+    let dir = skins_dir()?;
+    let mut library = load_library(&dir);
+    if let Some(skin) = library.iter_mut().find(|s| s.id == id) {
+        skin.slim = slim;
+    }
+    save_library(&dir, &library)?;
+    let mut index = load_index(&dir);
+    for saved in index.values_mut().filter(|s| s.hash == id) {
+        saved.slim = slim;
+    }
+    save_index(&dir, &index)
+}
+
+/// Gives the offline player `name` a skin from the library.
+#[tauri::command]
+pub fn skin_use(name: String, id: String) -> Result<SkinInfo, String> {
+    if key_for(&name).is_empty() {
+        return Err("Choose a username first.".into());
+    }
+    let id = valid_id(&id)?;
+    let dir = skins_dir()?;
+    let skin = load_library(&dir).into_iter().find(|s| s.id == id).ok_or("Unknown skin")?;
+    let saved = SavedSkin { hash: skin.id, slim: skin.slim };
+    let mut index = load_index(&dir);
+    index.insert(key_for(&name), saved.clone());
+    save_index(&dir, &index)?;
+    info(&dir, &saved).ok_or_else(|| "That skin's file is missing.".into())
+}
+
 /// Opens Ely.by's skin catalogue (Ely.by has no API to change skins from apps).
 #[tauri::command]
 pub fn ely_open_skins() -> Result<(), String> {
@@ -357,6 +573,18 @@ mod tests {
         bytes.extend(height.to_be_bytes());
         bytes.extend([8, 6, 0, 0, 0]);
         bytes
+    }
+
+    /// Real lookups against Mojang and Ely.by (HOME should point at a scratch folder).
+    #[test]
+    #[ignore]
+    fn imports_skins_by_name() {
+        let agent = crate::minecraft_java_install::agent();
+        let (url, _) = mojang_skin(&agent, "jeb_").unwrap();
+        assert!(url.starts_with("https://textures.minecraft.net/"));
+        assert!(mojang_skin(&agent, "zz_no_such_player_zz").is_err());
+        let (url, _) = ely_skin(&agent, "ErickSkrauch").unwrap();
+        assert!(url.starts_with("https://ely.by/"));
     }
 
     #[test]

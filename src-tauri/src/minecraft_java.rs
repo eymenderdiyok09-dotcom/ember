@@ -108,7 +108,7 @@ pub fn java_list_versions() -> Result<Vec<VersionEntry>, String> {
     Ok(versions)
 }
 
-fn loader_name(id: &str) -> String {
+pub(crate) fn loader_name(id: &str) -> String {
     let id = id.to_ascii_lowercase();
     let known = [
         ("neoforge", "NeoForge"),

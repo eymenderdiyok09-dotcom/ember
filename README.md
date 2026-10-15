@@ -6,6 +6,8 @@ A tiny, fast launcher for Minecraft: Java Edition, built with Tauri.
 
 - Every release and snapshot, plus Beta and Alpha versions, downloaded directly from Mojang
 - One-click Fabric, Forge and NeoForge
+- **Mod browser**: search Modrinth (and CurseForge with an API key) and install mods plus their dependencies; each loader + game version gets its own mods folder
+- **Skin library**: save skins, switch with one click, import any Minecraft or Ely.by player's skin by name
 - **FPS Boost**, on by default: Sodium, Lithium, FerriteCore and more in a separate instance, plus tuned JVM flags
 - **Shaders** in one click: Iris + Complementary Reimagined on top of FPS Boost
 - Correct Java runtime downloaded automatically for each version
@@ -46,6 +48,8 @@ To publish a release (builds, signs, notarizes, writes the signed `latest.json` 
 ```bash
 scripts/release.sh 0.5.1 "- First change\n- Second change"
 ```
+
+To enable CurseForge in the mod browser, build with `EMBER_CURSEFORGE_KEY=<your key from console.curseforge.com>`.
 
 To enable Microsoft sign-in, build with `EMBER_MSA_CLIENT_ID=<your Azure app client ID>`.
 

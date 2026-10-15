@@ -5,6 +5,7 @@ mod minecraft_java;
 mod minecraft_java_install;
 mod ely_auth;
 mod microsoft_auth;
+mod mods;
 mod rekindle;
 mod skins;
 
@@ -46,6 +47,20 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         skins::skin_set_offline_model,
         skins::skin_clear_offline,
         skins::ely_open_skins,
+        skins::skin_library,
+        skins::skin_library_add,
+        skins::skin_library_import,
+        skins::skin_library_remove,
+        skins::skin_library_set_slim,
+        skins::skin_use,
+        mods::mods_curseforge_available,
+        mods::mods_search,
+        mods::mods_install,
+        mods::mods_list,
+        mods::mods_set_enabled,
+        mods::mods_remove,
+        mods::mods_open_folder,
+        mods::mods_open_page,
         ely_auth::ely_open_register,
         minecraft_bedrock::bedrock_is_installed,
         minecraft_bedrock::bedrock_launch,
@@ -81,6 +96,20 @@ fn handlers() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static {
         skins::skin_set_offline_model,
         skins::skin_clear_offline,
         skins::ely_open_skins,
+        skins::skin_library,
+        skins::skin_library_add,
+        skins::skin_library_import,
+        skins::skin_library_remove,
+        skins::skin_library_set_slim,
+        skins::skin_use,
+        mods::mods_curseforge_available,
+        mods::mods_search,
+        mods::mods_install,
+        mods::mods_list,
+        mods::mods_set_enabled,
+        mods::mods_remove,
+        mods::mods_open_folder,
+        mods::mods_open_page,
         ely_auth::ely_open_register,
     ]
 }

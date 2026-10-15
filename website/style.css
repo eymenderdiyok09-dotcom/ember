@@ -33,9 +33,7 @@ svg { flex: none; }
   position: fixed; inset: 0 0 auto; z-index: 20;
   display: flex; align-items: center; gap: 24px;
   height: 72px; padding: 0 32px;
-  background: rgba(240, 245, 251, 0.72);
-  backdrop-filter: saturate(1.6) blur(18px);
-  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  background: rgba(240, 245, 251, 0.94);
   border-bottom: 1px solid rgba(15, 20, 25, 0.06);
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
@@ -72,7 +70,6 @@ svg { flex: none; }
 .hero-bg {
   position: absolute; left: -40px; top: -40px; width: calc(100% + 80px); height: calc(100% + 80px);
   object-fit: cover;
-  filter: blur(10px) saturate(1.1);
   z-index: -2;
 }
 .hero::after {

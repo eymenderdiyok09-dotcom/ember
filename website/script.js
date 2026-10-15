@@ -1,6 +1,34 @@
 const RELEASE = "https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/";
 
-// Blocky landscape behind the hero, drawn small and blurred by CSS.
+/** Blurs the canvas in place (three box-blur passes ≈ Gaussian). Done once, so
+ * the page doesn't pay for a live CSS blur while scrolling. */
+function blurCanvas(ctx, W, H, radius) {
+  const img = ctx.getImageData(0, 0, W, H);
+  const src = img.data;
+  const tmp = new Uint8ClampedArray(src.length);
+  const pass = (from, to, horizontal) => {
+    const len = horizontal ? W : H, lines = horizontal ? H : W, span = radius * 2 + 1;
+    for (let line = 0; line < lines; line++) {
+      const at = (i) => 4 * (horizontal ? line * W + Math.min(len - 1, Math.max(0, i)) : Math.min(len - 1, Math.max(0, i)) * W + line);
+      for (let c = 0; c < 3; c++) {
+        let sum = 0;
+        for (let i = -radius; i <= radius; i++) sum += from[at(i) + c];
+        for (let i = 0; i < len; i++) {
+          to[at(i) + c] = sum / span;
+          sum += from[at(i + radius + 1) + c] - from[at(i - radius) + c];
+        }
+      }
+      for (let i = 0; i < len; i++) to[at(i) + 3] = 255;
+    }
+  };
+  for (let n = 0; n < 3; n++) {
+    pass(src, tmp, true);
+    pass(tmp, src, false);
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// Blocky landscape behind the hero, drawn small and blurred once.
 function drawLandscape(canvas) {
   const W = 384, H = 216;
   canvas.width = W;
@@ -64,6 +92,7 @@ function drawLandscape(canvas) {
       }
     }
   }
+  blurCanvas(ctx, W, H, 3);
 }
 drawLandscape(document.getElementById("landscape"));
 

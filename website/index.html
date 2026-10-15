@@ -3,175 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ember — a tiny, fast Minecraft launcher</title>
+  <title>Ember — Minecraft launcher</title>
   <meta name="description" content="Ember is a free, lightweight launcher for Minecraft: Java Edition. Every version, Fabric, Forge and NeoForge, and one-click FPS Boost — for macOS and Windows." />
-  <meta property="og:title" content="Ember — Minecraft, lit fast." />
-  <meta property="og:description" content="A free, 4 MB launcher for Minecraft: Java Edition with one-click FPS Boost." />
-  <meta property="og:image" content="icon.png" />
+  <meta property="og:title" content="Ember — Minecraft launcher" />
+  <meta property="og:description" content="Tiny, fast and free. Every version, mod loaders and one-click FPS Boost." />
+  <meta property="og:image" content="https://emberlauncher.app/icon.png" />
+  <meta name="theme-color" content="#eef4fa" />
   <link rel="icon" type="image/png" href="favicon.png" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css?v=2" />
+  <script src="script.js?v=2" defer></script>
 </head>
 <body>
-  <div class="glow" aria-hidden="true"></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.3.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4zM13.9 5c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5.5 10.4 4.5v7H3zM11.4 4.4 21 3v8.5h-9.6zM3 12.5h7.4v7L3 18.5zM11.4 12.5H21V21l-9.6-1.4z"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.3 18.3 4.6 18.3 4.6c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></g></symbol>
+  </svg>
 
   <header class="nav">
     <a class="brand" href="#top">
-      <img src="icon.png" alt="" width="32" height="32" />
+      <img src="icon.png" alt="" width="34" height="34" />
       <span>Ember</span>
     </a>
-    <nav>
+    <nav class="nav-links">
       <a href="#features">Features</a>
+      <a href="#try">Try it</a>
       <a href="#download">Download</a>
       <a href="#faq">FAQ</a>
     </nav>
+    <a class="pill" href="https://github.com/eymenderdiyok09-dotcom/ember">
+      <svg><use href="#i-github" /></svg> GitHub
+    </a>
   </header>
 
   <main id="top">
     <section class="hero">
-      <svg class="flame" id="flame" viewBox="0 0 12 14" aria-hidden="true"></svg>
-      <h1>Minecraft, lit fast.</h1>
-      <p class="lead">
-        Ember is a tiny, free launcher for Minecraft: Java Edition. Every version, Fabric, Forge and NeoForge,
-        and one-click FPS Boost — in a 4&nbsp;MB app.
-      </p>
-      <div class="hero-actions">
-        <a class="button primary" id="hero-download" href="#download">
-          <span class="os-icon" id="hero-icon" aria-hidden="true"></span>
-          <span id="hero-label">Download Ember</span>
-        </a>
-        <a class="button ghost" href="#download" id="hero-other">All downloads</a>
-      </div>
-      <p class="meta">Version 0.1.0 · macOS 11+ (Apple Silicon &amp; Intel) · Windows 10 &amp; 11</p>
-
-      <figure class="demo">
-        <div class="demo-bar" aria-hidden="true">
-          <i></i><i></i><i></i>
-          <span class="demo-title">Ember</span>
+      <canvas class="hero-bg" id="landscape" aria-hidden="true"></canvas>
+      <div class="hero-content">
+        <h1>Minecraft launcher</h1>
+        <p class="tagline">Tiny, fast and free</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" id="hero-download" href="#download">
+            <svg class="btn-icon" id="hero-icon"><use href="#i-apple" /></svg>
+            <span id="hero-label">Download Ember</span>
+          </a>
+          <div class="more">
+            <button class="btn btn-primary btn-square" id="more-btn" aria-label="All downloads" aria-expanded="false" aria-controls="more-menu">
+              <svg class="btn-icon"><use href="#i-dots" /></svg>
+            </button>
+            <div class="menu" id="more-menu" hidden>
+              <a data-file="Ember_0.1.0_universal.dmg"><svg><use href="#i-apple" /></svg><span>macOS<small>Apple Silicon &amp; Intel</small></span></a>
+              <a data-file="Ember_0.1.0_windows-x64.zip"><svg><use href="#i-windows" /></svg><span>Windows x64<small>Intel &amp; AMD</small></span></a>
+              <a data-file="Ember_0.1.0_windows-arm64.zip"><svg><use href="#i-windows" /></svg><span>Windows ARM64<small>Snapdragon</small></span></a>
+              <a href="https://github.com/eymenderdiyok09-dotcom/ember/releases"><svg><use href="#i-github" /></svg><span>All releases<small>on GitHub</small></span></a>
+            </div>
+          </div>
         </div>
-        <iframe src="demo/index.html" title="Interactive demo of the Ember launcher" loading="lazy"></iframe>
-        <figcaption>
-          <span class="live-dot" aria-hidden="true"></span>
-          Live demo — type a name, pick a version, press Play. Downloads here are simulated.
-        </figcaption>
-      </figure>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b id="stat-versions">900+</b><span>Minecraft versions</span></div>
+        <div class="stat"><b>4 MB</b><span>app size</span></div>
+        <div class="stat"><b>1 click</b><span>FPS Boost</span></div>
+      </div>
     </section>
 
     <section class="section" id="features">
-      <h2>Everything you need, nothing you don't</h2>
+      <h2>Features</h2>
       <div class="features">
-        <article class="feature">
-          <span class="feature-icon">⬇</span>
+        <article class="card feature">
           <h3>Every version</h3>
-          <p>Pick any release or snapshot — even Beta and Alpha from 2011 — and press Play. Ember downloads it straight from Mojang.</p>
+          <p>Any release or snapshot, back to the Alpha days of 2010. Ember downloads it straight from Mojang — no official launcher needed.</p>
         </article>
-        <article class="feature">
-          <span class="feature-icon">⚡</span>
+        <article class="card feature">
           <h3>FPS Boost</h3>
-          <p>On by default. Adds Sodium, Lithium, FerriteCore and more in a separate folder, plus Java tuned for smooth frames. Your worlds stay shared.</p>
+          <p>On by default. Sodium, Lithium, FerriteCore and more in their own folder, plus Java tuned for smooth frames. Your worlds stay shared.</p>
         </article>
-        <article class="feature">
-          <span class="feature-icon">🧩</span>
+        <article class="card feature">
           <h3>Fabric, Forge, NeoForge</h3>
-          <p>Install any mod loader in one click. Ember always picks the latest stable build for your game version.</p>
+          <p>Install any mod loader in one click. Ember picks the latest stable build for your game version.</p>
         </article>
-        <article class="feature">
-          <span class="feature-icon">☕</span>
+        <article class="card feature">
           <h3>No Java setup</h3>
-          <p>Each version gets the exact Java runtime it needs, downloaded automatically. Nothing to install yourself.</p>
+          <p>Each version gets the exact Java runtime it needs, downloaded and checked automatically.</p>
         </article>
-        <article class="feature">
-          <span class="feature-icon">👤</span>
+        <article class="card feature">
           <h3>Offline &amp; Microsoft</h3>
-          <p>Play offline with any name. Microsoft account sign-in for online servers is built in and coming soon.</p>
+          <p>Play offline with any name. Microsoft sign-in for online servers is built in and coming soon.</p>
         </article>
-        <article class="feature">
-          <span class="feature-icon">🪶</span>
+        <article class="card feature">
           <h3>Tiny and native</h3>
-          <p>About 4&nbsp;MB, starts instantly, and every downloaded file is checksum-verified.</p>
+          <p>About 4 MB, opens instantly, and every downloaded file is checksum-verified.</p>
         </article>
       </div>
     </section>
 
-    <section class="section" id="download">
-      <h2>Download</h2>
-      <div class="downloads">
-        <article class="card" id="card-mac">
-          <div class="card-head">
-            <span class="os-icon mac" aria-hidden="true"></span>
-            <div>
-              <h3>macOS</h3>
-              <p class="card-meta">Universal · Apple Silicon &amp; Intel · macOS 11+ · 4.4&nbsp;MB</p>
-            </div>
-          </div>
-          <a class="button primary wide" href="https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/Ember_0.1.0_universal.dmg">Download for macOS</a>
-          <ol class="steps">
-            <li>Open <b>Ember_0.1.0_universal.dmg</b> and drag <b>Ember</b> into <b>Applications</b>.</li>
-            <li>Open Ember from Applications. It's signed and notarized by Apple, so it opens like any other app.</li>
-          </ol>
-        </article>
+    <section class="section" id="try">
+      <h2>Try it</h2>
+      <figure class="demo">
+        <iframe src="demo/index.html" title="Interactive demo of the Ember launcher" loading="lazy"></iframe>
+      </figure>
+      <p class="demo-caption">This is the real Ember interface, running in your browser. Type a name, pick a version and press Play — downloads here are simulated.</p>
+    </section>
 
-        <article class="card" id="card-win">
-          <div class="card-head">
-            <span class="os-icon win" aria-hidden="true"></span>
-            <div>
-              <h3>Windows</h3>
-              <p class="card-meta">Windows 10 &amp; 11 · portable · about 2&nbsp;MB</p>
+    <section class="section narrow" id="download">
+      <h2>Download</h2>
+      <div class="rows">
+        <details class="card row" id="row-mac">
+          <summary>
+            <svg class="row-icon"><use href="#i-apple" /></svg>
+            <span class="row-text">
+              <span class="row-title">macOS <span class="badge">For you</span></span>
+              <span class="row-sub">macOS 11 or later · Apple Silicon &amp; Intel · 4.4 MB</span>
+            </span>
+            <svg class="chevron"><use href="#i-chevron" /></svg>
+          </summary>
+          <div class="row-body">
+            <a class="btn btn-primary" data-file="Ember_0.1.0_universal.dmg">
+              <svg class="btn-icon"><use href="#i-apple" /></svg> Download for macOS
+            </a>
+            <ol class="steps">
+              <li>Open <b>Ember_0.1.0_universal.dmg</b> and drag <b>Ember</b> into <b>Applications</b>.</li>
+              <li>Open Ember. It's signed and notarized by Apple, so it opens like any other app.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="card row" id="row-win">
+          <summary>
+            <svg class="row-icon"><use href="#i-windows" /></svg>
+            <span class="row-text">
+              <span class="row-title">Windows <span class="badge">For you</span></span>
+              <span class="row-sub">Windows 10 &amp; 11 · portable, no installer · about 2 MB</span>
+            </span>
+            <svg class="chevron"><use href="#i-chevron" /></svg>
+          </summary>
+          <div class="row-body">
+            <div class="choices">
+              <a class="choice" id="win-x64" data-file="Ember_0.1.0_windows-x64.zip">
+                <span class="choice-title">Windows x64</span>
+                <span class="choice-sub">Intel &amp; AMD — most PCs</span>
+                <span class="btn btn-primary btn-small">Download</span>
+              </a>
+              <a class="choice" id="win-arm64" data-file="Ember_0.1.0_windows-arm64.zip">
+                <span class="choice-title">Windows ARM64</span>
+                <span class="choice-sub">Snapdragon, Surface Pro</span>
+                <span class="btn btn-primary btn-small">Download</span>
+              </a>
             </div>
+            <p class="hint">Not sure which? Open <b>Settings → System → About</b> and look at “System type”.</p>
+            <ol class="steps">
+              <li>Right-click the downloaded <b>.zip</b> → <b>Extract All</b>, and put the folder anywhere.</li>
+              <li>Open <b>Ember.exe</b>, keeping any files next to it in the same folder.</li>
+              <li>If you see “Windows protected your PC”, click <b>More info → Run anyway</b>.</li>
+            </ol>
+            <p class="hint">On Windows, Ember can also start <b>Bedrock Edition</b> if you have it installed.</p>
           </div>
-          <div class="button-pair">
-            <a class="button primary" id="win-x64" href="https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/Ember_0.1.0_windows-x64.zip">
-              <span class="button-main">Windows x64</span><span class="button-sub">Intel &amp; AMD · most PCs</span>
-            </a>
-            <a class="button primary" id="win-arm64" href="https://github.com/eymenderdiyok09-dotcom/ember/releases/latest/download/Ember_0.1.0_windows-arm64.zip">
-              <span class="button-main">Windows ARM64</span><span class="button-sub">Snapdragon · Surface Pro</span>
-            </a>
-          </div>
-          <p class="card-hint">Not sure? Open <b>Settings → System → About</b>: “x64-based processor” means x64, “ARM-based processor” means ARM64.</p>
-          <ol class="steps">
-            <li>Right-click the downloaded <b>.zip</b> → <b>Extract All</b>, and move the folder wherever you like.</li>
-            <li>Open <b>Ember.exe</b>. Keep any files next to it in the same folder.</li>
-            <li>If you see “Windows protected your PC”, click <b>More info → Run anyway</b>.</li>
-          </ol>
-          <p class="card-note">On Windows, Ember can also start <b>Bedrock Edition</b> if you have it installed.</p>
-        </article>
+        </details>
       </div>
     </section>
 
     <section class="section narrow" id="faq">
-      <h2>Questions</h2>
-      <details>
-        <summary>Is Ember free?</summary>
-        <p>Yes. No ads, no accounts, no tracking.</p>
-      </details>
-      <details>
-        <summary>Why does my computer warn me when I open it?</summary>
-        <p>On macOS it won't: Ember is signed and notarized by Apple. On Windows, Ember isn't code-signed yet, so SmartScreen shows a warning — click <b>More info → Run anyway</b>.</p>
-      </details>
-      <details>
-        <summary>Can I play on online servers?</summary>
-        <p>Online-mode servers and Realms need a Microsoft account that owns Minecraft: Java Edition. Ember's Microsoft sign-in is built and waiting for approval from Mojang; until then, Ember plays in offline mode (singleplayer and offline-mode servers).</p>
-      </details>
-      <details>
-        <summary>Does FPS Boost touch my mods or worlds?</summary>
-        <p>No. FPS Boost runs from its own folder (<code>ember/instances</code>) and links to your real worlds, resource packs, shader packs and screenshots. Your own <code>mods</code> folder is never changed.</p>
-      </details>
-      <details>
-        <summary>Where does Ember put game files?</summary>
-        <p>In the standard Minecraft folder — <code>~/Library/Application Support/minecraft</code> on macOS and <code>%APPDATA%\.minecraft</code> on Windows — so it works alongside the official launcher.</p>
-      </details>
+      <h2>FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Is it free?<svg class="chevron"><use href="#i-chevron" /></svg></summary>
+          <p>Yes. No ads, no accounts, no tracking — and the code is open on GitHub.</p>
+        </details>
+        <details>
+          <summary>Is it safe?<svg class="chevron"><use href="#i-chevron" /></svg></summary>
+          <p>The macOS app is signed and notarized by Apple. Game files come straight from Mojang, mods from Modrinth, and every file is checked against its official checksum. Windows builds aren't code-signed yet, so Windows shows a warning the first time.</p>
+        </details>
+        <details>
+          <summary>Can I install mods?<svg class="chevron"><use href="#i-chevron" /></svg></summary>
+          <p>Yes. Pick a Fabric, Forge or NeoForge version and put your mods in the <code>mods</code> folder of your Minecraft directory.</p>
+        </details>
+        <details>
+          <summary>Does FPS Boost touch my mods or worlds?<svg class="chevron"><use href="#i-chevron" /></svg></summary>
+          <p>No. FPS Boost runs from its own folder (<code>ember/instances</code>) and links to your real worlds, resource packs, shader packs and screenshots. Your own <code>mods</code> folder is never changed.</p>
+        </details>
+        <details>
+          <summary>Can I play on online servers?<svg class="chevron"><use href="#i-chevron" /></svg></summary>
+          <p>Online-mode servers and Realms need a Microsoft account that owns Minecraft: Java Edition. Ember's Microsoft sign-in is built and waiting for approval from Mojang; until then, Ember plays in offline mode.</p>
+        </details>
+        <details>
+          <summary>Minecraft doesn't start. What should I do?<svg class="chevron"><use href="#i-chevron" /></svg></summary>
+          <p>Try turning FPS Boost off, or lowering the memory slider. If it still won't start, open an issue on GitHub and attach <code>logs/mc-launcher-output.log</code> from your Minecraft folder.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="section narrow" id="support">
+      <h2>Support</h2>
+      <div class="card support-text">
+        <p>Something not working the way it should? Let us know and we'll help you out.</p>
+      </div>
+      <a class="card support-link" href="https://github.com/eymenderdiyok09-dotcom/ember/issues">
+        <svg><use href="#i-github" /></svg>
+        <span>GitHub Issues</span>
+      </a>
     </section>
   </main>
 
   <footer class="footer">
-    <p>
-      <img src="icon.png" alt="" width="20" height="20" />
-      Ember 0.1.0
-    </p>
-    <p class="legal">
-      NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
-      Minecraft is a trademark of Mojang AB.
-    </p>
+    <p>The game has a recommended PEGI rating of 7 and an ESRB rating of Everyone 10+.</p>
+    <p>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+    <p>Ember is not affiliated with or endorsed by Mojang Studios. Minecraft is a trademark of Mojang AB.</p>
+    <p>Ember 0.1.0 · <a href="https://github.com/eymenderdiyok09-dotcom/ember">Source on GitHub</a></p>
   </footer>
 </body>
 </html>

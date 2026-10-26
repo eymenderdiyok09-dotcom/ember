@@ -69,6 +69,13 @@ DMG="$BUNDLE/dmg/Ember_${VERSION}_universal.dmg"
 xcrun notarytool submit "$DMG" --keychain-profile ember --wait | tee /dev/stderr | grep -q "status: Accepted"
 xcrun stapler staple "$DMG"
 # The DMG's ticket normally covers the app inside; if not, notarize the app on its own.
+if [ ! -d "$BUNDLE/macos/Ember.app" ]; then
+  MOUNT_DIR=$(mktemp -d /tmp/ember-dmg.XXXXXX)
+  hdiutil attach "$DMG" -nobrowse -mountpoint "$MOUNT_DIR"
+  cp -R "$MOUNT_DIR/Ember.app" "$BUNDLE/macos/"
+  hdiutil detach "$MOUNT_DIR"
+  rmdir "$MOUNT_DIR"
+fi
 if ! xcrun stapler staple "$BUNDLE/macos/Ember.app"; then
   ditto -c -k --keepParent "$BUNDLE/macos/Ember.app" "$DIST/notarize-app.zip"
   xcrun notarytool submit "$DIST/notarize-app.zip" --keychain-profile ember --wait | grep -q "status: Accepted"

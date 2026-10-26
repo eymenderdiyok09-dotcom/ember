@@ -76,7 +76,7 @@ I18N.add("th", {
   q_fps: "FPS Boost ไปยุ่งกับม็อดหรือโลกของฉันไหม?",
   a_fps: "ไม่ FPS Boost ทำงานจากโฟลเดอร์ของตัวเอง (<code>ember/instances</code>) และลิงก์ไปยังโลก รีซอร์สแพ็ก แพ็กเชดเดอร์ และภาพหน้าจอจริงของคุณ โฟลเดอร์ <code>mods</code> ของคุณจะไม่ถูกเปลี่ยน",
   q_online: "เล่นบนเซิร์ฟเวอร์ออนไลน์ได้ไหม?",
-  a_online: "ได้ ด้วย<a href=\"https://account.ely.by/register\">บัญชี Ely.by ฟรี</a>: เลือก <b>Ely.by</b> ข้างผู้เล่น ลงชื่อเข้าใช้ แล้วเข้าเซิร์ฟเวอร์ไหนก็ได้ที่รองรับ Ely.by เซิร์ฟเวอร์ออนไลน์ทางการและ Realms ต้องใช้บัญชี Microsoft — การลงชื่อเข้าใช้ Microsoft ของ Ember พร้อมแล้วและกำลังรอ Mojang อนุมัติ",
+  a_online: "ได้: ลงชื่อเข้าใช้ด้วย <b>บัญชี Microsoft</b> สำหรับเซิร์ฟเวอร์ทางการและ Realms หรือใช้ <a href=\"https://account.ely.by/register\">บัญชี Ely.by ฟรี</a> เพื่อเข้าเซิร์ฟเวอร์ที่รองรับ Ely.by",
   q_crash: "Minecraft เปิดไม่ขึ้น ทำยังไงดี?",
   a_crash: "ลองปิด FPS Boost หรือเชดเดอร์ หรือลดหน่วยความจำลง ถ้ายังเปิดไม่ได้ ให้เปิด issue บน GitHub แล้วแนบไฟล์ <code>logs/mc-launcher-output.log</code> จากโฟลเดอร์ Minecraft",
 

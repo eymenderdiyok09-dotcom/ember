@@ -76,7 +76,7 @@ I18N.add("tr", {
   q_fps: "FPS Boost modlarıma veya dünyalarıma dokunur mu?",
   a_fps: "Hayır. FPS Boost kendi klasöründen (<code>ember/instances</code>) çalışır ve gerçek dünyalarına, kaynak paketlerine, shader paketlerine ve ekran görüntülerine bağlanır. Kendi <code>mods</code> klasörün asla değişmez.",
   q_online: "Çevrimiçi sunucularda oynayabilir miyim?",
-  a_online: "Evet, ücretsiz bir <a href=\"https://account.ely.by/register\">Ely.by hesabıyla</a>: Oyuncu'nun yanında <b>Ely.by</b>'ı seç, giriş yap ve Ely.by destekleyen her sunucuya katıl. Resmi çevrimiçi sunucular ve Realms için Microsoft hesabı gerekir — Ember'ın Microsoft girişi hazır ve Mojang'ın onayını bekliyor.",
+  a_online: "Evet: Resmi çevrimiçi sunucular ve Realms için <b>Microsoft hesabınla</b> giriş yapabilir, ya da ücretsiz bir <a href=\"https://account.ely.by/register\">Ely.by hesabıyla</a> Ely.by destekleyen tüm sunuculara katılabilirsin.",
   q_crash: "Minecraft açılmıyor. Ne yapmalıyım?",
   a_crash: "FPS Boost'u veya Shader'ları kapatmayı ya da bellek kaydırıcısını düşürmeyi dene. Yine açılmazsa GitHub'da bir issue aç ve Minecraft klasöründeki <code>logs/mc-launcher-output.log</code> dosyasını ekle.",
 

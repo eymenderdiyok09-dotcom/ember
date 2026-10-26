@@ -76,7 +76,7 @@ I18N.add("vi", {
   q_fps: "FPS Boost có động vào mod hay thế giới của tôi không?",
   a_fps: "Không. FPS Boost chạy từ thư mục riêng (<code>ember/instances</code>) và liên kết tới thế giới, gói tài nguyên, gói shader và ảnh chụp thật của bạn. Thư mục <code>mods</code> của bạn không bao giờ bị thay đổi.",
   q_online: "Có chơi được trên server trực tuyến không?",
-  a_online: "Được, với một <a href=\"https://account.ely.by/register\">tài khoản Ely.by miễn phí</a>: chọn <b>Ely.by</b> cạnh mục Người chơi, đăng nhập và vào bất kỳ server nào hỗ trợ Ely.by. Server trực tuyến chính thức và Realms cần tài khoản Microsoft — tính năng đăng nhập Microsoft của Ember đã sẵn sàng và đang chờ Mojang duyệt.",
+  a_online: "Được: đăng nhập bằng <b>tài khoản Microsoft</b> cho máy chủ trực tuyến chính thức và Realms, hoặc dùng <a href=\"https://account.ely.by/register\">tài khoản Ely.by miễn phí</a> cho bất kỳ máy chủ nào hỗ trợ Ely.by.",
   q_crash: "Minecraft không khởi động. Tôi nên làm gì?",
   a_crash: "Thử tắt FPS Boost hoặc Shader, hoặc giảm bộ nhớ. Nếu vẫn không chạy, hãy mở issue trên GitHub và đính kèm <code>logs/mc-launcher-output.log</code> trong thư mục Minecraft.",
 

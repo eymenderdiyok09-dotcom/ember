@@ -76,7 +76,7 @@ I18N.add("ro", {
   q_fps: "Atinge FPS Boost modurile sau lumile mele?",
   a_fps: "Nu. FPS Boost rulează din propriul folder (<code>ember/instances</code>) și leagă lumile, pachetele de resurse, pachetele de shadere și capturile tale reale. Folderul tău <code>mods</code> nu e modificat niciodată.",
   q_online: "Pot juca pe servere online?",
-  a_online: "Da, cu un <a href=\"https://account.ely.by/register\">cont Ely.by gratuit</a>: alege <b>Ely.by</b> lângă Jucător, conectează-te și intră pe orice server compatibil cu Ely.by. Serverele online oficiale și Realms cer un cont Microsoft — conectarea Microsoft din Ember e gata și așteaptă aprobarea Mojang.",
+  a_online: "Da: conectează-te cu <b>contul Microsoft</b> pentru serverele online oficiale și Realms, sau folosește un <a href=\"https://account.ely.by/register\">cont Ely.by gratuit</a> pentru orice server compatibil cu Ely.by.",
   q_crash: "Minecraft nu pornește. Ce fac?",
   a_crash: "Încearcă să oprești FPS Boost sau shaderele, ori să scazi memoria. Dacă tot nu pornește, deschide un issue pe GitHub și atașează <code>logs/mc-launcher-output.log</code> din folderul Minecraft.",
 

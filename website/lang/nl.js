@@ -76,7 +76,7 @@ I18N.add("nl", {
   q_fps: "Raakt FPS Boost mijn mods of werelden aan?",
   a_fps: "Nee. FPS Boost draait vanuit een eigen map (<code>ember/instances</code>) en linkt naar je echte werelden, resourcepacks, shaderpakketten en screenshots. Je eigen map <code>mods</code> wordt nooit aangepast.",
   q_online: "Kan ik op onlineservers spelen?",
-  a_online: "Ja, met een gratis <a href=\"https://account.ely.by/register\">Ely.by-account</a>: kies <b>Ely.by</b> naast Speler, log in en speel op elke server met Ely.by-ondersteuning. Officiële onlineservers en Realms hebben een Microsoft-account nodig — de Microsoft-login in Ember is klaar en wacht op goedkeuring van Mojang.",
+  a_online: "Ja: log in met je <b>Microsoft-account</b> voor officiële onlineservers en Realms, of gebruik een gratis <a href=\"https://account.ely.by/register\">Ely.by-account</a> voor elke server met Ely.by-ondersteuning.",
   q_crash: "Minecraft start niet. Wat nu?",
   a_crash: "Zet FPS Boost of Shaders uit, of verlaag het geheugen. Start het nog steeds niet, open dan een issue op GitHub en voeg <code>logs/mc-launcher-output.log</code> uit je Minecraft-map toe.",
 

@@ -76,7 +76,7 @@ I18N.add("de", {
   q_fps: "Verändert FPS Boost meine Mods oder Welten?",
   a_fps: "Nein. FPS Boost läuft in einem eigenen Ordner (<code>ember/instances</code>) und verlinkt deine echten Welten, Ressourcenpakete, Shaderpakete und Screenshots. Dein eigener <code>mods</code>-Ordner bleibt unverändert.",
   q_online: "Kann ich auf Online-Servern spielen?",
-  a_online: "Ja, mit einem kostenlosen <a href=\"https://account.ely.by/register\">Ely.by-Konto</a>: Wähle <b>Ely.by</b> neben Spieler, melde dich an und betritt jeden Server mit Ely.by-Unterstützung. Offizielle Online-Server und Realms brauchen ein Microsoft-Konto — Embers Microsoft-Anmeldung ist fertig und wartet auf die Freigabe durch Mojang.",
+  a_online: "Ja: Melde dich mit deinem <b>Microsoft-Konto</b> für offizielle Online-Server und Realms an, oder nutze ein kostenloses <a href=\"https://account.ely.by/register\">Ely.by-Konto</a> für jeden Server mit Ely.by-Unterstützung.",
   q_crash: "Minecraft startet nicht. Was tun?",
   a_crash: "Schalte FPS Boost oder Shader aus oder verringere den Arbeitsspeicher-Regler. Startet es immer noch nicht, eröffne ein Issue auf GitHub und häng <code>logs/mc-launcher-output.log</code> aus deinem Minecraft-Ordner an.",
 

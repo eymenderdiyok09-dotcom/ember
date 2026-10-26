@@ -76,7 +76,7 @@ I18N.add("id", {
   q_fps: "Apakah FPS Boost mengubah mod atau duniaku?",
   a_fps: "Tidak. FPS Boost berjalan dari foldernya sendiri (<code>ember/instances</code>) dan terhubung ke dunia, resource pack, shader pack, dan tangkapan layarmu yang asli. Folder <code>mods</code>-mu tidak pernah diubah.",
   q_online: "Bisa main di server online?",
-  a_online: "Bisa, dengan <a href=\"https://account.ely.by/register\">akun Ely.by gratis</a>: pilih <b>Ely.by</b> di sebelah Pemain, masuk, lalu gabung ke server mana pun yang mendukung Ely.by. Server online resmi dan Realms butuh akun Microsoft — fitur masuk Microsoft di Ember sudah siap dan menunggu persetujuan Mojang.",
+  a_online: "Ya: masuk dengan <b>akun Microsoft</b> untuk server online resmi dan Realms, atau gunakan <a href=\"https://account.ely.by/register\">akun Ely.by gratis</a> untuk bergabung ke server mana pun yang mendukung Ely.by.",
   q_crash: "Minecraft tidak mau jalan. Harus bagaimana?",
   a_crash: "Coba matikan FPS Boost atau Shader, atau turunkan memori. Kalau masih tidak jalan, buat issue di GitHub dan lampirkan <code>logs/mc-launcher-output.log</code> dari folder Minecraft-mu.",
 

@@ -76,7 +76,7 @@ I18N.add("ja", {
   q_fps: "FPS Boost は自分の Mod やワールドに影響しますか?",
   a_fps: "いいえ。FPS Boost は専用フォルダー(<code>ember/instances</code>)で動き、本物のワールド、リソースパック、シェーダーパック、スクリーンショットにリンクします。自分の <code>mods</code> フォルダーは変更されません。",
   q_online: "オンラインサーバーで遊べますか?",
-  a_online: "はい、無料の <a href=\"https://account.ely.by/register\">Ely.by アカウント</a>で遊べます。プレイヤーの横で <b>Ely.by</b> を選んでサインインすれば、Ely.by 対応サーバーに参加できます。公式のオンラインサーバーや Realms には Microsoft アカウントが必要です — Ember の Microsoft サインインは完成済みで、Mojang の承認待ちです。",
+  a_online: "はい。公式オンラインサーバーや Realms には <b>Microsoft アカウント</b>でサインインでき、無料の <a href=\"https://account.ely.by/register\">Ely.by アカウント</a>を使えば Ely.by 対応のすべてのサーバーに参加できます。",
   q_crash: "Minecraft が起動しません。どうすれば?",
   a_crash: "FPS Boost やシェーダーをオフにするか、メモリを減らしてみてください。それでも起動しない場合は GitHub で issue を作成し、Minecraft フォルダーの <code>logs/mc-launcher-output.log</code> を添付してください。",
 

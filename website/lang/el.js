@@ -76,7 +76,7 @@ I18N.add("el", {
   q_fps: "Πειράζει το FPS Boost τα mods ή τους κόσμους μου;",
   a_fps: "Όχι. Το FPS Boost τρέχει από δικό του φάκελο (<code>ember/instances</code>) και συνδέεται με τους αληθινούς σου κόσμους, πακέτα πόρων, πακέτα shader και στιγμιότυπα. Ο δικός σου φάκελος <code>mods</code> δεν αλλάζει ποτέ.",
   q_online: "Μπορώ να παίξω σε online servers;",
-  a_online: "Ναι, με δωρεάν <a href=\"https://account.ely.by/register\">λογαριασμό Ely.by</a>: διάλεξε <b>Ely.by</b> δίπλα στο Παίκτης, συνδέσου και μπες σε οποιονδήποτε server υποστηρίζει το Ely.by. Οι επίσημοι online servers και τα Realms θέλουν λογαριασμό Microsoft — η σύνδεση Microsoft του Ember είναι έτοιμη και περιμένει έγκριση από τη Mojang.",
+  a_online: "Ναι: συνδέσου με τον <b>λογαριασμό Microsoft</b> σου για επίσημους online servers και Realms, ή με έναν δωρεάν <a href=\"https://account.ely.by/register\">λογαριασμό Ely.by</a> για οποιονδήποτε server υποστηρίζει το Ely.by.",
   q_crash: "Το Minecraft δεν ξεκινά. Τι να κάνω;",
   a_crash: "Δοκίμασε να κλείσεις το FPS Boost ή τα Shaders, ή να μειώσεις τη μνήμη. Αν πάλι δεν ξεκινά, άνοιξε ένα issue στο GitHub και επισύναψε το <code>logs/mc-launcher-output.log</code> από τον φάκελο του Minecraft.",
 

@@ -76,7 +76,7 @@ I18N.add("zh-CN", {
   q_fps: "FPS Boost 会动我的模组或存档吗?",
   a_fps: "不会。FPS Boost 在独立文件夹(<code>ember/instances</code>)中运行,并链接到你真实的存档、资源包、光影包和截图。你自己的 <code>mods</code> 文件夹永远不会被修改。",
   q_online: "可以玩在线服务器吗?",
-  a_online: "可以,使用免费的 <a href=\"https://account.ely.by/register\">Ely.by 账户</a>:在“玩家”旁选择 <b>Ely.by</b>,登录后即可进入任何支持 Ely.by 的服务器。官方在线服务器和 Realms 需要 Microsoft 账户 — Ember 的 Microsoft 登录已经完成,正在等待 Mojang 批准。",
+  a_online: "可以:使用 <b>Microsoft 账户</b>即可登录官方在线服务器和 Realms,也可以使用免费的 <a href=\"https://account.ely.by/register\">Ely.by 账户</a>进入任何支持 Ely.by 的服务器。",
   q_crash: "Minecraft 打不开,怎么办?",
   a_crash: "试着关闭 FPS Boost 或光影,或者调低内存。如果还是打不开,请在 GitHub 上提交 issue,并附上 Minecraft 文件夹中的 <code>logs/mc-launcher-output.log</code>。",
 

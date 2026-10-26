@@ -76,7 +76,7 @@ I18N.add("ru", {
   q_fps: "FPS Boost трогает мои моды или миры?",
   a_fps: "Нет. FPS Boost работает из своей папки (<code>ember/instances</code>) и ссылается на твои настоящие миры, ресурспаки, пакеты шейдеров и скриншоты. Твоя папка <code>mods</code> никогда не меняется.",
   q_online: "Можно играть на онлайн-серверах?",
-  a_online: "Да, с бесплатным <a href=\"https://account.ely.by/register\">аккаунтом Ely.by</a>: выбери <b>Ely.by</b> рядом с «Игрок», войди и заходи на любой сервер с поддержкой Ely.by. Для официальных онлайн-серверов и Realms нужен аккаунт Microsoft — вход через Microsoft в Ember готов и ждёт одобрения Mojang.",
+  a_online: "Да: входи через <b>аккаунт Microsoft</b> для официальных онлайн-серверов и Realms или используй бесплатный <a href=\"https://account.ely.by/register\">аккаунт Ely.by</a> для серверов с поддержкой Ely.by.",
   q_crash: "Minecraft не запускается. Что делать?",
   a_crash: "Попробуй выключить FPS Boost или шейдеры либо уменьшить память. Если всё равно не запускается, создай issue на GitHub и приложи <code>logs/mc-launcher-output.log</code> из папки Minecraft.",
 

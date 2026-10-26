@@ -76,7 +76,7 @@ I18N.add("fa", {
   q_fps: "آیا FPS Boost به مادها یا دنیاهایم دست می‌زند؟",
   a_fps: "نه. FPS Boost از پوشهٔ خودش (<code>ember/instances</code>) اجرا می‌شود و به دنیاها، بسته‌های منابع، بسته‌های شیدر و اسکرین‌شات‌های واقعی‌ات پیوند می‌خورد. پوشهٔ <code>mods</code> خودت هیچ‌وقت تغییر نمی‌کند.",
   q_online: "می‌توانم روی سرورهای آنلاین بازی کنم؟",
-  a_online: "بله، با یک <a href=\"https://account.ely.by/register\">حساب رایگان Ely.by</a>: کنار بازیکن، <b>Ely.by</b> را انتخاب کن، وارد شو و به هر سروری که از Ely.by پشتیبانی می‌کند بپیوند. سرورهای آنلاین رسمی و Realms حساب Microsoft لازم دارند — ورود با Microsoft در Ember آماده است و منتظر تأیید Mojang است.",
+  a_online: "بله: با <b>حساب Microsoft</b> برای سرورهای رسمی آنلاین و Realms وارد شو، یا با یک <a href=\"https://account.ely.by/register\">حساب رایگان Ely.by</a> به هر سروری که از Ely.by پشتیبانی می‌کند بپیوند.",
   q_crash: "Minecraft اجرا نمی‌شود. چه کار کنم؟",
   a_crash: "FPS Boost یا شیدرها را خاموش کن یا حافظه را کم کن. اگر باز هم اجرا نشد، در GitHub یک issue باز کن و فایل <code>logs/mc-launcher-output.log</code> را از پوشهٔ Minecraft پیوست کن.",
 

@@ -76,7 +76,7 @@ I18N.add("hi", {
   q_fps: "क्या FPS Boost मेरे मॉड या दुनियाओं को छेड़ता है?",
   a_fps: "नहीं। FPS Boost अपने अलग फ़ोल्डर (<code>ember/instances</code>) से चलता है और आपकी असली दुनियाओं, रिसोर्स पैक, शेडर पैक और स्क्रीनशॉट से जुड़ता है। आपका अपना <code>mods</code> फ़ोल्डर कभी नहीं बदलता।",
   q_online: "क्या मैं ऑनलाइन सर्वरों पर खेल सकता हूँ?",
-  a_online: "हाँ, मुफ़्त <a href=\"https://account.ely.by/register\">Ely.by खाते</a> से: खिलाड़ी के पास <b>Ely.by</b> चुनें, साइन इन करें और Ely.by सपोर्ट करने वाले किसी भी सर्वर से जुड़ें। ऑफ़िशियल ऑनलाइन सर्वरों और Realms के लिए Microsoft खाता चाहिए — Ember का Microsoft साइन-इन तैयार है और Mojang की मंज़ूरी का इंतज़ार कर रहा है।",
+  a_online: "हाँ: आधिकारिक ऑनलाइन सर्वरों और Realms के लिए अपने <b>Microsoft खाते</b> से साइन इन करें, या Ely.by समर्थित सर्वरों के लिए मुफ़्त <a href=\"https://account.ely.by/register\">Ely.by खाते</a> का उपयोग करें।",
   q_crash: "Minecraft शुरू नहीं हो रहा। क्या करूँ?",
   a_crash: "FPS Boost या शेडर बंद करके या मेमोरी कम करके देखें। फिर भी शुरू न हो, तो GitHub पर issue खोलें और अपने Minecraft फ़ोल्डर से <code>logs/mc-launcher-output.log</code> जोड़ें।",
 

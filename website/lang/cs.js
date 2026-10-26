@@ -76,7 +76,7 @@ I18N.add("cs", {
   q_fps: "Sahá FPS Boost na moje módy nebo světy?",
   a_fps: "Ne. FPS Boost běží z vlastní složky (<code>ember/instances</code>) a odkazuje na tvoje skutečné světy, balíčky zdrojů, balíčky shaderů a snímky obrazovky. Tvoje složka <code>mods</code> se nikdy nemění.",
   q_online: "Můžu hrát na online serverech?",
-  a_online: "Ano, s bezplatným <a href=\"https://account.ely.by/register\">účtem Ely.by</a>: vyber <b>Ely.by</b> vedle pole Hráč, přihlas se a připoj se na jakýkoli server s podporou Ely.by. Oficiální online servery a Realms vyžadují účet Microsoft — přihlášení přes Microsoft v Emberu je hotové a čeká na schválení Mojangem.",
+  a_online: "Ano: přihlas se pomocí <b>účtu Microsoft</b> na oficiální online servery a Realms, nebo použij bezplatný <a href=\"https://account.ely.by/register\">účet Ely.by</a> pro servery s podporou Ely.by.",
   q_crash: "Minecraft se nespustí. Co dělat?",
   a_crash: "Zkus vypnout FPS Boost nebo shadery, případně snížit paměť. Pokud se pořád nespustí, založ issue na GitHubu a přilož <code>logs/mc-launcher-output.log</code> ze složky Minecraftu.",
 

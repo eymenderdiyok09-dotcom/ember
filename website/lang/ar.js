@@ -76,7 +76,7 @@ I18N.add("ar", {
   q_fps: "هل يغيّر FPS Boost تعديلاتي أو عوالمي؟",
   a_fps: "لا. يعمل FPS Boost من مجلده الخاص (<code>ember/instances</code>) ويرتبط بعوالمك وحزم الموارد وحزم الظلال ولقطات الشاشة الحقيقية. مجلد <code>mods</code> الخاص بك لا يتغيّر أبدًا.",
   q_online: "هل يمكنني اللعب على خوادم عبر الإنترنت؟",
-  a_online: "نعم، بحساب <a href=\"https://account.ely.by/register\">Ely.by مجاني</a>: اختر <b>Ely.by</b> بجانب اللاعب، وسجّل الدخول، وادخل أي خادم يدعم Ely.by. أما الخوادم الرسمية وRealms فتحتاج إلى حساب Microsoft — تسجيل الدخول عبر Microsoft في Ember جاهز وينتظر موافقة Mojang.",
+  a_online: "نعم: سجّل الدخول بـ <b>حساب Microsoft</b> للخوادم الرسمية عبر الإنترنت وRealms، أو استخدم حساب <a href=\"https://account.ely.by/register\">Ely.by مجاني</a> لأي خادم يدعم Ely.by.",
   q_crash: "Minecraft لا يعمل. ماذا أفعل؟",
   a_crash: "جرّب إيقاف FPS Boost أو الظلال، أو تقليل الذاكرة. إذا ظل لا يعمل، افتح مشكلة على GitHub وأرفق ملف <code>logs/mc-launcher-output.log</code> من مجلد Minecraft.",
 

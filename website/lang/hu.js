@@ -76,7 +76,7 @@ I18N.add("hu", {
   q_fps: "Hozzányúl az FPS Boost a modjaimhoz vagy világaimhoz?",
   a_fps: "Nem. Az FPS Boost a saját mappájából fut (<code>ember/instances</code>), és a valódi világaidra, erőforráscsomagjaidra, shadercsomagjaidra és képernyőképeidre hivatkozik. A saját <code>mods</code> mappád sosem változik.",
   q_online: "Játszhatok online szervereken?",
-  a_online: "Igen, egy ingyenes <a href=\"https://account.ely.by/register\">Ely.by-fiókkal</a>: válaszd az <b>Ely.by</b>-t a Játékos mellett, jelentkezz be, és csatlakozz bármely Ely.by-t támogató szerverhez. A hivatalos online szerverekhez és a Realmshez Microsoft-fiók kell — az Ember Microsoft-bejelentkezése elkészült, és a Mojang jóváhagyására vár.",
+  a_online: "Igen: jelentkezz be a <b>Microsoft-fiókoddal</b> a hivatalos online szerverekhez és a Realmshez, vagy használj ingyenes <a href=\"https://account.ely.by/register\">Ely.by-fiókot</a> bármely Ely.by-t támogató szerverhez.",
   q_crash: "Nem indul a Minecraft. Mit tegyek?",
   a_crash: "Próbáld kikapcsolni az FPS Boostot vagy a shadereket, vagy csökkentsd a memóriát. Ha még mindig nem indul, nyiss egy issue-t a GitHubon, és csatold a Minecraft-mappádból a <code>logs/mc-launcher-output.log</code> fájlt.",
 

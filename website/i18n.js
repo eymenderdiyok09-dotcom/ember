@@ -165,7 +165,7 @@ async function initI18n() {
   if (lang !== "en") {
     await new Promise((resolve) => {
       const script = document.createElement("script");
-      script.src = `lang/${lang}.js?v=3`;
+      script.src = `lang/${lang}.js?v=4`;
       script.onload = script.onerror = resolve;
       document.head.append(script);
     });

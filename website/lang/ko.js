@@ -76,7 +76,7 @@ I18N.add("ko", {
   q_fps: "FPS Boost가 내 모드나 월드를 건드리나요?",
   a_fps: "아니요. FPS Boost는 전용 폴더(<code>ember/instances</code>)에서 돌아가고, 진짜 월드, 리소스 팩, 셰이더 팩, 스크린샷에 연결만 해요. 내 <code>mods</code> 폴더는 절대 바뀌지 않아요.",
   q_online: "온라인 서버에서 플레이할 수 있나요?",
-  a_online: "네, 무료 <a href=\"https://account.ely.by/register\">Ely.by 계정</a>이 있으면 돼요. 플레이어 옆에서 <b>Ely.by</b>를 고르고 로그인하면 Ely.by를 지원하는 서버 어디든 들어갈 수 있어요. 공식 온라인 서버와 Realms는 Microsoft 계정이 필요해요 — Ember의 Microsoft 로그인은 준비가 끝났고 Mojang의 승인을 기다리고 있어요.",
+  a_online: "네! 공식 온라인 서버와 Realms는 <b>Microsoft 계정</b>으로 로그인해 이용할 수 있고, 무료 <a href=\"https://account.ely.by/register\">Ely.by 계정</a>으로 Ely.by를 지원하는 서버에도 들어갈 수 있어요.",
   q_crash: "Minecraft가 실행되지 않아요. 어떻게 하죠?",
   a_crash: "FPS Boost나 셰이더를 끄거나 메모리를 줄여 보세요. 그래도 안 되면 GitHub에 issue를 올리고 Minecraft 폴더의 <code>logs/mc-launcher-output.log</code>를 첨부해 주세요.",
 

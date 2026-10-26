@@ -87,9 +87,10 @@ I18N.add("hu", {
   click_to_copy: "Kattints a másoláshoz",
   click_code_hint: "Kattints a kódra a másoláshoz",
   ms_open: "{url} megnyitása",
-  ms_waiting: "Várakozás a bejelentkezés befejezésére…",
-  ms_not_configured: "A Microsoft-bejelentkezés ebben az Ember-verzióban még nincs bekapcsolva. Mojang által jóváhagyott alkalmazásazonosító kell hozzá; addig használd az Offline vagy az Ely.by módot.",
   code_copied: "Kód kimásolva",
+  ms_browser: "Fejezd be a bejelentkezést az imént megnyílt böngészőablakban.",
+  ms_reopen: "Bejelentkezési oldal megnyitása újra",
+  ms_waiting: "Várakozás a bejelentkezés befejezésére…",
   back: "Vissza",
 
   ely_title: "Ely.by-fiók",

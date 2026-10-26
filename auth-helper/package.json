@@ -1,0 +1,21 @@
+{
+  "name": "ember-microsoft-auth",
+  "version": "0.6.3",
+  "private": true,
+  "description": "Ember's private prismarine-auth bridge",
+  "scripts": {
+    "build": "node build.cjs",
+    "test": "node --test test/*.test.cjs"
+  },
+  "dependencies": {
+    "prismarine-auth": "3.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  },
+  "overrides": {
+    "@azure/msal-node": {
+      "uuid": "11.1.1"
+    }
+  }
+}

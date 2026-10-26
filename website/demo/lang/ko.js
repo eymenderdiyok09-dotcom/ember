@@ -87,9 +87,10 @@ I18N.add("ko", {
   click_to_copy: "클릭해서 복사",
   click_code_hint: "코드를 클릭하면 복사돼요",
   ms_open: "{url} 열기",
-  ms_waiting: "로그인을 마칠 때까지 기다리는 중…",
-  ms_not_configured: "이 버전의 Ember에서는 Microsoft 로그인이 아직 켜져 있지 않아요. Mojang이 승인한 앱 ID가 필요해요. 그때까지는 오프라인이나 Ely.by를 사용하세요.",
   code_copied: "코드를 복사했어요",
+  ms_browser: "방금 열린 브라우저 창에서 로그인을 완료하세요.",
+  ms_reopen: "로그인 페이지 다시 열기",
+  ms_waiting: "로그인을 마칠 때까지 기다리는 중…",
   back: "뒤로",
 
   ely_title: "Ely.by 계정",

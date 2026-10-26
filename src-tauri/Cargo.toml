@@ -1,6 +1,6 @@
 [package]
 name = "mc-launcher"
-version = "0.6.2"
+version = "0.6.3"
 description = "Ember — a lightweight Minecraft launcher"
 license = "MIT"
 repository = "https://github.com/eymenderdiyok09-dotcom/ember"
@@ -24,6 +24,9 @@ ureq = { version = "3", features = ["json"] }
 keyring = { version = "3", features = ["apple-native", "windows-native"] }
 base64 = "0.22"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+aes-gcm = "0.10"
+flate2 = "1"
+tar = "0.4"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

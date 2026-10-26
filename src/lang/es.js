@@ -87,9 +87,10 @@ I18N.add("es", {
   click_to_copy: "Haz clic para copiar",
   click_code_hint: "Haz clic en el código para copiarlo",
   ms_open: "Abrir {url}",
-  ms_waiting: "Esperando a que termines de iniciar sesión…",
-  ms_not_configured: "El inicio de sesión con Microsoft aún no está activado en esta versión de Ember. Necesita un ID de aplicación aprobado por Mojang; mientras tanto, usa Sin conexión o Ely.by.",
   code_copied: "Código copiado",
+  ms_browser: "Termina de iniciar sesión en la ventana del navegador que se acaba de abrir.",
+  ms_reopen: "Abrir de nuevo la página de inicio de sesión",
+  ms_waiting: "Esperando a que termines de iniciar sesión…",
   back: "Atrás",
 
   ely_title: "Cuenta de Ely.by",

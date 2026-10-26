@@ -87,9 +87,10 @@ I18N.add("zh-CN", {
   click_to_copy: "点击复制",
   click_code_hint: "点击代码即可复制",
   ms_open: "打开 {url}",
-  ms_waiting: "正在等待你完成登录…",
-  ms_not_configured: "此版本的 Ember 尚未开启 Microsoft 登录。它需要经 Mojang 批准的应用 ID;在此之前请使用离线或 Ely.by。",
   code_copied: "代码已复制",
+  ms_browser: "请在刚打开的浏览器窗口中完成登录。",
+  ms_reopen: "重新打开登录页面",
+  ms_waiting: "正在等待你完成登录…",
   back: "返回",
 
   ely_title: "Ely.by 账户",

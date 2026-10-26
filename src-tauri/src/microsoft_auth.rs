@@ -1,45 +1,28 @@
-//! Microsoft account sign-in for online play.
-//!
-//! Device-code OAuth with Microsoft → Xbox Live → XSTS → Minecraft services.
-//! The refresh token and Minecraft token are kept in the OS credential store
-//! (macOS Keychain / Windows Credential Manager), never in plain files.
-//!
-//! Needs an Azure app registration (public client, personal accounts) whose
-//! client ID is approved by Mojang for Minecraft services; set it at build
-//! time with `EMBER_MSA_CLIENT_ID`.
+//! Microsoft → Xbox → Minecraft authentication through prismarine-auth.
+//! Only device codes and public profile details cross the frontend boundary.
+mod runtime;
+mod storage;
 
-use base64::Engine;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Mutex;
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::{io::{BufRead, BufReader, Read, Write}, process::{Child, Command, Stdio},
+    sync::{atomic::{AtomicBool, Ordering}, mpsc, Arc, Mutex}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}};
+use tauri::Emitter;
 
-const CLIENT_ID: Option<&str> = option_env!("EMBER_MSA_CLIENT_ID");
-const SCOPE: &str = "XboxLive.signin offline_access";
-const DEVICE_CODE_URL: &str = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
-const TOKEN_URL: &str = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-const XBL_URL: &str = "https://user.auth.xboxlive.com/user/authenticate";
-const XSTS_URL: &str = "https://xsts.auth.xboxlive.com/xsts/authorize";
-const MC_LOGIN_URL: &str = "https://api.minecraftservices.com/authentication/login_with_xbox";
-const MC_PROFILE_URL: &str = "https://api.minecraftservices.com/minecraft/profile";
-const KEYRING_SERVICE: &str = "app.ember.launcher";
-const KEYRING_USER: &str = "microsoft-account";
+const HELPER: &str = include_str!("../../auth-helper/dist/main.cjs");
 
-/// Stored in the credential store.
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Account {
     pub name: String,
     pub uuid: String,
     pub xuid: String,
     pub mc_token: String,
-    /// Unix seconds.
     pub mc_expires_at: u64,
-    pub refresh_token: String,
     pub skin_url: Option<String>,
+    #[serde(default)]
+    pub cache: Value,
 }
 
-/// What the UI is allowed to see.
 #[derive(Serialize)]
 pub struct AccountInfo {
     pub name: String,
@@ -49,349 +32,260 @@ pub struct AccountInfo {
 
 impl From<&Account> for AccountInfo {
     fn from(a: &Account) -> Self {
-        AccountInfo { name: a.name.clone(), uuid: a.uuid.clone(), skin_url: a.skin_url.clone() }
+        Self { name: a.name.clone(), uuid: a.uuid.clone(), skin_url: a.skin_url.clone() }
     }
 }
 
-#[derive(Serialize)]
-pub struct DeviceCode {
-    pub user_code: String,
-    pub verification_uri: String,
-    pub expires_in: u64,
-}
-
-struct PendingLogin {
-    device_code: String,
+#[derive(Clone, Deserialize, Serialize)]
+struct DeviceCode {
+    user_code: String,
     verification_uri: String,
-    interval: u64,
-    expires_at: Instant,
+    expires_in: u64,
 }
 
-static PENDING: Mutex<Option<PendingLogin>> = Mutex::new(None);
-static CANCELLED: AtomicBool = AtomicBool::new(false);
-
-fn client_id() -> Result<&'static str, String> {
-    CLIENT_ID.filter(|id| !id.is_empty()).ok_or_else(|| {
-        "Microsoft sign-in isn't set up in this build of Ember yet (no Azure client ID).".into()
-    })
+struct Job {
+    attempt: String,
+    cancel: Arc<AtomicBool>,
+    verification_uri: Option<String>,
 }
 
-fn agent() -> ureq::Agent {
-    ureq::Agent::config_builder()
-        .timeout_global(Some(Duration::from_secs(30)))
-        .http_status_as_error(false)
-        .user_agent(concat!("Ember/", env!("CARGO_PKG_VERSION")))
-        .build()
-        .into()
-}
+static PENDING: Mutex<Option<Job>> = Mutex::new(None);
 
-fn now() -> u64 {
-    SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_secs())
-}
-
-/// Sends a request and returns (status, JSON body); non-JSON bodies become `null`.
-fn read(response: Result<ureq::http::Response<ureq::Body>, ureq::Error>, what: &str) -> Result<(u16, Value), String> {
-    let mut response = response.map_err(|e| format!("{what}: {e}"))?;
-    let status = response.status().as_u16();
-    let body = response.body_mut().read_json::<Value>().unwrap_or(Value::Null);
-    Ok((status, body))
-}
-
-fn post_form(agent: &ureq::Agent, url: &str, form: &[(&str, &str)], what: &str) -> Result<(u16, Value), String> {
-    read(agent.post(url).header("Accept", "application/json").send_form(form.iter().copied()), what)
-}
-
-fn post_json(agent: &ureq::Agent, url: &str, body: &Value, what: &str) -> Result<(u16, Value), String> {
-    read(agent.post(url).header("Accept", "application/json").send_json(body), what)
-}
-
-// ---------- credential store ----------
-
-fn entry() -> Result<keyring::Entry, String> {
-    keyring::Entry::new(KEYRING_SERVICE, KEYRING_USER).map_err(|e| e.to_string())
-}
-
-fn load() -> Option<Account> {
-    serde_json::from_str(&entry().ok()?.get_password().ok()?).ok()
-}
-
-fn store(account: &Account) -> Result<(), String> {
-    let text = serde_json::to_string(account).map_err(|e| e.to_string())?;
-    entry()?.set_password(&text).map_err(|e| format!("Couldn't save the account: {e}"))
-}
-
-// ---------- commands ----------
-
-/// Whether this build can sign in (it was built with a client ID).
-#[tauri::command]
-pub fn msa_configured() -> bool {
-    client_id().is_ok()
-}
-
-/// The signed-in account, if any (no network).
-#[tauri::command]
-pub fn msa_status() -> Option<AccountInfo> {
-    load().as_ref().map(AccountInfo::from)
-}
-
-/// Starts a device-code sign-in; the user enters the code at `verification_uri`.
-#[tauri::command]
-pub async fn msa_begin_login() -> Result<DeviceCode, String> {
-    tauri::async_runtime::spawn_blocking(|| {
-        let client_id = client_id()?;
-        let (status, body) =
-            post_form(&agent(), DEVICE_CODE_URL, &[("client_id", client_id), ("scope", SCOPE)], "Microsoft sign-in")?;
-        if status != 200 {
-            return Err(oauth_error("Microsoft sign-in", &body));
-        }
-        let field = |k: &str| body[k].as_str().map(str::to_owned).ok_or_else(|| format!("Microsoft sign-in: missing {k}"));
-        let expires_in = body["expires_in"].as_u64().unwrap_or(900);
-        let code = DeviceCode {
-            user_code: field("user_code")?,
-            verification_uri: field("verification_uri")?,
-            expires_in,
-        };
-        CANCELLED.store(false, Ordering::Relaxed);
-        *PENDING.lock().unwrap() = Some(PendingLogin {
-            device_code: field("device_code")?,
-            verification_uri: code.verification_uri.clone(),
-            interval: body["interval"].as_u64().unwrap_or(5).max(1),
-            expires_at: Instant::now() + Duration::from_secs(expires_in),
-        });
-        Ok(code)
-    })
-    .await
-    .map_err(|e| e.to_string())?
-}
-
-/// Opens Microsoft's sign-in page for the pending login in the default browser.
-#[tauri::command]
-pub fn msa_open_verification() -> Result<(), String> {
-    let url = PENDING
-        .lock()
-        .unwrap()
-        .as_ref()
-        .map(|p| p.verification_uri.clone())
-        .ok_or("No sign-in in progress")?;
-    open_url(&url)
-}
-
-/// Opens an https URL in the default browser.
-pub(crate) fn open_url(url: &str) -> Result<(), String> {
-    if !url.starts_with("https://") {
-        return Err("Unexpected sign-in URL".into());
+struct LoginGuard { attempt: String, cancel: Arc<AtomicBool> }
+impl LoginGuard {
+    fn start(attempt: String, replace: bool) -> Result<Self, String> {
+        let mut pending = PENDING.lock().unwrap();
+        if pending.is_some() && !replace { return Err("Finish Microsoft sign-in before starting the game.".into()) }
+        if let Some(old) = pending.take() { old.cancel.store(true, Ordering::SeqCst); }
+        let cancel = Arc::new(AtomicBool::new(false));
+        *pending = Some(Job { attempt: attempt.clone(), cancel: cancel.clone(), verification_uri: None });
+        Ok(Self { attempt, cancel })
     }
-    #[cfg(target_os = "macos")]
-    let result = std::process::Command::new("open").arg(url).status();
-    #[cfg(target_os = "windows")]
-    let result = std::process::Command::new("rundll32").args(["url.dll,FileProtocolHandler", url]).status();
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    let result = std::process::Command::new("xdg-open").arg(url).status();
-    result.map(|_| ()).map_err(|e| e.to_string())
+
+    fn with_current<T>(&self, action: impl FnOnce(&mut Job) -> Result<T, String>) -> Result<T, String> {
+        let mut pending = PENDING.lock().unwrap();
+        let job = pending.as_mut().filter(|p| p.attempt == self.attempt && Arc::ptr_eq(&p.cancel, &self.cancel))
+            .ok_or("Sign-in cancelled")?;
+        runtime::check_cancel(&self.cancel)?;
+        action(job)
+    }
+}
+impl Drop for LoginGuard {
+    fn drop(&mut self) {
+        let mut pending = PENDING.lock().unwrap();
+        if pending.as_ref().is_some_and(|p| Arc::ptr_eq(&p.cancel, &self.cancel)) { *pending = None; }
+    }
 }
 
-/// Waits for the user to finish signing in, then signs in to Minecraft.
-#[tauri::command]
-pub async fn msa_finish_login() -> Result<AccountInfo, String> {
-    tauri::async_runtime::spawn_blocking(|| {
-        let client_id = client_id()?;
-        let (device_code, mut interval, expires_at) = {
-            let pending = PENDING.lock().unwrap();
-            let p = pending.as_ref().ok_or("No sign-in in progress")?;
-            (p.device_code.clone(), p.interval, p.expires_at)
-        };
-        let agent = agent();
-        let tokens = loop {
-            for _ in 0..interval * 4 {
-                if CANCELLED.load(Ordering::Relaxed) {
-                    return Err("Sign-in cancelled".into());
+struct Helper(Child);
+impl Drop for Helper {
+    fn drop(&mut self) { let _ = self.0.kill(); let _ = self.0.wait(); }
+}
+
+fn now() -> u64 { SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_secs()) }
+
+fn validate_code(code: &DeviceCode) -> Result<(), String> {
+    let url = tauri::Url::parse(&code.verification_uri).map_err(|_| "Invalid Microsoft verification URL")?;
+    if url.scheme() != "https" || !matches!(url.host_str(), Some("microsoft.com" | "www.microsoft.com" | "login.microsoftonline.com"))
+        || !url.username().is_empty() || url.password().is_some() || url.port().is_some()
+        || !(4..=20).contains(&code.user_code.len())
+        || !code.user_code.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '-')
+        || !(1..=1800).contains(&code.expires_in) {
+        return Err("Invalid Microsoft sign-in code".into());
+    }
+    Ok(())
+}
+
+fn helper_error(code: &str) -> String {
+    match code {
+        "SIGN_IN_REQUIRED" => "Your Microsoft sign-in expired. Sign in again.",
+        "PROFILE_UNAVAILABLE" => "Couldn't load your Minecraft profile. Make sure this account owns Java Edition and has a profile at minecraft.net, then try again.",
+        "2148916233" => "This account has no Xbox profile. Sign in at xbox.com to create one, then try again.",
+        "2148916235" => "Xbox Live isn't available in your country.",
+        "2148916236" | "2148916237" => "This account needs adult verification at xbox.com first.",
+        "2148916238" => "An adult needs to add this account to a Microsoft family before it can use Xbox Live.",
+        "TIMEOUT" => "Microsoft sign-in timed out. Try again.",
+        "NETWORK" => "Couldn't reach Microsoft or Minecraft. Check your internet connection and try again.",
+        "FORBIDDEN" => "Microsoft or Minecraft refused sign-in. Check your account at minecraft.net and try again.",
+        _ => "Microsoft sign-in failed. Please try again.",
+    }.into()
+}
+
+fn run_helper(guard: &LoginGuard, cache: Option<Value>, on_code: impl Fn(DeviceCode) -> Result<(), String>) -> Result<Account, String> {
+    let node = runtime::node(&guard.cancel)?;
+    let script = runtime::helper(HELPER)?;
+    runtime::check_cancel(&guard.cancel)?;
+    let refreshing = cache.is_some();
+    let mut command = Command::new(node);
+    command.arg(script).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null())
+        .env_remove("NODE_OPTIONS").env_remove("NODE_PATH").env_remove("DEBUG").env_remove("SSLKEYLOGFILE");
+    #[cfg(windows)] {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x08000000);
+    }
+    let mut child = Helper(command.spawn().map_err(|e| format!("Couldn't start Microsoft sign-in: {e}"))?);
+    // Keep stdin open while the helper runs; closing it tells Node its parent exited.
+    let mut input = child.0.stdin.take().ok_or("Couldn't open the sign-in helper")?;
+    let request = json!({ "mode": if refreshing { "refresh" } else { "login" }, "cache": cache.unwrap_or_else(|| json!({})) });
+    serde_json::to_writer(&mut input, &request).map_err(|_| "Couldn't send data to the sign-in helper")?;
+    input.write_all(b"\n").map_err(|_| "Couldn't start the sign-in helper")?;
+    let stdout = child.0.stdout.take().ok_or("Couldn't read the sign-in helper")?;
+    let (send, receive) = mpsc::sync_channel(4);
+    std::thread::spawn(move || {
+        let mut reader = BufReader::new(stdout);
+        loop {
+            let mut line = Vec::new();
+            match (&mut reader).take(4 * 1024 * 1024).read_until(b'\n', &mut line) {
+                Ok(0) | Err(_) => break,
+                Ok(_) => {
+                    if line.last() != Some(&b'\n') { break }
+                    let parsed = serde_json::from_slice::<Value>(&line).map_err(|_| "Invalid response from the sign-in helper".to_owned());
+                    if send.send(parsed).is_err() { break }
                 }
-                std::thread::sleep(Duration::from_millis(250));
             }
-            if Instant::now() > expires_at {
-                return Err("The sign-in code expired. Try again.".into());
-            }
-            let (status, body) = post_form(
-                &agent,
-                TOKEN_URL,
-                &[
-                    ("grant_type", "urn:ietf:params:oauth:grant-type:device_code"),
-                    ("client_id", client_id),
-                    ("device_code", &device_code),
-                ],
-                "Microsoft sign-in",
-            )?;
-            if status == 200 {
-                break body;
-            }
-            match body["error"].as_str() {
-                Some("authorization_pending") => {}
-                Some("slow_down") => interval += 5,
-                Some("authorization_declined") => return Err("Sign-in was declined.".into()),
-                Some("expired_token") => return Err("The sign-in code expired. Try again.".into()),
-                _ => return Err(oauth_error("Microsoft sign-in", &body)),
-            }
+        }
+    });
+    let mut deadline = Instant::now() + Duration::from_secs(if refreshing { 120 } else { 900 });
+    loop {
+        runtime::check_cancel(&guard.cancel)?;
+        if Instant::now() >= deadline { return Err(helper_error("TIMEOUT")) }
+        let message = match receive.recv_timeout(Duration::from_millis(100)) {
+            Ok(message) => message?,
+            Err(mpsc::RecvTimeoutError::Timeout) => continue,
+            Err(_) => return Err("The Microsoft sign-in helper stopped unexpectedly. Try again.".into()),
         };
-        *PENDING.lock().unwrap() = None;
-        let account = minecraft_login(&agent, &tokens)?;
-        store(&account)?;
-        Ok(AccountInfo::from(&account))
-    })
-    .await
-    .map_err(|e| e.to_string())?
+        match message["type"].as_str() {
+            Some("device_code") => {
+                if refreshing { return Err(helper_error("SIGN_IN_REQUIRED")) }
+                let code: DeviceCode = serde_json::from_value(message).map_err(|_| "Invalid Microsoft sign-in code")?;
+                validate_code(&code)?;
+                deadline = Instant::now() + Duration::from_secs(code.expires_in.min(900));
+                on_code(code)?;
+            }
+            Some("account") => {
+                let account: Account = serde_json::from_value(message["account"].clone()).map_err(|_| "Invalid Minecraft account response")?;
+                if account.mc_token.is_empty() || account.mc_expires_at <= now() + 60 || account.uuid.len() != 32
+                    || !account.uuid.chars().all(|c| c.is_ascii_hexdigit()) || account.name.is_empty() || !account.cache.is_object() {
+                    return Err("Invalid Minecraft account response".into());
+                }
+                runtime::check_cancel(&guard.cancel)?;
+                return Ok(account);
+            }
+            Some("error") => return Err(helper_error(message["code"].as_str().unwrap_or("AUTH_FAILED"))),
+            _ => return Err("Unexpected response from the sign-in helper".into()),
+        }
+    }
 }
 
 #[tauri::command]
-pub fn msa_cancel_login() {
-    CANCELLED.store(true, Ordering::Relaxed);
-    *PENDING.lock().unwrap() = None;
+pub fn msa_configured() -> bool { runtime::supported() }
+
+#[tauri::command]
+pub fn msa_status() -> Option<AccountInfo> { storage::load().ok().flatten().as_ref().map(AccountInfo::from) }
+
+/// Emits only the device code, then returns the public account after sign-in.
+#[tauri::command]
+pub async fn msa_begin_login(app: tauri::AppHandle, attempt: String) -> Result<AccountInfo, String> {
+    if attempt.is_empty() || attempt.len() > 64 { return Err("Invalid sign-in attempt".into()) }
+    let guard = LoginGuard::start(attempt, true)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let account = run_helper(&guard, None, |code| {
+            guard.with_current(|job| {
+                job.verification_uri = Some(code.verification_uri.clone());
+                app.emit("msa-device-code", json!({ "attempt": job.attempt, "code": code })).map_err(|e| e.to_string())
+            })
+        })?;
+        guard.with_current(|_| { storage::store(&account)?; Ok(AccountInfo::from(&account)) })
+    }).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub fn msa_open_verification(attempt: String) -> Result<(), String> {
+    let pending = PENDING.lock().unwrap();
+    let job = pending.as_ref().filter(|p| p.attempt == attempt).ok_or("No sign-in in progress")?;
+    open_url(job.verification_uri.as_deref().ok_or("Microsoft hasn't sent a sign-in code yet")?)
+}
+
+/// Also used by Ely.by and the mod browser for ordinary HTTPS links.
+pub(crate) fn open_url(url: &str) -> Result<(), String> {
+    if !url.starts_with("https://") { return Err("Unexpected sign-in URL".into()) }
+    #[cfg(target_os = "macos")]
+    let result = Command::new("open").arg(url).status();
+    #[cfg(target_os = "windows")]
+    let result = Command::new("rundll32").args(["url.dll,FileProtocolHandler", url]).status();
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    let result = Command::new("xdg-open").arg(url).status();
+    match result { Ok(status) if status.success() => Ok(()), _ => Err("Couldn't open your browser. Open the sign-in page manually.".into()) }
+}
+
+#[tauri::command]
+pub fn msa_cancel_login(attempt: String) {
+    let mut pending = PENDING.lock().unwrap();
+    if pending.as_ref().is_some_and(|p| p.attempt == attempt) {
+        if let Some(job) = pending.take() { job.cancel.store(true, Ordering::SeqCst); }
+    }
 }
 
 #[tauri::command]
 pub fn msa_logout() -> Result<(), String> {
-    match entry()?.delete_credential() {
-        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-        Err(e) => Err(e.to_string()),
-    }
+    let mut pending = PENDING.lock().unwrap();
+    if let Some(job) = pending.take() { job.cancel.store(true, Ordering::SeqCst); }
+    storage::forget()
 }
 
-/// A signed-in account with a Minecraft token valid for at least 10 minutes.
 pub(crate) fn session() -> Result<Account, String> {
-    let account = load().ok_or("Sign in with Microsoft to play online.")?;
-    if account.mc_expires_at > now() + 600 {
-        return Ok(account);
-    }
-    let client_id = client_id()?;
-    let agent = agent();
-    let (status, tokens) = post_form(
-        &agent,
-        TOKEN_URL,
-        &[
-            ("grant_type", "refresh_token"),
-            ("client_id", client_id),
-            ("refresh_token", &account.refresh_token),
-            ("scope", SCOPE),
-        ],
-        "Refreshing Microsoft sign-in",
-    )?;
-    if status != 200 {
-        return Err("Your Microsoft sign-in expired. Sign in again.".into());
-    }
-    let account = minecraft_login(&agent, &tokens)?;
-    store(&account)?;
-    Ok(account)
-}
-
-// ---------- token chain ----------
-
-fn oauth_error(what: &str, body: &Value) -> String {
-    let detail = body["error_description"]
-        .as_str()
-        .and_then(|d| d.lines().next())
-        .or(body["error"].as_str())
-        .unwrap_or("unexpected response");
-    format!("{what}: {detail}")
-}
-
-/// Microsoft OAuth tokens → Minecraft account.
-fn minecraft_login(agent: &ureq::Agent, ms_tokens: &Value) -> Result<Account, String> {
-    let ms_access = ms_tokens["access_token"].as_str().ok_or("Microsoft returned no access token")?;
-    let refresh_token = ms_tokens["refresh_token"].as_str().ok_or("Microsoft returned no refresh token")?;
-
-    let (status, xbl) = post_json(
-        agent,
-        XBL_URL,
-        &json!({
-            "Properties": { "AuthMethod": "RPS", "SiteName": "user.auth.xboxlive.com", "RpsTicket": format!("d={ms_access}") },
-            "RelyingParty": "http://auth.xboxlive.com",
-            "TokenType": "JWT",
-        }),
-        "Xbox Live sign-in",
-    )?;
-    let xbl_token = xbl["Token"].as_str().filter(|_| status == 200).ok_or("Xbox Live sign-in failed")?;
-    let uhs = xbl["DisplayClaims"]["xui"][0]["uhs"].as_str().ok_or("Xbox Live returned no user hash")?;
-
-    let (status, xsts) = post_json(
-        agent,
-        XSTS_URL,
-        &json!({
-            "Properties": { "SandboxId": "RETAIL", "UserTokens": [xbl_token] },
-            "RelyingParty": "rp://api.minecraftservices.com/",
-            "TokenType": "JWT",
-        }),
-        "Xbox Live authorization",
-    )?;
-    if status != 200 {
-        return Err(match xsts["XErr"].as_u64() {
-            Some(2148916233) => "This Microsoft account has no Xbox profile. Sign in once at minecraft.net to create one.".into(),
-            Some(2148916235) => "Xbox Live isn't available in your country.".into(),
-            Some(2148916236 | 2148916237) => "This account needs adult verification on xbox.com first.".into(),
-            Some(2148916238) => "This is a child account. An adult must add it to a Microsoft family first.".into(),
-            _ => format!("Xbox Live authorization failed (HTTP {status})."),
-        });
-    }
-    let xsts_token = xsts["Token"].as_str().ok_or("Xbox Live returned no XSTS token")?;
-
-    let (status, mc) = post_json(
-        agent,
-        MC_LOGIN_URL,
-        &json!({ "identityToken": format!("XBL3.0 x={uhs};{xsts_token}") }),
-        "Minecraft sign-in",
-    )?;
-    if status == 403 {
-        return Err("Minecraft refused this app. Its Azure client ID must be approved by Mojang (aka.ms/mce-reviewappid).".into());
-    }
-    let mc_token = mc["access_token"].as_str().filter(|_| status == 200).ok_or_else(|| format!("Minecraft sign-in failed (HTTP {status})."))?;
-    let expires_in = mc["expires_in"].as_u64().unwrap_or(86400);
-
-    let (status, profile) = read(
-        agent.get(MC_PROFILE_URL).header("Authorization", &format!("Bearer {mc_token}")).call(),
-        "Minecraft profile",
-    )?;
-    if status == 404 {
-        return Err("This Microsoft account doesn't own Minecraft: Java Edition.".into());
-    }
-    if status != 200 {
-        return Err(format!("Couldn't load the Minecraft profile (HTTP {status})."));
-    }
-    let skin_url = profile["skins"]
-        .as_array()
-        .into_iter()
-        .flatten()
-        .find(|s| s["state"] == "ACTIVE")
-        .and_then(|s| s["url"].as_str())
-        .map(|u| u.replacen("http://", "https://", 1));
-
-    Ok(Account {
-        name: profile["name"].as_str().ok_or("profile has no name")?.to_owned(),
-        uuid: profile["id"].as_str().ok_or("profile has no id")?.to_owned(),
-        xuid: jwt_claim(mc_token, "xuid").unwrap_or_else(|| "0".into()),
-        mc_token: mc_token.to_owned(),
-        mc_expires_at: now() + expires_in,
-        refresh_token: refresh_token.to_owned(),
-        skin_url,
-    })
-}
-
-/// Reads a string claim from a JWT payload without verifying it (it's only
-/// passed back to the game).
-fn jwt_claim(token: &str, claim: &str) -> Option<String> {
-    let payload = token.split('.').nth(1)?;
-    let bytes = base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(payload.trim_end_matches('=')).ok()?;
-    let json: Value = serde_json::from_slice(&bytes).ok()?;
-    match &json[claim] {
-        Value::String(s) => Some(s.clone()),
-        Value::Number(n) => Some(n.to_string()),
-        _ => None,
-    }
+    let guard = LoginGuard::start(format!("refresh-{}", rand::random::<u64>()), false)?;
+    let account = storage::load()?.ok_or("Sign in with Microsoft to play online.")?;
+    if account.mc_expires_at > now() + 600 { return guard.with_current(|_| Ok(account)) }
+    if !account.cache.is_object() { return Err(helper_error("SIGN_IN_REQUIRED")) }
+    let refreshed = run_helper(&guard, Some(account.cache), |_| Err(helper_error("SIGN_IN_REQUIRED")))?;
+    guard.with_current(|_| { storage::store(&refreshed)?; Ok(refreshed) })
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     #[test]
-    fn reads_jwt_claims() {
-        // {"alg":"none"}.{"xuid":"2535400000000000"}.
-        let token = "eyJhbGciOiJub25lIn0.eyJ4dWlkIjoiMjUzNTQwMDAwMDAwMDAwMCJ9.";
-        assert_eq!(super::jwt_claim(token, "xuid").as_deref(), Some("2535400000000000"));
+    fn validates_codes_and_rejects_untrusted_browser_destinations() {
+        let mut code = DeviceCode { user_code: "EMBR-7Q2K".into(), verification_uri: "https://www.microsoft.com/link".into(), expires_in: 900 };
+        assert!(validate_code(&code).is_ok());
+        for url in ["http://microsoft.com/link", "https://microsoft.com.attacker.test/", "https://user@microsoft.com/link", "https://microsoft.com:8443/link", "file:///tmp/test"] {
+            code.verification_uri = url.into();
+            assert!(validate_code(&code).is_err());
+        }
+    }
+    #[test]
+    fn legacy_account_can_be_read_but_needs_reauthentication_to_refresh() {
+        let account: Account = serde_json::from_value(json!({ "name": "Player", "uuid": "abcd", "xuid": "0", "mc_token": "old", "mc_expires_at": 1, "skin_url": null, "refresh_token": "legacy" })).unwrap();
+        assert!(account.cache.is_null());
+        let public = serde_json::to_value(AccountInfo::from(&account)).unwrap();
+        assert_eq!(public.as_object().unwrap().len(), 3);
+        assert!(public.get("mc_token").is_none());
+    }
+    #[test]
+    fn cancelling_old_attempt_cannot_cancel_or_clear_new_attempt() {
+        let first = LoginGuard::start("first".into(), true).unwrap();
+        let second = LoginGuard::start("second".into(), true).unwrap();
+        assert!(first.cancel.load(Ordering::SeqCst));
+        msa_cancel_login("first".into());
+        drop(first);
+        assert!(second.with_current(|_| Ok(())).is_ok());
+        msa_cancel_login("second".into());
+        assert!(second.with_current(|_| Ok(())).is_err());
+    }
+
+    #[test]
+    #[ignore = "requests a Microsoft device code, then cancels without signing in"]
+    fn prismarine_device_code_smoke() {
+        let guard = LoginGuard::start("smoke".into(), true).unwrap();
+        let seen = AtomicBool::new(false);
+        let result = run_helper(&guard, None, |code| {
+            validate_code(&code)?;
+            seen.store(true, Ordering::SeqCst);
+            guard.cancel.store(true, Ordering::SeqCst);
+            Ok(())
+        });
+        assert!(seen.load(Ordering::SeqCst), "No valid Microsoft device code: {}", result.err().unwrap_or_default());
+        assert!(guard.cancel.load(Ordering::SeqCst));
     }
 }

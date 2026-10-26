@@ -87,9 +87,10 @@ I18N.add("sv", {
   click_to_copy: "Klicka för att kopiera",
   click_code_hint: "Klicka på koden för att kopiera den",
   ms_open: "Öppna {url}",
-  ms_waiting: "Väntar på att du loggar in klart…",
-  ms_not_configured: "Inloggning med Microsoft är inte påslagen i den här versionen av Ember än. Den kräver ett app-ID som Mojang har godkänt; använd Offline eller Ely.by tills dess.",
   code_copied: "Koden kopierades",
+  ms_browser: "Slutför inloggningen i webbläsarfönstret som just öppnades.",
+  ms_reopen: "Öppna inloggningssidan igen",
+  ms_waiting: "Väntar på att du loggar in klart…",
   back: "Tillbaka",
 
   ely_title: "Ely.by-konto",

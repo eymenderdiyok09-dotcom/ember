@@ -87,9 +87,10 @@ I18N.add("vi", {
   click_to_copy: "Bấm để sao chép",
   click_code_hint: "Bấm vào mã để sao chép",
   ms_open: "Mở {url}",
-  ms_waiting: "Đang chờ bạn đăng nhập xong…",
-  ms_not_configured: "Bản Ember này chưa bật đăng nhập Microsoft. Tính năng cần ID ứng dụng được Mojang duyệt; trong lúc chờ, hãy dùng Ngoại tuyến hoặc Ely.by.",
   code_copied: "Đã sao chép mã",
+  ms_browser: "Hoàn tất đăng nhập trong cửa sổ trình duyệt vừa mở.",
+  ms_reopen: "Mở lại trang đăng nhập",
+  ms_waiting: "Đang chờ bạn đăng nhập xong…",
   back: "Quay lại",
 
   ely_title: "Tài khoản Ely.by",

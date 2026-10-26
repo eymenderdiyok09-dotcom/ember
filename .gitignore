@@ -3,3 +3,5 @@ src-tauri/gen/
 dist/
 website/downloads/
 .DS_Store
+auth-helper/node_modules/
+auth-helper/dist/

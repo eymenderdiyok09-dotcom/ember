@@ -87,9 +87,10 @@ I18N.add("ja", {
   click_to_copy: "クリックしてコピー",
   click_code_hint: "コードをクリックするとコピーできます",
   ms_open: "{url} を開く",
-  ms_waiting: "サインインの完了を待っています…",
-  ms_not_configured: "このバージョンの Ember では Microsoft サインインはまだ有効になっていません。Mojang に承認されたアプリ ID が必要です。それまではオフラインか Ely.by を使ってください。",
   code_copied: "コードをコピーしました",
+  ms_browser: "開いたブラウザのウィンドウでサインインを完了してください。",
+  ms_reopen: "サインインページをもう一度開く",
+  ms_waiting: "サインインの完了を待っています…",
   back: "戻る",
 
   ely_title: "Ely.by アカウント",

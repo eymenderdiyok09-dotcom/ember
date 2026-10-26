@@ -563,6 +563,7 @@ async function initEly() {
 }
 
 function showLoginStep(step, message = "") {
+  $("ms-step-loading").hidden = step !== "loading";
   $("ms-step-code").hidden = step !== "code";
   $("ms-step-error").hidden = step !== "error";
   $("ms-error").textContent = message;
@@ -570,34 +571,43 @@ function showLoginStep(step, message = "") {
   $("ms-modal").hidden = false;
 }
 
-let loginActive = false;
+let loginAttempt = null;
 async function signIn() {
-  if (!(await invoke("msa_configured"))) {
-    showLoginStep("error", t("ms_not_configured"));
-    $("ms-cancel").focus({ preventScroll: true });
-    return;
-  }
-  loginActive = true;
+  if (loginAttempt) return;
+  const attempt = crypto.randomUUID();
+  loginAttempt = attempt;
+  showLoginStep("loading");
+  $("ms-cancel").focus({ preventScroll: true });
   try {
-    const code = await invoke("msa_begin_login");
-    if (!loginActive) return;
-    $("ms-code").textContent = code.user_code;
-    $("ms-open-label").textContent = t("ms_open", { url: code.verification_uri.replace(/^https:\/\/(www\.)?/, "") });
-    showLoginStep("code");
-    $("ms-open").focus({ preventScroll: true });
-    account.info = await invoke("msa_finish_login");
+    const configured = await invoke("msa_configured");
+    if (loginAttempt !== attempt) return;
+    if (!configured) throw new Error(t("ms_not_configured"));
+    const info = await invoke("msa_begin_login", { attempt });
+    if (loginAttempt !== attempt) return;
+    account.info = info;
     $("ms-modal").hidden = true;
     toast(t("signed_in_as", { name: account.info.name }));
   } catch (e) {
-    // Errors after the user pressed Cancel are expected; anything else is shown.
-    if (loginActive) showLoginStep("error", String(e));
+    if (loginAttempt === attempt) showLoginStep("error", String(e));
   } finally {
-    loginActive = false;
-    renderAccount();
+    if (loginAttempt === attempt) {
+      loginAttempt = null;
+      renderAccount();
+    }
   }
 }
 
 async function initAccount() {
+  await listen("msa-device-code", ({ payload }) => {
+    if (payload.attempt !== loginAttempt) return;
+    $("ms-code").textContent = payload.code.user_code;
+    $("ms-open-label").textContent = t("ms_open", { url: payload.code.verification_uri.replace(/^https:\/\/(www\.)?/, "") });
+    showLoginStep("code");
+    $("ms-open").focus({ preventScroll: true });
+    invoke("msa_open_verification", { attempt: loginAttempt }).catch((e) => {
+      if (payload.attempt === loginAttempt) toast(String(e), { error: true });
+    });
+  });
   account.mode = ACCOUNT_MODES.includes(load("accountMode")) ? load("accountMode") : "offline";
   account.info = await invoke("msa_status");
   await initEly();
@@ -614,7 +624,7 @@ async function initAccount() {
     account.info = null;
     renderAccount();
   });
-  $("ms-open").addEventListener("click", () => invoke("msa_open_verification").catch((e) => toast(String(e), { error: true })));
+  $("ms-open").addEventListener("click", () => invoke("msa_open_verification", { attempt: loginAttempt }).catch((e) => toast(String(e), { error: true })));
   $("ms-code").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText($("ms-code").textContent);
@@ -622,9 +632,11 @@ async function initAccount() {
     } catch {}
   });
   const cancel = () => {
-    loginActive = false;
-    invoke("msa_cancel_login");
+    const attempt = loginAttempt;
+    loginAttempt = null;
+    if (attempt) invoke("msa_cancel_login", { attempt }).catch(() => {});
     $("ms-modal").hidden = true;
+    $("ms-signin").focus({ preventScroll: true });
   };
   $("ms-cancel").addEventListener("click", cancel);
   $("ms-modal").addEventListener("keydown", (e) => { if (e.key === "Escape") cancel(); });
@@ -1381,6 +1393,7 @@ function previewBackend() {
   ].map(([id, kind]) => ({ id, kind }));
   let progress;
   const listeners = {};
+  const demoLogins = new Map();
   const demoSkins = {};
   const demoLibrary = [];
   const demoMods = [];
@@ -1397,10 +1410,25 @@ function previewBackend() {
     java_available_versions: () => ({ vanilla, fabric: ["26.3", "26.2", "1.21.11", "1.20.1"], forge: ["26.3", "1.21.1", "1.20.1"], neoforge: ["26.3", "1.21.1"] }),
     system_memory_mb: () => 16384,
     msa_status: () => null,
-    msa_configured: () => new URLSearchParams(location.search).has("msa"),
-    msa_begin_login: () => ({ user_code: "EMBR-7Q2K", verification_uri: "https://www.microsoft.com/link", expires_in: 900 }),
-    msa_finish_login: () => new Promise((resolve) => setTimeout(() => resolve({ name: "Notch", uuid: "x", skin_url: null }), 60000)),
-    msa_cancel_login: () => null,
+    msa_configured: () => true,
+    msa_begin_login: ({ attempt }) => new Promise((resolve, reject) => {
+      const codeTimer = setTimeout(() => listeners["msa-device-code"]?.({ payload: { attempt, code: { user_code: "EMBR-7Q2K", verification_uri: "https://www.microsoft.com/link", expires_in: 900 } } }), 500);
+      const doneTimer = setTimeout(() => {
+        demoLogins.delete(attempt);
+        resolve({ name: "Player", uuid: "0123456789abcdef0123456789abcdef", skin_url: null });
+      }, 15000);
+      demoLogins.set(attempt, { codeTimer, doneTimer, reject });
+    }),
+    msa_cancel_login: ({ attempt }) => {
+      const pending = demoLogins.get(attempt);
+      if (pending) {
+        clearTimeout(pending.codeTimer);
+        clearTimeout(pending.doneTimer);
+        pending.reject("Sign-in cancelled");
+        demoLogins.delete(attempt);
+      }
+    },
+    msa_logout: () => null,
     msa_open_verification: () => null,
     ely_status: () => null,
     // Demo: any login works; the password "2fa" asks for a code first.

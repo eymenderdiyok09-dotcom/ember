@@ -87,9 +87,10 @@ I18N.add("cs", {
   click_to_copy: "Klikni pro zkopírování",
   click_code_hint: "Kliknutím na kód ho zkopíruješ",
   ms_open: "Otevřít {url}",
-  ms_waiting: "Čekám, až dokončíš přihlášení…",
-  ms_not_configured: "Přihlášení přes Microsoft v této verzi Emberu zatím není zapnuté. Potřebuje ID aplikace schválené Mojangem; do té doby používej Offline nebo Ely.by.",
   code_copied: "Kód zkopírován",
+  ms_browser: "Dokonči přihlášení v okně prohlížeče, které se právě otevřelo.",
+  ms_reopen: "Znovu otevřít přihlašovací stránku",
+  ms_waiting: "Čekám, až dokončíš přihlášení…",
   back: "Zpět",
 
   ely_title: "Účet Ely.by",

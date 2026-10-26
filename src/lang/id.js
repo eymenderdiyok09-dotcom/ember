@@ -87,9 +87,10 @@ I18N.add("id", {
   click_to_copy: "Klik untuk menyalin",
   click_code_hint: "Klik kodenya untuk menyalin",
   ms_open: "Buka {url}",
-  ms_waiting: "Menunggu kamu selesai masuk…",
-  ms_not_configured: "Masuk dengan Microsoft belum aktif di versi Ember ini. Fitur ini butuh ID aplikasi yang disetujui Mojang; sementara itu, pakai Offline atau Ely.by.",
   code_copied: "Kode disalin",
+  ms_browser: "Selesaikan proses masuk di jendela browser yang baru saja terbuka.",
+  ms_reopen: "Buka lagi halaman masuk",
+  ms_waiting: "Menunggu kamu selesai masuk…",
   back: "Kembali",
 
   ely_title: "Akun Ely.by",

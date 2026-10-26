@@ -14,6 +14,7 @@ REPO="eymenderdiyok09-dotcom/ember"
 IDENTITY="Developer ID Application: Eymen Derdiyok (J4V5QR4FYJ)"
 KEY="$HOME/.ember-signing/update-key.pem"
 OPENSSL=/opt/homebrew/opt/openssl@3/bin/openssl
+export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:/opt/homebrew/opt/llvm/bin:$PATH"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="$ROOT/dist"
 cd "$ROOT"
@@ -22,26 +23,38 @@ test -f "$KEY" || { echo "Missing update key $KEY" >&2; exit 1; }
 test -z "$(git status --porcelain)" || { echo "Commit or stash your changes first." >&2; exit 1; }
 
 # 1. Version numbers.
-OLD=$(sed -n 's/.*"version": "\(.*\)",/\1/p' src-tauri/tauri.conf.json)
-sed -i '' "3s/version = \"$OLD\"/version = \"$VERSION\"/" src-tauri/Cargo.toml
-sed -i '' "s/\"version\": \"$OLD\"/\"version\": \"$VERSION\"/" src-tauri/tauri.conf.json
-sed -i '' "s/$OLD/$VERSION/g" website/index.html README.md
+python3 - "$VERSION" <<'PY_VERSION'
+import json, re, sys
+from pathlib import Path
+version = sys.argv[1]
+if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+    raise SystemExit("Expected a version such as 0.6.3")
+config = Path("src-tauri/tauri.conf.json")
+data = json.loads(config.read_text())
+data["version"] = version
+config.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+cargo = Path("src-tauri/Cargo.toml")
+cargo.write_text(re.sub(r'^version = "[^"\n]+"', f'version = "{version}"', cargo.read_text(), count=1, flags=re.M))
+for name in ["package.json", "package-lock.json"]:
+    path = Path("auth-helper") / name
+    data = json.loads(path.read_text())
+    data["version"] = version
+    if "packages" in data:
+        data["packages"][""]["version"] = version
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+# Change download names and the footer, leaving historical version prose alone.
+for name in ["website/index.html", "README.md"]:
+    path = Path(name)
+    text = re.sub(r"Ember_[0-9]+\.[0-9]+\.[0-9]+_", f"Ember_{version}_", path.read_text())
+    text = re.sub(r"Ember [0-9]+\.[0-9]+\.[0-9]+ ·", f"Ember {version} ·", text)
+    path.write_text(text)
+PY_VERSION
 sh website/sync-demo.sh
 
 # 2. Builds.
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-# Microsoft sign-in: the Azure client ID lives in the Keychain, never in the repo.
-MSA_ID=$(security find-generic-password -s "Ember Microsoft client ID" -w 2>/dev/null) || MSA_ID=""
-if [ -n "$MSA_ID" ] && ! echo "$MSA_ID" | grep -Eqi '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
-  echo "The Keychain's \"Ember Microsoft client ID\" isn't an Azure app client ID (Ember's own app registration is required)." >&2
-  exit 1
-fi
-if [ -n "$MSA_ID" ]; then
-  export EMBER_MSA_CLIENT_ID="$MSA_ID"
-  echo "Microsoft sign-in: on"
-else
-  echo "Microsoft sign-in: off (no \"Ember Microsoft client ID\" in the Keychain)"
-fi
+# Tauri bundles the pinned prismarine-auth helper using Node/npm.
+echo "Microsoft sign-in: prismarine-auth"
 cd src-tauri
 APPLE_SIGNING_IDENTITY="$IDENTITY" cargo tauri build --target universal-apple-darwin --bundles app,dmg
 cargo tauri build --target x86_64-pc-windows-gnu --no-bundle

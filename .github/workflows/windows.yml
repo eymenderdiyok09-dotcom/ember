@@ -35,6 +35,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: auth-helper/package-lock.json
+
+      - name: Test Microsoft authentication helper
+        run: |
+          npm --prefix auth-helper ci --ignore-scripts --no-audit --no-fund
+          npm --prefix auth-helper run build
+          npm --prefix auth-helper test
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}

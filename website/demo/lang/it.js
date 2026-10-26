@@ -87,9 +87,10 @@ I18N.add("it", {
   click_to_copy: "Clicca per copiare",
   click_code_hint: "Clicca sul codice per copiarlo",
   ms_open: "Apri {url}",
-  ms_waiting: "In attesa che tu completi l'accesso…",
-  ms_not_configured: "L'accesso con Microsoft non è ancora attivo in questa versione di Ember. Serve un ID app approvato da Mojang; nel frattempo usa Offline o Ely.by.",
   code_copied: "Codice copiato",
+  ms_browser: "Completa l’accesso nella finestra del browser che si è appena aperta.",
+  ms_reopen: "Riapri la pagina di accesso",
+  ms_waiting: "In attesa che tu completi l'accesso…",
   back: "Indietro",
 
   ely_title: "Account Ely.by",

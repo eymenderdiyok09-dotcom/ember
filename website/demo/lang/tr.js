@@ -87,9 +87,10 @@ I18N.add("tr", {
   click_to_copy: "Kopyalamak için tıkla",
   click_code_hint: "Kopyalamak için koda tıkla",
   ms_open: "{url} adresini aç",
-  ms_waiting: "Girişi tamamlaman bekleniyor…",
-  ms_not_configured: "Microsoft ile giriş bu Ember sürümünde henüz açık değil. Mojang'ın onayladığı bir uygulama kimliği gerekiyor; o zamana kadar Çevrimdışı ya da Ely.by kullan.",
   code_copied: "Kod kopyalandı",
+  ms_browser: "Az önce açılan tarayıcı penceresinde girişi tamamla.",
+  ms_reopen: "Giriş sayfasını yeniden aç",
+  ms_waiting: "Girişi tamamlaman bekleniyor…",
   back: "Geri",
 
   ely_title: "Ely.by Hesabı",

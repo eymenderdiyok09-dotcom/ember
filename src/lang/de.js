@@ -87,9 +87,10 @@ I18N.add("de", {
   click_to_copy: "Zum Kopieren klicken",
   click_code_hint: "Klicke auf den Code, um ihn zu kopieren",
   ms_open: "{url} öffnen",
-  ms_waiting: "Warte, bis du die Anmeldung abgeschlossen hast…",
-  ms_not_configured: "Die Microsoft-Anmeldung ist in dieser Ember-Version noch nicht aktiv. Sie braucht eine von Mojang genehmigte App-ID; nutze bis dahin Offline oder Ely.by.",
   code_copied: "Code kopiert",
+  ms_browser: "Schließe die Anmeldung im gerade geöffneten Browserfenster ab.",
+  ms_reopen: "Anmeldeseite erneut öffnen",
+  ms_waiting: "Warte, bis du die Anmeldung abgeschlossen hast…",
   back: "Zurück",
 
   ely_title: "Ely.by-Konto",

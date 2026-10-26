@@ -87,9 +87,10 @@ I18N.add("ro", {
   click_to_copy: "Clic pentru a copia",
   click_code_hint: "Fă clic pe cod ca să-l copiezi",
   ms_open: "Deschide {url}",
-  ms_waiting: "Se așteaptă să termini conectarea…",
-  ms_not_configured: "Conectarea cu Microsoft nu este încă activată în această versiune Ember. Are nevoie de un ID de aplicație aprobat de Mojang; până atunci, folosește Offline sau Ely.by.",
   code_copied: "Cod copiat",
+  ms_browser: "Finalizează conectarea în fereastra de browser care tocmai s-a deschis.",
+  ms_reopen: "Deschide din nou pagina de conectare",
+  ms_waiting: "Se așteaptă să termini conectarea…",
   back: "Înapoi",
 
   ely_title: "Cont Ely.by",

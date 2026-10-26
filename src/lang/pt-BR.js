@@ -87,9 +87,10 @@ I18N.add("pt-BR", {
   click_to_copy: "Clique para copiar",
   click_code_hint: "Clique no código para copiá-lo",
   ms_open: "Abrir {url}",
-  ms_waiting: "Aguardando você terminar o login…",
-  ms_not_configured: "O login com a Microsoft ainda não está ativado nesta versão do Ember. Ele precisa de um ID de app aprovado pela Mojang; até lá, use Offline ou Ely.by.",
   code_copied: "Código copiado",
+  ms_browser: "Conclua o login na janela do navegador que acabou de abrir.",
+  ms_reopen: "Abrir a página de login novamente",
+  ms_waiting: "Aguardando você terminar o login…",
   back: "Voltar",
 
   ely_title: "Conta Ely.by",

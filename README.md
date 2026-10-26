@@ -11,7 +11,7 @@ A tiny, fast launcher for Minecraft: Java Edition, built with Tauri.
 - **FPS Boost**, on by default: Sodium, Lithium, FerriteCore and more in a separate instance, plus tuned JVM flags
 - **Shaders** in one click: Iris + Complementary Reimagined on top of FPS Boost
 - Correct Java runtime downloaded automatically for each version
-- Offline play with **custom skins**, free Ely.by accounts (skins + online servers via authlib-injector), and Microsoft sign-in built in (needs an approved client ID)
+- Offline play with **custom skins**, free Ely.by accounts (skins + online servers via authlib-injector), and Microsoft sign-in through **prismarine-auth** (from 0.6.3)
 - **Rekindle**: signed, one-click self-updates
 - **26 languages**, picked automatically (right-to-left included)
 - Starts Bedrock Edition on Windows if it's installed
@@ -30,7 +30,8 @@ The macOS build is signed and notarized. Windows builds aren't signed yet: click
 
 ## Build
 
-Requires Rust and `cargo install tauri-cli --version "^2"`.
+Requires Rust, Node.js 22+ for building, and `cargo install tauri-cli --version "^2"`.
+Tauri builds the bundled authentication helper automatically. Players do not need to install Node.js; Ember downloads a pinned, SHA-256-verified runtime on first Microsoft sign-in.
 
 ```bash
 cd src-tauri
@@ -51,11 +52,22 @@ scripts/release.sh 0.5.1 "- First change\n- Second change"
 
 To enable CurseForge in the mod browser, build with `EMBER_CURSEFORGE_KEY=<your key from console.curseforge.com>`.
 
-To enable Microsoft sign-in, build with `EMBER_MSA_CLIENT_ID=<your Azure app client ID>`.
+Microsoft sign-in uses `prismarine-auth`'s default device-code flow. No `EMBER_MSA_CLIENT_ID` build setting is needed. See [Microsoft authentication](docs/MICROSOFT_AUTH.md) for storage, runtime verification and tests.
+
+To run the checks directly:
+
+```bash
+npm --prefix auth-helper ci --ignore-scripts
+npm --prefix auth-helper run build
+npm --prefix auth-helper test
+cd src-tauri
+cargo test --locked
+```
 
 ## Layout
 
 - `src/`: the UI (vanilla HTML, CSS and JS)
+- `auth-helper/`: the pinned `prismarine-auth` bridge and its tests
 - `src-tauri/src/`: game installer, launcher, Microsoft auth, Bedrock (Windows)
 - `website/`: the download page, with a live demo of the UI (`website/sync-demo.sh` refreshes it)
 

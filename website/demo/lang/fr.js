@@ -87,9 +87,10 @@ I18N.add("fr", {
   click_to_copy: "Cliquer pour copier",
   click_code_hint: "Clique sur le code pour le copier",
   ms_open: "Ouvrir {url}",
-  ms_waiting: "En attente de la fin de ta connexion…",
-  ms_not_configured: "La connexion Microsoft n'est pas encore activée dans cette version d'Ember. Elle nécessite un identifiant d'appli approuvé par Mojang ; en attendant, utilise Hors ligne ou Ely.by.",
   code_copied: "Code copié",
+  ms_browser: "Termine la connexion dans la fenêtre du navigateur qui vient de s’ouvrir.",
+  ms_reopen: "Rouvrir la page de connexion",
+  ms_waiting: "En attente de la fin de ta connexion…",
   back: "Retour",
 
   ely_title: "Compte Ely.by",

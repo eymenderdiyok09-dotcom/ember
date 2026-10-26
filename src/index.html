@@ -159,9 +159,14 @@
         <h2 id="ms-title" data-i18n="ms_title">Microsoft Account</h2>
       </div>
 
-      <div class="mc-modal-body" id="ms-step-code">
+      <div class="mc-modal-body" id="ms-step-loading" hidden>
+        <p class="modal-text" data-i18n="ms_preparing">Preparing Microsoft sign-in. First use may take a moment while Ember downloads what it needs.</p>
+        <span class="spinner" aria-hidden="true"></span>
+      </div>
+
+      <div class="mc-modal-body" id="ms-step-code" hidden>
         <p class="modal-text" data-i18n="ms_enter_code">Go to the Microsoft sign-in page and enter this code:</p>
-        <button class="device-code" id="ms-code" title="Click to copy" data-i18n-title="click_to_copy"></button>
+        <button class="device-code" id="ms-code" title="Click to copy" data-i18n-title="click_to_copy" dir="ltr"></button>
         <span class="device-code-hint" data-i18n="click_code_hint">Click the code to copy it</span>
         <button class="mc-button" id="ms-open">
           <span class="mc-button-logo"><svg class="ms-mark" viewBox="0 0 20 20" aria-hidden="true"><rect width="9" height="9" fill="#f25022" /><rect x="11" width="9" height="9" fill="#7fba00" /><rect y="11" width="9" height="9" fill="#00a4ef" /><rect x="11" y="11" width="9" height="9" fill="#ffb900" /></svg></span>

@@ -87,9 +87,10 @@ I18N.add("nl", {
   click_to_copy: "Klik om te kopiëren",
   click_code_hint: "Klik op de code om hem te kopiëren",
   ms_open: "{url} openen",
-  ms_waiting: "Wachten tot je klaar bent met inloggen…",
-  ms_not_configured: "Inloggen met Microsoft staat in deze versie van Ember nog niet aan. Er is een door Mojang goedgekeurde app-ID voor nodig; gebruik tot die tijd Offline of Ely.by.",
   code_copied: "Code gekopieerd",
+  ms_browser: "Rond het inloggen af in het browservenster dat net is geopend.",
+  ms_reopen: "Inlogpagina opnieuw openen",
+  ms_waiting: "Wachten tot je klaar bent met inloggen…",
   back: "Terug",
 
   ely_title: "Ely.by-account",

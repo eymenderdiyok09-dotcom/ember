@@ -87,9 +87,10 @@ I18N.add("pl", {
   click_to_copy: "Kliknij, aby skopiować",
   click_code_hint: "Kliknij kod, aby go skopiować",
   ms_open: "Otwórz {url}",
-  ms_waiting: "Czekam, aż dokończysz logowanie…",
-  ms_not_configured: "Logowanie przez Microsoft nie jest jeszcze włączone w tej wersji Embera. Wymaga identyfikatora aplikacji zatwierdzonego przez Mojang; do tego czasu używaj trybu Offline lub Ely.by.",
   code_copied: "Skopiowano kod",
+  ms_browser: "Dokończ logowanie w oknie przeglądarki, które właśnie się otworzyło.",
+  ms_reopen: "Otwórz ponownie stronę logowania",
+  ms_waiting: "Czekam, aż dokończysz logowanie…",
   back: "Wstecz",
 
   ely_title: "Konto Ely.by",

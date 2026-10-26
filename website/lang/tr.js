@@ -35,7 +35,7 @@ I18N.add("tr", {
   f_skins_t: "Senin skinin",
   f_skins_d: "Çevrimdışı oyun için istediğin skin PNG'sini seç ve oyunda gör, ya da Ely.by skinini Ely.by sunucularına taşı.",
   f_accounts_t: "Çevrimdışı, Ely.by ve Microsoft",
-  f_accounts_d: "İstediğin isimle çevrimdışı oyna ya da çevrimiçi sunucular için ücretsiz Ely.by hesabıyla giriş yap. Microsoft girişi hazır ve yakında geliyor.",
+  f_accounts_d: "İstediğin isimle çevrimdışı oyna, ücretsiz Ely.by hesabıyla sunuculara katıl ya da resmi sunucular ve Realms için Microsoft hesabınla giriş yap.",
   f_updates_t: "Kendini günceller",
   f_updates_d: "Rekindle yeni sürümleri bulur ve tek tıkla kurar. Her güncelleme imzalıdır, yani yalnızca gerçek Ember güncellemeleri girebilir.",
   f_java_t: "Java kurulumu yok",

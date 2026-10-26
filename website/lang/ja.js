@@ -35,7 +35,7 @@ I18N.add("ja", {
   f_skins_t: "自分のスキン",
   f_skins_d: "オフラインでは好きなスキン PNG を選んでゲーム内で表示。Ely.by のスキンは Ely.by サーバーでそのまま使えます。",
   f_accounts_t: "オフライン・Ely.by・Microsoft",
-  f_accounts_d: "好きな名前でオフラインプレイ、または無料の Ely.by アカウントでオンラインサーバーへ。Microsoft サインインも組み込み済みで、近日公開です。",
+  f_accounts_d: "好きな名前でオフラインプレイ、無料の Ely.by アカウントでのオンライン参加、または Microsoft アカウントでの公式サーバーや Realms へのログインに対応しています。",
   f_updates_t: "自動でアップデート",
   f_updates_d: "Rekindle が新しいバージョンを見つけ、ワンクリックでインストールします。すべてのアップデートに署名があるので、本物の Ember の更新だけが入ります。",
   f_java_t: "Java の準備は不要",

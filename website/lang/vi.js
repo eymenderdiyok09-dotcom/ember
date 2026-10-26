@@ -35,7 +35,7 @@ I18N.add("vi", {
   f_skins_t: "Skin của bạn",
   f_skins_d: "Chọn bất kỳ ảnh PNG skin nào khi chơi ngoại tuyến và thấy nó trong game, hoặc mang skin Ely.by lên các server Ely.by.",
   f_accounts_t: "Ngoại tuyến, Ely.by và Microsoft",
-  f_accounts_d: "Chơi ngoại tuyến với tên bất kỳ, hoặc đăng nhập tài khoản Ely.by miễn phí để vào server trực tuyến. Đăng nhập Microsoft đã được tích hợp và sắp ra mắt.",
+  f_accounts_d: "Chơi ngoại tuyến với tên bất kỳ, đăng nhập bằng tài khoản Ely.by miễn phí hoặc sử dụng tài khoản Microsoft cho các máy chủ chính thức và Realms.",
   f_updates_t: "Tự cập nhật",
   f_updates_d: "Rekindle tìm phiên bản mới và cài chỉ với một cú nhấp. Mỗi bản cập nhật đều được ký, nên chỉ bản cập nhật Ember thật mới vào được.",
   f_java_t: "Không cần cài Java",

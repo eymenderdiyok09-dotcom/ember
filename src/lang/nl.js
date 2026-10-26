@@ -117,7 +117,7 @@ I18N.add("nl", {
   skin_reset: "Standaardskin gebruiken",
   skin_ely_open: "Wijzigen op Ely.by",
   skin_ely_text: "Ely.by-skins wijzig je op ely.by — kies er een uit de catalogus of upload daar je eigen skin. Ember toont hem de volgende keer dat het opent.",
-  skin_ms_text: "Microsoft-skins wijzigen vanuit Ember komt samen met inloggen met Microsoft.",
+  skin_ms_text: "Microsoft-skins beheer je op minecraft.net — je actieve skin wordt automatisch geladen.",
   skin_need_name: "Kies eerst een gebruikersnaam (3–16 letters, cijfers of _)",
   skin_saved: "Skin opgeslagen — je ziet hem in het spel als je weer op Spelen drukt",
   done: "Klaar",

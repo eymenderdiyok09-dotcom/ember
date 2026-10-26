@@ -35,7 +35,7 @@ I18N.add("fr", {
   f_skins_t: "Ton skin",
   f_skins_d: "Choisis n'importe quel PNG de skin pour jouer hors ligne et vois-le en jeu, ou emporte ton skin Ely.by sur les serveurs Ely.by.",
   f_accounts_t: "Hors ligne, Ely.by et Microsoft",
-  f_accounts_d: "Joue hors ligne avec n'importe quel pseudo, ou connecte-toi avec un compte Ely.by gratuit pour les serveurs en ligne. La connexion Microsoft est intégrée et arrive bientôt.",
+  f_accounts_d: "Joue hors ligne avec n'importe quel pseudo, connecte-toi avec un compte Ely.by gratuit ou utilise ton compte Microsoft pour les serveurs officiels et Realms.",
   f_updates_t: "Se met à jour tout seul",
   f_updates_d: "Rekindle repère les nouvelles versions et les installe en un clic. Chaque mise à jour est signée : seules les vraies mises à jour d'Ember passent.",
   f_java_t: "Pas de Java à installer",

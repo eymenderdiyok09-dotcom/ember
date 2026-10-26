@@ -35,7 +35,7 @@ I18N.add("id", {
   f_skins_t: "Skin-mu",
   f_skins_d: "Pilih PNG skin apa pun untuk main offline dan lihat di game, atau bawa skin Ely.by-mu ke server Ely.by.",
   f_accounts_t: "Offline, Ely.by & Microsoft",
-  f_accounts_d: "Main offline dengan nama apa saja, atau masuk dengan akun Ely.by gratis untuk server online. Masuk dengan Microsoft sudah tertanam dan segera hadir.",
+  f_accounts_d: "Main offline dengan nama apa pun, masuk dengan akun Ely.by gratis, atau gunakan akun Microsoft untuk server resmi dan Realms.",
   f_updates_t: "Memperbarui sendiri",
   f_updates_d: "Rekindle menemukan versi baru dan memasangnya sekali klik. Setiap pembaruan ditandatangani, jadi hanya pembaruan Ember yang asli yang bisa masuk.",
   f_java_t: "Tanpa pengaturan Java",

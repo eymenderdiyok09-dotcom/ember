@@ -35,7 +35,7 @@ I18N.add("cs", {
   f_skins_t: "Tvůj skin",
   f_skins_d: "Vyber si jakýkoli PNG skin pro hru offline a uvidíš ho ve hře, nebo si vezmi svůj skin z Ely.by na servery Ely.by.",
   f_accounts_t: "Offline, Ely.by a Microsoft",
-  f_accounts_d: "Hraj offline s libovolným jménem, nebo se přihlas bezplatným účtem Ely.by na online servery. Přihlášení přes Microsoft je zabudované a brzy přijde.",
+  f_accounts_d: "Hraj offline s libovolným jménem, přihlas se bezplatným účtem Ely.by nebo použij účet Microsoft pro oficiální servery a Realms.",
   f_updates_t: "Aktualizuje se sám",
   f_updates_d: "Rekindle najde nové verze a nainstaluje je jedním klikem. Každá aktualizace je podepsaná, takže projdou jen skutečné aktualizace Emberu.",
   f_java_t: "Žádné nastavování Javy",

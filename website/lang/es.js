@@ -35,7 +35,7 @@ I18N.add("es", {
   f_skins_t: "Tu skin",
   f_skins_d: "Elige cualquier PNG de skin para jugar sin conexión y míralo en el juego, o lleva tu skin de Ely.by a los servidores de Ely.by.",
   f_accounts_t: "Sin conexión, Ely.by y Microsoft",
-  f_accounts_d: "Juega sin conexión con cualquier nombre o inicia sesión con una cuenta gratuita de Ely.by para servidores en línea. El inicio de sesión de Microsoft ya está integrado y llegará pronto.",
+  f_accounts_d: "Juega sin conexión con cualquier nombre, inicia sesión con una cuenta gratuita de Ely.by o usa tu cuenta de Microsoft para servidores oficiales y Realms.",
   f_updates_t: "Se actualiza solo",
   f_updates_d: "Rekindle detecta nuevas versiones y las instala en un clic. Cada actualización va firmada, así que solo entran actualizaciones reales de Ember.",
   f_java_t: "Sin instalar Java",

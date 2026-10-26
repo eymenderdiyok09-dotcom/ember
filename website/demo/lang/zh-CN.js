@@ -117,7 +117,7 @@ I18N.add("zh-CN", {
   skin_reset: "使用默认皮肤",
   skin_ely_open: "在 Ely.by 上更换",
   skin_ely_text: "Ely.by 皮肤需要在 ely.by 上更换 — 从目录中挑选或上传你自己的皮肤。下次打开 Ember 时会显示。",
-  skin_ms_text: "在 Ember 中更换 Microsoft 皮肤的功能将与 Microsoft 登录一同推出。",
+  skin_ms_text: "Microsoft 皮肤在 minecraft.net 上管理 — 你的当前皮肤将自动加载。",
   skin_need_name: "请先输入用户名(3–16 位字母、数字或 _)",
   skin_saved: "皮肤已保存 — 下次点击开始游戏时即可在游戏中看到",
   done: "完成",

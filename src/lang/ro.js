@@ -117,7 +117,7 @@ I18N.add("ro", {
   skin_reset: "Folosește skinul implicit",
   skin_ely_open: "Schimbă pe Ely.by",
   skin_ely_text: "Skinurile Ely.by se schimbă pe ely.by — alege unul din catalog sau încarcă-l pe al tău acolo. Ember îl arată la următoarea deschidere.",
-  skin_ms_text: "Schimbarea skinurilor Microsoft din Ember vine odată cu conectarea cu Microsoft.",
+  skin_ms_text: "Skinurile Microsoft sunt gestionate pe minecraft.net — skinul tău activ se încarcă automat.",
   skin_need_name: "Mai întâi alege un nume (3–16 litere, cifre sau _)",
   skin_saved: "Skin salvat — îl vei vedea în joc data viitoare când apeși Joacă",
   done: "Gata",

@@ -117,7 +117,7 @@ I18N.add("zh-TW", {
   skin_reset: "使用預設外觀",
   skin_ely_open: "到 Ely.by 更換",
   skin_ely_text: "Ely.by 外觀要在 ely.by 上更換 — 從目錄挑選,或上傳你自己的外觀。下次開啟 Ember 時就會顯示。",
-  skin_ms_text: "在 Ember 中更換 Microsoft 外觀的功能,會和 Microsoft 登入一起推出。",
+  skin_ms_text: "Microsoft 外觀在 minecraft.net 上管理 — 你的當前外觀將會自動載入。",
   skin_need_name: "請先輸入使用者名稱(3–16 個英文字母、數字或 _)",
   skin_saved: "外觀已儲存 — 下次按下開始遊戲就能在遊戲中看到",
   done: "完成",

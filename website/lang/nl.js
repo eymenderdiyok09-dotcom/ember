@@ -35,7 +35,7 @@ I18N.add("nl", {
   f_skins_t: "Jouw skin",
   f_skins_d: "Kies een willekeurige skin-PNG voor offline spelen en zie hem in het spel, of neem je Ely.by-skin mee naar Ely.by-servers.",
   f_accounts_t: "Offline, Ely.by & Microsoft",
-  f_accounts_d: "Speel offline met elke naam, of log in met een gratis Ely.by-account voor onlineservers. Inloggen met Microsoft is ingebouwd en komt binnenkort.",
+  f_accounts_d: "Speel offline met elke gewenste naam, log in met een gratis Ely.by-account of gebruik je Microsoft-account voor officiële servers en Realms.",
   f_updates_t: "Werkt zichzelf bij",
   f_updates_d: "Rekindle vindt nieuwe versies en installeert ze met één klik. Elke update is ondertekend, dus alleen echte Ember-updates komen erin.",
   f_java_t: "Geen Java instellen",

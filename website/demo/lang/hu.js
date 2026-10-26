@@ -117,7 +117,7 @@ I18N.add("hu", {
   skin_reset: "Alapértelmezett skin használata",
   skin_ely_open: "Csere az Ely.by-on",
   skin_ely_text: "Az Ely.by-skineket az ely.by oldalon cserélheted — válassz a katalógusból, vagy töltsd fel ott a sajátodat. Az Ember a következő megnyitáskor mutatja.",
-  skin_ms_text: "A Microsoft-skinek Emberből való cseréje a Microsoft-bejelentkezéssel együtt érkezik.",
+  skin_ms_text: "A Microsoft-skinek a minecraft.net oldalon kezelhetők — az aktív skined automatikusan betöltődik.",
   skin_need_name: "Előbb válassz felhasználónevet (3–16 betű, szám vagy _)",
   skin_saved: "Skin elmentve — a játékban a következő Játék gombnyomás után látod",
   done: "Kész",

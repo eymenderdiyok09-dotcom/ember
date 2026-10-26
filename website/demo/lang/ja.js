@@ -117,7 +117,7 @@ I18N.add("ja", {
   skin_reset: "デフォルトのスキンに戻す",
   skin_ely_open: "Ely.by で変更",
   skin_ely_text: "Ely.by のスキンは ely.by で変更します。カタログから選ぶか、自分のスキンをアップロードしてください。次に Ember を開いたときに反映されます。",
-  skin_ms_text: "Ember からの Microsoft スキンの変更は、Microsoft サインインと一緒に対応予定です。",
+  skin_ms_text: "Microsoft スキンは minecraft.net で管理されます。有効なスキンが自動的に読み込まれます。",
   skin_need_name: "先にユーザー名を入力してください(3〜16 文字の英数字または _)",
   skin_saved: "スキンを保存しました — 次にプレイを押すとゲーム内で反映されます",
   done: "完了",

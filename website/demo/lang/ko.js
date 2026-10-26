@@ -117,7 +117,7 @@ I18N.add("ko", {
   skin_reset: "기본 스킨 사용",
   skin_ely_open: "Ely.by에서 변경",
   skin_ely_text: "Ely.by 스킨은 ely.by에서 바꿔요 — 카탈로그에서 고르거나 내 스킨을 올리세요. 다음에 Ember를 열 때 보여 줄게요.",
-  skin_ms_text: "Ember에서 Microsoft 스킨을 바꾸는 기능은 Microsoft 로그인과 함께 나올 예정이에요.",
+  skin_ms_text: "Microsoft 스킨은 minecraft.net에서 관리하며, 현재 사용 중인 스킨이 자동으로 불러와집니다.",
   skin_need_name: "먼저 사용자 이름을 정하세요 (3~16자의 영문, 숫자, _)",
   skin_saved: "스킨을 저장했어요 — 다음에 플레이를 누르면 게임에서 보여요",
   done: "완료",

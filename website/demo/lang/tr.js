@@ -117,7 +117,7 @@ I18N.add("tr", {
   skin_reset: "Varsayılan skini kullan",
   skin_ely_open: "Ely.by'da değiştir",
   skin_ely_text: "Ely.by skinleri ely.by'da değiştirilir — katalogdan birini seç ya da kendi skinini oraya yükle. Ember bir sonraki açılışta gösterir.",
-  skin_ms_text: "Microsoft skinlerini Ember'dan değiştirmek, Microsoft ile giriş geldiğinde mümkün olacak.",
+  skin_ms_text: "Microsoft skinleri minecraft.net üzerinden yönetilir — aktif skinin otomatik olarak yüklenir.",
   skin_need_name: "Önce bir kullanıcı adı seç (3–16 harf, rakam veya _)",
   skin_saved: "Skin kaydedildi — bir sonraki Oyna'da oyunda göreceksin",
   done: "Tamam",

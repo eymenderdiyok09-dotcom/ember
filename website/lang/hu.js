@@ -35,7 +35,7 @@ I18N.add("hu", {
   f_skins_t: "A te skined",
   f_skins_d: "Válassz bármilyen skin-PNG-t offline játékhoz, és lásd a játékban, vagy vidd az Ely.by-skinedet az Ely.by-szerverekre.",
   f_accounts_t: "Offline, Ely.by és Microsoft",
-  f_accounts_d: "Játssz offline bármilyen névvel, vagy jelentkezz be ingyenes Ely.by-fiókkal online szerverekhez. A Microsoft-bejelentkezés már beépült, és hamarosan érkezik.",
+  f_accounts_d: "Játssz offline bármilyen névvel, jelentkezz be ingyenes Ely.by-fiókkal, vagy használd a Microsoft-fiókodat a hivatalos szerverekhez és a Realmshez.",
   f_updates_t: "Frissíti magát",
   f_updates_d: "A Rekindle észreveszi az új verziókat, és egy kattintással telepíti őket. Minden frissítés aláírt, így csak valódi Ember-frissítések jutnak be.",
   f_java_t: "Nincs Java-telepítés",

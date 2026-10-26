@@ -35,7 +35,7 @@ I18N.add("ro", {
   f_skins_t: "Skinul tău",
   f_skins_d: "Alege orice PNG de skin pentru jocul offline și vezi-l în joc, sau du-ți skinul Ely.by pe serverele Ely.by.",
   f_accounts_t: "Offline, Ely.by și Microsoft",
-  f_accounts_d: "Joacă offline cu orice nume sau conectează-te cu un cont Ely.by gratuit pentru servere online. Conectarea cu Microsoft e integrată și vine curând.",
+  f_accounts_d: "Joacă offline cu orice nume, conectează-te cu un cont Ely.by gratuit sau folosește contul Microsoft pentru serverele oficiale și Realms.",
   f_updates_t: "Se actualizează singur",
   f_updates_d: "Rekindle găsește versiunile noi și le instalează dintr-un clic. Fiecare actualizare e semnată, deci intră doar actualizări reale Ember.",
   f_java_t: "Fără instalare de Java",

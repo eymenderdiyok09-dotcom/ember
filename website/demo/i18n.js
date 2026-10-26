@@ -153,7 +153,7 @@ const EN = {
   skin_reset: "Use the default skin",
   skin_ely_open: "Change on Ely.by",
   skin_ely_text: "Ely.by skins are changed on ely.by — pick one from the catalogue or upload your own there. Ember shows it the next time it opens.",
-  skin_ms_text: "Changing Microsoft skins from Ember comes together with Microsoft sign-in.",
+  skin_ms_text: "Microsoft skins are managed on minecraft.net — your active skin is loaded automatically in Ember.",
   skin_need_name: "Pick a username first (3–16 letters, numbers or _)",
   skin_saved: "Skin saved — you'll see it in-game next time you press Play",
   done: "Done",

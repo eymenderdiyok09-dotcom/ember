@@ -117,7 +117,7 @@ I18N.add("fr", {
   skin_reset: "Utiliser le skin par défaut",
   skin_ely_open: "Changer sur Ely.by",
   skin_ely_text: "Les skins Ely.by se changent sur ely.by — choisis-en un dans le catalogue ou importe le tien là-bas. Ember l'affichera à la prochaine ouverture.",
-  skin_ms_text: "Changer de skin Microsoft depuis Ember arrivera avec la connexion Microsoft.",
+  skin_ms_text: "Les skins Microsoft sont gérés sur minecraft.net — votre skin actif se charge automatiquement.",
   skin_need_name: "Choisis d'abord un pseudo (3–16 lettres, chiffres ou _)",
   skin_saved: "Skin enregistré — tu le verras en jeu la prochaine fois que tu appuieras sur Jouer",
   done: "Terminé",

@@ -117,7 +117,7 @@ I18N.add("cs", {
   skin_reset: "Použít výchozí skin",
   skin_ely_open: "Změnit na Ely.by",
   skin_ely_text: "Skiny Ely.by se mění na ely.by — vyber si z katalogu nebo tam nahraj vlastní. Ember ho ukáže při příštím otevření.",
-  skin_ms_text: "Změna skinů Microsoft v Emberu přijde spolu s přihlášením přes Microsoft.",
+  skin_ms_text: "Skiny Microsoftu se spravují na minecraft.net — tvůj aktivní skin se načte automaticky.",
   skin_need_name: "Nejdřív si vyber jméno (3–16 písmen, číslic nebo _)",
   skin_saved: "Skin uložen — ve hře ho uvidíš, až příště stiskneš Hrát",
   done: "Hotovo",

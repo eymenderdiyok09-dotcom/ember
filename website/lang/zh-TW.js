@@ -35,7 +35,7 @@ I18N.add("zh-TW", {
   f_skins_t: "你的外觀",
   f_skins_d: "離線遊玩時可選擇任何外觀 PNG 並在遊戲中看到,或在 Ely.by 伺服器上使用你的 Ely.by 外觀。",
   f_accounts_t: "離線、Ely.by 與 Microsoft",
-  f_accounts_d: "用任意名稱離線遊玩,或使用免費的 Ely.by 帳號進入線上伺服器。Microsoft 登入已內建,即將推出。",
+  f_accounts_d: "用任意名稱離線遊玩,使用免費的 Ely.by 帳號進入線上伺服器,或使用 Microsoft 帳號遊玩官方伺服器和 Realms。",
   f_updates_t: "自動更新",
   f_updates_d: "Rekindle 會找到新版本並一鍵安裝。每個更新都有簽章,只有真正的 Ember 更新才能進來。",
   f_java_t: "不用設定 Java",

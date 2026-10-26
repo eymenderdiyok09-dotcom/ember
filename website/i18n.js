@@ -69,7 +69,7 @@ const EN = {
   f_skins_t: "Your skin",
   f_skins_d: "Pick any skin PNG for offline play and see it in-game, or bring your Ely.by skin to Ely.by servers.",
   f_accounts_t: "Offline, Ely.by & Microsoft",
-  f_accounts_d: "Play offline with any name, or sign in with a free Ely.by account for online servers. Microsoft sign-in is built in and coming soon.",
+  f_accounts_d: "Play offline with any name, sign in with a free Ely.by account, or use your Microsoft account for official servers and Realms.",
   f_updates_t: "Updates itself",
   f_updates_d: "Rekindle spots new versions and installs them in one click. Every update is signed, so only real Ember updates get in.",
   f_java_t: "No Java setup",
@@ -110,7 +110,7 @@ const EN = {
   q_fps: "Does FPS Boost touch my mods or worlds?",
   a_fps: "No. FPS Boost runs from its own folder (<code>ember/instances</code>) and links to your real worlds, resource packs, shader packs and screenshots. Your own <code>mods</code> folder is never changed.",
   q_online: "Can I play on online servers?",
-  a_online: "Yes, with a free <a href=\"https://account.ely.by/register\">Ely.by account</a>: pick <b>Ely.by</b> next to Player, sign in, and join any server that supports Ely.by. Official online-mode servers and Realms need a Microsoft account — Ember's Microsoft sign-in is built and waiting for approval from Mojang.",
+  a_online: "Yes: sign in with your <b>Microsoft account</b> for official online servers and Realms, or use a free <a href=\"https://account.ely.by/register\">Ely.by account</a> to join any server that supports Ely.by.",
   q_crash: "Minecraft doesn't start. What should I do?",
   a_crash: "Try turning FPS Boost or Shaders off, or lowering the memory slider. If it still won't start, open an issue on GitHub and attach <code>logs/mc-launcher-output.log</code> from your Minecraft folder.",
 

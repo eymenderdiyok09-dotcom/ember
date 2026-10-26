@@ -35,7 +35,7 @@ I18N.add("sv", {
   f_skins_t: "Din skin",
   f_skins_d: "Välj valfri skin-PNG för offlinespel och se den i spelet, eller ta med din Ely.by-skin till Ely.by-servrar.",
   f_accounts_t: "Offline, Ely.by och Microsoft",
-  f_accounts_d: "Spela offline med valfritt namn, eller logga in med ett gratis Ely.by-konto för onlineservrar. Inloggning med Microsoft är inbyggd och kommer snart.",
+  f_accounts_d: "Spela offline med valfritt namn, logga in med ett gratis Ely.by-konto eller använd ditt Microsoft-konto för officiella servrar och Realms.",
   f_updates_t: "Uppdaterar sig själv",
   f_updates_d: "Rekindle hittar nya versioner och installerar dem med ett klick. Varje uppdatering är signerad, så bara riktiga Ember-uppdateringar kommer in.",
   f_java_t: "Ingen Java att installera",

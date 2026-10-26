@@ -35,7 +35,7 @@ I18N.add("ko", {
   f_skins_t: "나만의 스킨",
   f_skins_d: "오프라인에서는 원하는 스킨 PNG를 골라 게임에서 보고, Ely.by 스킨은 Ely.by 서버에서 그대로 써요.",
   f_accounts_t: "오프라인, Ely.by, Microsoft",
-  f_accounts_d: "원하는 이름으로 오프라인 플레이를 하거나, 무료 Ely.by 계정으로 온라인 서버에 들어가세요. Microsoft 로그인도 이미 들어 있고 곧 열려요.",
+  f_accounts_d: "원하는 이름으로 오프라인 플레이를 하거나, 무료 Ely.by 계정 또는 공식 서버와 Realms를 위한 Microsoft 계정으로 로그인하세요.",
   f_updates_t: "알아서 업데이트",
   f_updates_d: "Rekindle이 새 버전을 찾아 클릭 한 번으로 설치해요. 모든 업데이트에 서명이 있어서 진짜 Ember 업데이트만 들어와요.",
   f_java_t: "Java 설치 필요 없음",

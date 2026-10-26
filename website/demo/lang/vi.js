@@ -117,7 +117,7 @@ I18N.add("vi", {
   skin_reset: "Dùng skin mặc định",
   skin_ely_open: "Đổi trên Ely.by",
   skin_ely_text: "Skin Ely.by được đổi trên ely.by — chọn từ danh mục hoặc tải skin của bạn lên đó. Ember sẽ hiện nó ở lần mở sau.",
-  skin_ms_text: "Tính năng đổi skin Microsoft trong Ember sẽ đến cùng đăng nhập Microsoft.",
+  skin_ms_text: "Skin Microsoft được quản lý trên minecraft.net — skin đang dùng của bạn sẽ tự động được tải.",
   skin_need_name: "Hãy chọn tên người dùng trước (3–16 chữ cái, chữ số hoặc _)",
   skin_saved: "Đã lưu skin — bạn sẽ thấy nó trong game lần tới khi bấm Chơi",
   done: "Xong",

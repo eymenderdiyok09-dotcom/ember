@@ -117,7 +117,7 @@ I18N.add("id", {
   skin_reset: "Pakai skin bawaan",
   skin_ely_open: "Ganti di Ely.by",
   skin_ely_text: "Skin Ely.by diganti di ely.by — pilih dari katalog atau unggah skin-mu sendiri di sana. Ember akan menampilkannya saat dibuka lagi.",
-  skin_ms_text: "Mengganti skin Microsoft dari Ember akan hadir bersama fitur masuk dengan Microsoft.",
+  skin_ms_text: "Skin Microsoft dikelola di minecraft.net — skin aktifmu akan dimuat secara otomatis.",
   skin_need_name: "Pilih nama pengguna dulu (3–16 huruf, angka, atau _)",
   skin_saved: "Skin disimpan — kamu akan melihatnya di game saat menekan Main berikutnya",
   done: "Selesai",
